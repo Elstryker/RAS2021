@@ -1,6 +1,9 @@
-from Data import Event, DataBaseAccess
+from Data import DataBaseAccess
 
-class MemoryDataBase(DataBaseAccess.DataBaseAccess):  # Colocar a interface aqui
-    
+class MemoryDataBase(DataBaseAccess.DataBaseAccess):
+
     def __init__(self) -> None:
-        self.eventos = Event.Event()
+        self.availableCurrencies = ['Euros','Dollars','English pounds','Cardans']
+
+    def getCurrencies(self):
+        return self.availableCurrencies

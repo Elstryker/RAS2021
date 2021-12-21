@@ -1,2 +1,4 @@
 class DataBaseAccess:
-    pass
+    
+    def getCurrencies(self):
+        pass

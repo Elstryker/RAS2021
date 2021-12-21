@@ -1,13 +1,28 @@
 class ClientGUI:
-    
+
     @staticmethod
-    def show_Menu():
+    def showMenu():
         print(
 """
 0 -> Quit
-1 -> Deposit Money""")
+1 -> Add Bet To Bet Slip
+2 -> Remove Bet From Bet Slip
+3 -> Cancel Bet Slip
+4 -> Show Bet Slip
+5 -> Deposit Money
+6 -> Withdraw Money
+7 -> Previous Page
+8 -> Next Page
+9 -> Login""")
 
-    def deposit_money():
+    def askAmount():
         print(
 """
-How much money do you want to deposit?""")
+Amount:""")
+
+    def askCurrency(availableCurrencies):
+        print(
+"""
+Choose currency:""")
+        for i,el in enumerate(availableCurrencies):
+            print(f"{i+1} - {el}")

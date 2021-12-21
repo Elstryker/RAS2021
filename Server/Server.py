@@ -1,4 +1,4 @@
-import threading, socket, ServerWorker, RASBetFacade, RASBetLN
+import threading, socket, ServerWorkerClient, RASBetFacade, RASBetLN, ServerWorkerBookie
 from Data import DataBaseAccess, MemoryDataBase
 
 HOST = ''
@@ -19,9 +19,17 @@ def main():
     sock.listen()
     while True:
         client_sock, info = sock.accept()
-        print("Conectei-me com o cliente: ", info)
-        sw = ServerWorker.ServerWorker(client_sock,info,app)
-        sw.run()
+        data = client_sock.recv(256)
+        message = data.decode("utf-8").strip()
+        if message == 'client':
+            sw = ServerWorkerClient.ServerWorkerClient(client_sock,info,app)
+            print("Conectei-me com o cliente: ", info)
+            sw.run()
+        elif message == 'bookie':
+            sw = ServerWorkerBookie.ServerWorkerBookie(client_sock,app)
+            print("Conectei-me com o bookie: ", info)
+            sw.run()
+
 
 if __name__ == "__main__":
     main()

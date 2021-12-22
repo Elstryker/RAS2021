@@ -17,3 +17,16 @@ class RASBetFacade:
 
     def cancelBetSlip(self,userID):
         pass
+    
+    def concludeBetSlip(self,userID,amount,currency):
+        pass
+    
+    def getEvents(self,offset,numOfEvents):
+        pass
+
+    def login(self,username,password) -> int:
+        pass
+    
+
+    def getCurrencies(self):
+        pass

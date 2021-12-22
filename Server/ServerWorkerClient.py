@@ -13,7 +13,9 @@ class ServerWorkerClient:
         self.sock = sock
         self.info = info
         self.app = app
-        self.userID = 0
+        self.userID = -1
+        self.eventPage = 0
+        self.eventsPerPage = 5
         
     def run(self):
         self.sendInitialAppInfoToClient()
@@ -46,24 +48,37 @@ class ServerWorkerClient:
         print("Operation:", operation)
         print("Args:", args)
         if operation == 1: # Add Bet To Bet Slip
-            pass
-        if operation == 2: # Remove Bet From Bet Slip
-            pass
-        if operation == 3: # Cancel Bet Slip
-            pass
-        if operation == 4: # Show Bet Slip
-            pass
-        elif operation == 5: # Deposit Money
+            self.app.addBetToBetSlip(self.userID,args[0],args[1])
+            message = "\n\nBet added with success!\n"
+        elif operation == 2: # Remove Bet From Bet Slip
+            self.app.removeBetFromBetSlip(self.userID,args[0])
+            message = "\n\nBet removed with success!\n"
+        elif operation == 3: # Cancel Bet Slip
+            self.app.cancelBetSlip(self.userID)
+            message = "\n\nCancelled Bet Slip with success!\n"
+        elif operation == 4: # Show Bet Slip
+            self.app.showBetSlip(self.userID)
+            message = "\n\nSent Bet Slip!\n"
+        elif operation == 5: # Conclude Bet Slip
+            self.app.concludeBetSlip(self.userID,args[0],args[1])
+            message = "\n\nMoney deposited with success!\n"
+        elif operation == 6: # Deposit Money
             self.app.depositMoney(self.userID,args[0],args[1])
             message = "\n\nMoney deposited with success!\n"
-        if operation == 6: # Withdraw Money
-            pass
-        if operation == 7: # Previous Page
-            pass
-        if operation == 8: # Next Page
-            pass
-        if operation == 9: # Login
-            pass
+        elif operation == 7: # Withdraw Money
+            self.app.withdrawMoney(self.userID,args[0],args[1])
+            message = "\n\nMoney withdrawed with success!\n"
+        elif operation == 8: # Previous Page
+            self.eventPage -= 1 if self.eventPage > 0 else self.eventPage
+            self.app.getEvents(self.eventPage,self.eventsPerPage)
+            message = "\n\nPrevious Page!\n"
+        elif operation == 9: # Next Page
+            self.eventPage += 1
+            self.app.getEvents(self.eventPage,self.eventsPerPage)
+            message = "\n\nNext Page!\n"
+        elif operation == 10: # Login/Logout
+            self.userID = self.app.login(args[0],args[1])
+            message = "\n\nLogged in!\n"
         else:
             message = "Invalid input"
         self.sock.send(message.encode("utf-8"))

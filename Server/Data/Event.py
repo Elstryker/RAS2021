@@ -11,8 +11,8 @@ class Event:
     idGenerator = 1
 
     def __init__(self,sport : Sport,intervenors : list) -> None:
-        self.id = self.idGenerator
-        self.idGenerator += 1
+        self.id = Event.idGenerator
+        Event.idGenerator += 1
         self.state = EventState.Open
         self.sport = sport
         self.intervenors = intervenors

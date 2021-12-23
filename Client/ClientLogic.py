@@ -1,6 +1,8 @@
 import socket
 import ClientGUI
 import ClientInfo
+import json
+
 class ClientLogic:
     
     sock : socket.socket
@@ -18,26 +20,25 @@ class ClientLogic:
             ClientGUI.showMenu(self.clientInfo.loggedIn)
             inp = input(" -> ")
             option = int(inp)
-            message = self.handleInput(option)
-            data = message.encode('utf-8')
-            self.sock.send(data)
-            data = self.sock.recv(256)
-            print(data.decode("utf-8"))
+            self.handleInput(option)
+
+    def requestServer(self,message):
+        data = message.encode('utf-8')
+        self.sock.send(data)
+        data = self.sock.recv(256)
+        response = json.loads(data.decode('utf-8'))
+        return response
+
+
 
     def handleInput(self,option):
         args = []
         option = str(option)
 
         if option == "1": # Add Bet To Bet Slip
-            ClientGUI.askEvent()
-            eventID = input("-> ")
-            ClientGUI.showDetailedEvent()
-            result = input("-> ")
-            args = [option,eventID,result]
+            self.addBetToBetSlip(option)
         elif option == "2": # Remove Bet From Bet Slip
-            ClientGUI.askEvent()
-            eventID = input("-> ")
-            args = [option,eventID]
+            self.removeBetFromBetSlip(option)
         elif option == "3": # Cancel Bet Slip
             args = [option]
         elif option == "4": # Show Bet Slip
@@ -82,22 +83,50 @@ class ClientLogic:
             password = input("-> ")
             args = [option,username,password]
         elif option == "11": # Register
-            ClientGUI.askUserName()
-            username = input("-> ")
-            ClientGUI.askPassword()
-            password = input("-> ")
-            ClientGUI.askBirthDate()
-            birthdate = input("-> ")
-            args = [option,username,password,birthdate]
+            self.registerUser(option)
         elif option == "0": # Quit
             args = [option]
+            message = " ".join(args)
+            self.requestServer(message)
 
         else:
             raise IOError
 
-        return " ".join(args)
+    def addBetToBetSlip(self,option):
+        ClientGUI.askEvent()
+        eventID = input("-> ")
 
-    
+        ClientGUI.showDetailedEvent()
+        result = input("-> ")
+
+        args = [option,eventID,result]
+        message = " ".join(args)
+        self.requestServer(message)
+
+    def removeBetFromBetSlip(self,option):
+        ClientGUI.askEvent()
+        eventID = input("-> ")
+        args = [option,eventID]
+        message = " ".join(args)
+        self.requestServer(message)
+
+    def registerUser(self,option):
+        ClientGUI.askUserName()
+        username = input("-> ")
+
+        ClientGUI.askPassword()
+        password = input("-> ")
+
+        ClientGUI.askBirthDate()
+        birthdate = input("-> ")
+
+        args = [option,username,password,birthdate]
+        message = " ".join(args)
+        response = self.requestServer(message)
+
+        print(response)
+
+
     def run(self):
         self.menu()
         self.closeConnection()

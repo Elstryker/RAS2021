@@ -1,4 +1,5 @@
-import Bet, enum
+from Data import Bet
+import enum
 
 class BetSlipState(enum.Enum):
     Creating = 1 # Didn't bet yet
@@ -9,14 +10,13 @@ class BetSlip:
     
     idGenerator = 1
 
-    def __init__(self,userID) -> None:
-        self.id = self.idGenerator
-        self.idGenerator += 1
+    def __init__(self) -> None:
+        self.id = BetSlip.idGenerator
+        BetSlip.idGenerator += 1
         self.amount = 0
         self.currency = ''
         self.winValue = 0
         self.bets = {'Finished':dict(),'Unfinished':dict()}
-        self.user = userID
         self.state = BetSlipState.Creating
         self.inStake = 0
         self.won = 1

@@ -1,4 +1,4 @@
-import RASBetFacade
+import RASBetFacade, json
 from Data import DataBaseAccess
 
 class RASBetLN(RASBetFacade.RASBetFacade):
@@ -36,6 +36,14 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         print("User logged in")
         return 0
 
+    def register(self,username,password,birthdate):
+        success = self.db.createUser(username,password,birthdate)
+        toSend = dict()
+        if success:
+            toSend['Message'] = "\n\nUser registered with success!\n"
+        else:
+            toSend['Message'] = "\n\nCould not register user\n"
+        return json.dumps(toSend)
 
     def getCurrencies(self):
         return self.db.getCurrencies()

@@ -1,13 +1,11 @@
-import BetSlip
+from Data import BetSlip
 
 
 class User:
-    
-    idGenerator = 1
 
-    def __init__(self,currencies : list,birthDate,betSlip : BetSlip.BetSlip) -> None:
-        self.id = self.idGenerator
-        self.idGenerator += 1
+    def __init__(self,username,password,currencies : list,birthDate,betSlip : BetSlip.BetSlip) -> None:
+        self.username = username
+        self.password = password
         self.wallet = self.newCurrenciesDict(currencies)
         self.birtDate = birthDate
         self.currentBetSlip = betSlip

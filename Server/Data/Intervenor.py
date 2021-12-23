@@ -3,8 +3,8 @@ class Intervenor:
     idGenerator = 1
 
     def __init__(self,name) -> None:
-        self.id = self.idGenerator
-        self.idGenerator += 1
+        self.id = Intervenor.idGenerator
+        Intervenor.idGenerator += 1
         self.name = name
         self.events = []
 

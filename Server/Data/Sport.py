@@ -8,8 +8,8 @@ class Sport:
     idGenerator = 1
 
     def __init__(self,type : SportType,name) -> None:
-        self.id = self.idGenerator
-        self.idGenerator += 1
+        self.id = Sport.idGenerator
+        Sport.idGenerator += 1
         self.name = name
         self.type = type
         self.events = []

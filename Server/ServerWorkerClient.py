@@ -79,6 +79,8 @@ class ServerWorkerClient:
         elif operation == 10: # Login/Logout
             self.userID = self.app.login(args[0],args[1])
             message = "\n\nLogged in!\n"
+        elif operation == 11: # Register
+            message = self.app.register(args[0],args[1],args[2])
         else:
             message = "Invalid input"
         self.sock.send(message.encode("utf-8"))

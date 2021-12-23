@@ -27,6 +27,8 @@ class RASBetFacade:
     def login(self,username,password) -> int:
         pass
     
+    def register(self,username,password,birthdate):
+        pass
 
     def getCurrencies(self):
         pass

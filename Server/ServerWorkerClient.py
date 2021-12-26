@@ -80,17 +80,17 @@ class ServerWorkerClient:
             message = self.app.withdrawMoney(self.userID,args[0],args[1])
         elif operation == 8: # Previous Page
             self.eventPage -= 1 if self.eventPage > 0 else self.eventPage
-            self.app.getEvents(self.eventPage,self.eventsPerPage)
+            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
             message = "\n\nPrevious Page!\n"
         elif operation == 9: # Next Page
             self.eventPage += 1
-            self.app.getEvents(self.eventPage,self.eventsPerPage)
+            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
             message = "\n\nNext Page!\n"
         elif operation == 10: # See Bet History
             message = self.app.getBetHistory(self.userID)
         elif operation == 11: # Register
-            message = self.app.logout()
             self.getIdForNotLoggedInUser()
+            message = self.app.logout(self.userID)
         elif operation == 0: # Quit
             replyBye = dict()
             replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"
@@ -122,13 +122,13 @@ class ServerWorkerClient:
             message = "\n\nSent Bet Slip!\n"
         elif operation == 5: # Previous Page
             self.eventPage -= 1 if self.eventPage > 0 else self.eventPage
-            self.app.getEvents(self.eventPage,self.eventsPerPage)
+            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
             message = "\n\nPrevious Page!\n"
         elif operation == 6: # Next Page
             self.eventPage += 1
-            self.app.getEvents(self.eventPage,self.eventsPerPage)
+            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
             message = "\n\nNext Page!\n"
-        elif operation == 7: # Login/Logout
+        elif operation == 7: # Login
             message = self.app.login(self.userID,args[0],args[1])
             dic = json.loads(message)
             if dic['LoggedIn']:

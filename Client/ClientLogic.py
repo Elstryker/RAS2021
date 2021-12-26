@@ -25,10 +25,17 @@ class ClientLogic:
 
     def requestServer(self,args):
         message = ";".join(args)
+
         data = message.encode('utf-8')
         self.sock.send(data)
         data = self.sock.recv(256)
         response = json.loads(data.decode('utf-8'))
+
+        # Retrieve additional info
+        if args[0] != "0": # See if it just wants to quit
+            self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["DetailedEvent"],response["Currencies"])
+            print(self.clientInfo.wallet)
+
         return response
 
     def handleInputNotLoggedIn(self,option):
@@ -112,9 +119,11 @@ class ClientLogic:
     def depositMoney(self,option):
         ClientGUI.askAmount()
         amount = input("-> ")
+
         currency = ''
         ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
         currency = input("-> ")
+
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
         args = [option,currency,amount]
         self.requestServer(args)
@@ -123,10 +132,12 @@ class ClientLogic:
     def withdrawMoney(self,option):
         ClientGUI.askAmount()
         amount = input("-> ")
+
         currency = ''
         ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
         currency = input("-> ")
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
+
         args = [option,currency,amount]
         self.requestServer(args)
 
@@ -141,8 +152,10 @@ class ClientLogic:
     def login(self,option):
         ClientGUI.askUserName()
         username = input("-> ")
+
         ClientGUI.askPassword()
         password = input("-> ")
+        
         args = [option,username,password]
         response = self.requestServer(args)
         if response["LoggedIn"]:

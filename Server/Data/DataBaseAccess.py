@@ -27,3 +27,8 @@ class DataBaseAccess:
     def withdrawMoney(self,username,currency,amount) -> bool:
         pass
 
+    def getUserTotalBalance(self,username) -> dict:
+        pass
+
+    def getAvailableEvents(self,page,eventsPerPage) -> list:
+        pass

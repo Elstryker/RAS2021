@@ -33,7 +33,7 @@ class RASBetFacade:
     def login(self,prevID,username,password):
         pass
     
-    def logout(self):
+    def logout(self,username):
         pass
 
     def register(self,username,password,birthdate):

@@ -23,7 +23,8 @@ class ClientLogic:
             else:
                 self.handleInputNotLoggedIn(option)
 
-    def requestServer(self,message):
+    def requestServer(self,args):
+        message = ";".join(args)
         data = message.encode('utf-8')
         self.sock.send(data)
         data = self.sock.recv(256)
@@ -32,57 +33,42 @@ class ClientLogic:
 
     def handleInputNotLoggedIn(self,option):
         option = str(option)
+        actions = {
+            "1":self.addBetToBetSlip,
+            "2":self.removeBetFromBetSlip,
+            "3":self.cancelBetSlip,
+            "4":self.showBetSlip,
+            "5":self.changePage,
+            "6":self.changePage,
+            "7":self.login,
+            "8":self.register,
+            "0":self.quit
+        }
 
-        if option == "1": # Add Bet To Bet Slip
-            self.addBetToBetSlip(option)
-        elif option == "2": # Remove Bet From Bet Slip
-            self.removeBetFromBetSlip(option)
-        elif option == "3": # Cancel Bat Slip
-            self.cancelBetSlip(option)
-        elif option == "4": # Show Bet Slip
-            self.showBetSlip(option)
-        elif option == "5": # Previus Page
-            self.changePage(option)
-        elif option == "6": # Next Page
-            self.changePage(option)
-        elif option == "7": # Login
-            self.login(option)
-        elif option == "8": # Register
-            self.register(option)
-        elif option == "0": # Quit
-            self.quit(option)
-        else:
-            raise IOError
+        toDo = actions.get(option,self.noSuchAction)
+        toDo(option)
 
     def handleInputLoggedIn(self,option): # TODO: Exchange currencies
         option = str(option)
+        actions = {
+            "1":self.addBetToBetSlip,
+            "2":self.removeBetFromBetSlip,
+            "3":self.cancelBetSlip,
+            "4":self.showBetSlip,
+            "5":self.concludeBetSlip,
+            "6":self.depositMoney,
+            "7":self.withdrawMoney,
+            "8":self.changePage, # Previous Page
+            "9":self.changePage, # Next Page
+            "10":self.login,
+            "11":self.register,
+            "0":self.quit
+        }
+        toDo = actions.get(option,self.noSuchAction)
+        toDo(option)
 
-        if option == "1": # Add Bet To Bet Slip
-            self.addBetToBetSlip(option)
-        elif option == "2": # Remove Bet From Bet Slip
-            self.removeBetFromBetSlip(option)
-        elif option == "3": # Cancel Bet Slip
-            self.cancelBetSlip(option)
-        elif option == "4": # Show Bet Slip
-            self.showBetSlip(option)
-        elif option == "5": # Conclude Bet Slip
-            self.concludeBetSlip(option)
-        elif option == "6": # Deposit Money
-            self.depositMoney(option)
-        elif option == "7": # Withdraw Money
-            self.withdrawMoney(option)
-        elif option == "8": # Previous Page
-            self.changePage(option)
-        elif option == "9": # Next Page
-            self.changePage(option)
-        elif option == "10": # See Bet History
-            self.showBetHistory(option)
-        elif option == "11": # Logout
-            self.register(option)
-        elif option == "0": # Quit
-            self.quit(option)
-        else:
-            raise IOError
+    def noSuchAction(self,option):
+        raise IOError
 
     def addBetToBetSlip(self,option): # TODO
         ClientGUI.askEvent()
@@ -92,29 +78,25 @@ class ClientLogic:
         result = input("-> ")
 
         args = [option,eventID,result]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
     def removeBetFromBetSlip(self,option): # TODO
         ClientGUI.askEvent()
         eventID = input("-> ")
         args = [option,eventID]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
     def cancelBetSlip(self,option): # TODO
         args = [option]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
     def showBetSlip(self,option): # TODO
         args = [option]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
     def concludeBetSlip(self,option): # TODO
-        message = self.handleInput(4)
-        data = message.encode('utf-8')
+        args = self.handleInput(4)
+        data = args.encode('utf-8')
         self.sock.send(data)
         data = self.sock.recv(256)
         print(data.decode("utf-8"))
@@ -125,10 +107,9 @@ class ClientLogic:
         currency = input("-> ")
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
         args = [option,amount,currency]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
-    def depositMoney(self,option): # TODO
+    def depositMoney(self,option):
         ClientGUI.askAmount()
         amount = input("-> ")
         currency = ''
@@ -136,11 +117,10 @@ class ClientLogic:
         currency = input("-> ")
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
         args = [option,currency,amount]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
         # Update clientInfo
 
-    def withdrawMoney(self,option): # TODO
+    def withdrawMoney(self,option):
         ClientGUI.askAmount()
         amount = input("-> ")
         currency = ''
@@ -148,18 +128,15 @@ class ClientLogic:
         currency = input("-> ")
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
         args = [option,currency,amount]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
     def changePage(self,option): # TODO
         args = [option]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
 
     def showBetHistory(self,option): # TODO
         args = [option]
-        message = ";".join(args)
-        self.requestServer(message)
+        self.requestServer(args)
     
     def login(self,option):
         ClientGUI.askUserName()
@@ -167,16 +144,14 @@ class ClientLogic:
         ClientGUI.askPassword()
         password = input("-> ")
         args = [option,username,password]
-        message = ";".join(args)
-        response = self.requestServer(message)
+        response = self.requestServer(args)
         if response["LoggedIn"]:
             self.clientInfo.loggedIn = True
         print(response['Message'])
         
     def logout(self,option):
         args = [option]
-        message = ";".join(args)
-        response = self.requestServer(message)
+        response = self.requestServer(args)
         self.clientInfo.loggedIn = False
         print(response['Message'])
 
@@ -191,15 +166,13 @@ class ClientLogic:
         birthdate = input("-> ")
 
         args = [option,username,password,birthdate]
-        message = ";".join(args)
-        response = self.requestServer(message)
+        response = self.requestServer(args)
 
         print(response['Message'])
     
     def quit(self,option):
         args = [option]
-        message = ";".join(args)
-        reply = self.requestServer(message)
+        reply = self.requestServer(args)
         print(reply['Message'])
 
     def run(self):

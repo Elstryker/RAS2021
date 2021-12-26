@@ -7,13 +7,10 @@ def showMenu(loggedIn : bool):
 2 -> Remove Bet From Bet Slip
 3 -> Cancel Bet Slip
 4 -> Show Bet Slip
-5 -> Conclude Bet Slip
-6 -> Deposit Money
-7 -> Withdraw Money
-8 -> Previous Page
-9 -> Next Page
-10 -> Login
-11 -> Register""")
+5 -> Previous Page
+6 -> Next Page
+7 -> Login
+8 -> Register""")
     else:
         print(
 """
@@ -27,7 +24,8 @@ def showMenu(loggedIn : bool):
 7 -> Withdraw Money
 8 -> Previous Page
 9 -> Next Page
-10 -> Logout""")
+10 -> See Bet History
+11 -> Logout""")
 
 def askAmount():
     print(

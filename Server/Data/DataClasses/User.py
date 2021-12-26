@@ -1,4 +1,4 @@
-from Data import BetSlip
+from Data.DataClasses import BetSlip
 
 
 class User:
@@ -9,12 +9,14 @@ class User:
         self.wallet = self.newCurrenciesDict(currencies)
         self.birtDate = birthDate
         self.currentBetSlip = betSlip
+        self.currentBetSlip.user = self.username
         self.betSlips = {}
 
     def newCurrenciesDict(self,currencies : list):
-        wallet = {}
+        wallet = dict()
         for currency in currencies:
             wallet[currency] = 0
+        return wallet
 
     def depositMoney(self,amount,currency):
         self.wallet[currency] += amount

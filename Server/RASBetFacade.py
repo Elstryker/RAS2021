@@ -1,3 +1,6 @@
+from Data.DataClasses import BetSlip
+
+
 class RASBetFacade:
     
     def depositMoney(self,userID,currency,amount):
@@ -15,7 +18,7 @@ class RASBetFacade:
     def showBetSlip(self,userID):
         pass
 
-    def cancelBetSlip(self,userID):
+    def getBetSlip(self,userID) -> BetSlip.BetSlip:
         pass
     
     def concludeBetSlip(self,userID,amount,currency):
@@ -24,9 +27,15 @@ class RASBetFacade:
     def getEvents(self,offset,numOfEvents):
         pass
 
-    def login(self,username,password) -> int:
+    def getBetHistory(self,username):
+        pass
+
+    def login(self,prevID,username,password):
         pass
     
+    def logout(self):
+        pass
+
     def register(self,username,password,birthdate):
         pass
 

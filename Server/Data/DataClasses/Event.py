@@ -1,6 +1,6 @@
 import enum
 
-from Server.Data.Sport import Sport
+from Data.DataClasses import Sport
 class EventState(enum.Enum):
     Open = 1
     Suspended = 2

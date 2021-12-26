@@ -1,4 +1,4 @@
-from Data import Bet
+from Data.DataClasses import Bet
 import enum
 
 class BetSlipState(enum.Enum):
@@ -13,6 +13,7 @@ class BetSlip:
     def __init__(self) -> None:
         self.id = BetSlip.idGenerator
         BetSlip.idGenerator += 1
+        self.user = -1
         self.amount = 0
         self.currency = ''
         self.winValue = 0

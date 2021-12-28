@@ -29,8 +29,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createIntervenor("FCPorto")
         self.createIntervenor("FCBarcelona")
         self.createIntervenor("SCBraga")
-        self.createEvent("Championship","Futebol","FCPorto,SCBraga")
-        self.createEvent("Europa","Futebol","FCPorto,FCBarcelona")
+        self.createEvent("Championship","Futebol","FCPorto,SCBraga","1.05,6.21,1.50")
+        self.createEvent("Europa","Futebol","FCPorto,FCBarcelona","1.56,3.67,2.00")
 
     def getCurrencies(self):
         return self.currencies
@@ -126,6 +126,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
             intervenors = list(self.intervenors.keys())
             params["Intervenors"] = intervenors
 
+            params["Odds"] = 0
+
             return params
 
 
@@ -146,17 +148,25 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         
         return False
 
-    def createEvent(self,name,sport,intervenors):
+    def createEvent(self,name,sport,intervenors,odds):
         eventSport = self.sports[sport]
         eventIntervenors = intervenors.split(",")
+        eventOdds = odds.split(",")
+
         eventIntervenors = list(map(lambda x: self.intervenors[x],eventIntervenors))
+        eventOdds = list(map(lambda x: float(x),eventOdds))
+
         nIntervenors = len(eventIntervenors)
+        if (eventSport.type is SportType.WinDraw and nIntervenors != len(eventOdds)-1) or (eventSport.type is SportType.Win and nIntervenors != len(eventOdds)):
+            return False
         if nIntervenors < 2:
             return False
         if eventSport.type is SportType.WinDraw and nIntervenors > 2:
             return False
         
-        newEvent = Event.Event(name,eventSport,eventIntervenors)
+        oddsWithIntervenors = list(zip(eventOdds,eventIntervenors))
+        oddsWithIntervenors.append((eventOdds[-1],None))
+        newEvent = Event.Event(name,eventSport,oddsWithIntervenors)
         self.events["Available"][newEvent.id] = newEvent
         return True
         

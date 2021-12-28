@@ -66,6 +66,14 @@ def showEvents(events : list):
     for event in events:
         print(event["Name"])
         print(event["Sport"]["Name"])
-        string = " vs ".join(event["Intervenors"])
+        intervenors = [x[1] for x in event["Intervenors"]]
+        odds = [str(x[0]) for x in event["Intervenors"]]
+        if event["Sport"]["Type"] == "WinDraw":
+            intervenors.remove("Draw")
+            drawOdd = odds.pop(-1)
+            odds.insert(1,drawOdd)
+        string = " vs ".join(intervenors)
+        print(string)
+        string = " ; ".join(odds)
         print(string)
         print("______________________________")

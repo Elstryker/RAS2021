@@ -11,7 +11,7 @@ class Event:
 
     idGenerator = 1
 
-    def __init__(self,name,sport : Sport.Sport,intervenors : list[Intervenor.Intervenor]) -> None:
+    def __init__(self,name,sport : Sport.Sport,intervenors : list[tuple[float,Intervenor.Intervenor]]) -> None:
         self.id = Event.idGenerator
         Event.idGenerator += 1
         self.name = name
@@ -36,7 +36,12 @@ class Event:
 
         toReturn["Sport"] = self.sport.toJSON()
 
-        intervenors = list(map(lambda x:x.name,self.intervenors))
+        intervenors = []
+        for odd, intervenor in self.intervenors:
+            if intervenor != None:
+                intervenors.append([odd,intervenor.name])
+            else:
+                intervenors.append([odd,"Draw"])
         toReturn["Intervenors"] = intervenors
 
         return toReturn

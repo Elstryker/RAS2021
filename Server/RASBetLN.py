@@ -137,7 +137,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             toSend["Params"] = self.db.getParameters("Event")
         
         else:
-            if self.db.createEvent(args[1],args[2],args[3]):
+            if self.db.createEvent(args[1],args[2],args[3],args[4]):
                 toSend["Message"] = "\n\nEvent added\n"
             else:
                 toSend["Message"] = "\n\nCould not add Event\n"

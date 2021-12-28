@@ -50,7 +50,10 @@ class BookieLogic:
         answers = []
         for key,value in params.items():
             if value == 0:
-                BookieGUI.askParam(key)
+                if key == "Odds":
+                    BookieGUI.askParam("Odds for respective intervenors (if event permits draws, last odd is draw odd)")
+                else:
+                    BookieGUI.askParam(key)
                 answer = input("-> ")
             elif isinstance(value, list):
                 if key == "Intervenors":

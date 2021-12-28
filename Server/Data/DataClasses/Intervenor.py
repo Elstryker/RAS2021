@@ -10,3 +10,10 @@ class Intervenor:
 
     def addEvent(self,eventID):
         self.events.append(eventID)
+
+    @classmethod
+    def getParameters(cls) -> dict:
+        params = dict()
+        params["Name"] = 0
+
+        return params

@@ -31,7 +31,7 @@ def runServerWorker(client_sock,info,app):
         print("Conectei-me com o cliente: ", info)
         sw.run()
     elif message == 'bookie':
-        sw = ServerWorkerBookie.ServerWorkerBookie(client_sock,app)
+        sw = ServerWorkerBookie.ServerWorkerBookie(client_sock,info,app)
         print("Conectei-me com o bookie: ", info)
         sw.run()
 

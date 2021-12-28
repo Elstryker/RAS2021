@@ -8,13 +8,14 @@ class ClientLogic:
     sock : socket.socket
     clientInfo : ClientInfo.ClientInfo
 
-    def __init__(self,sock,currencies):
+    def __init__(self,sock,info):
         self.sock = sock
-        self.clientInfo = ClientInfo.ClientInfo(currencies)
+        self.clientInfo = ClientInfo.ClientInfo(info)
 
     def menu(self):
         inp = ''
         while inp != '0':
+            ClientGUI.showEvents(self.clientInfo.events)
             ClientGUI.showMenu(self.clientInfo.loggedIn)
             inp = input(" -> ")
             option = int(inp)
@@ -28,7 +29,7 @@ class ClientLogic:
 
         data = message.encode('utf-8')
         self.sock.send(data)
-        data = self.sock.recv(256)
+        data = self.sock.recv(2048)
         response = json.loads(data.decode('utf-8'))
 
         # Retrieve additional info

@@ -18,7 +18,7 @@ class RASBetFacade:
     def showBetSlip(self,userID):
         pass
 
-    def getBetSlip(self,userID) -> BetSlip.BetSlip:
+    def getBetSlip(self,userID):
         pass
     
     def concludeBetSlip(self,userID,amount,currency):
@@ -39,5 +39,22 @@ class RASBetFacade:
     def register(self,username,password,birthdate):
         pass
 
-    def getCurrencies(self):
+    def getDefaultInfo(self,userID):
+        pass
+
+    # ---------------------------------------- Bookie Methods ---------------------------------------- #
+        
+    def addEvent(self,args):
+        pass
+
+    def addSport(self,args):
+        pass
+
+    def addIntervenor(self,args):
+        pass
+
+    def startEvent(self,args):
+        pass
+
+    def concludeEvent(self,args):
         pass

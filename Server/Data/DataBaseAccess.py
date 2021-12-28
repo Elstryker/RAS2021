@@ -32,3 +32,15 @@ class DataBaseAccess:
 
     def getAvailableEvents(self,page,eventsPerPage) -> list:
         pass
+
+    def getParameters(self,obj) -> dict:
+        pass
+
+    def createSport(self,name,type) -> bool:
+        pass
+
+    def createIntervenor(self,name) -> bool:
+        pass
+
+    def createEvent(self,name,sport,intervenors) -> bool:
+        pass

@@ -1,3 +1,6 @@
+from os import name
+
+
 def showMenu(loggedIn : bool):
     if not loggedIn:
         print(
@@ -58,3 +61,11 @@ def askPassword():
 
 def askBirthDate():
     print("Enter Birthdate (dd/mm/yyyy):")
+
+def showEvents(events : list):
+    for event in events:
+        print(event["Name"])
+        print(event["Sport"]["Name"])
+        string = " vs ".join(event["Intervenors"])
+        print(string)
+        print("______________________________")

@@ -16,10 +16,12 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         if userID not in self.sessionsInfo:
             self.sessionsInfo[userID] = {"Page":0,"EventsPerPage":5}
 
-        # sessionInfo = self.sessionsInfo[userID] -> Next
+        sessionInfo = self.sessionsInfo[userID]
         toSend = dict()
         toSend["Wallet"] = self.db.getUserTotalBalance(userID)
-        toSend["Events"] = [] # self.db.getAvailableEvents(sessionInfo["Page"],sessionInfo["EventsPerPage"]) -> Next
+        events = self.db.getAvailableEvents(sessionInfo["Page"],sessionInfo["EventsPerPage"])
+        self.sessionsInfo[userID]["Page"] = events[1]
+        toSend["Events"] = list(map(lambda x:x.toJSON(),events[0]))
         toSend["Currencies"] = self.db.getCurrencies()
         toSend["DetailedEvent"] = None
 
@@ -123,10 +125,56 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             
         return json.dumps(toSend)
 
-    def getCurrencies(self):
-        return self.db.getCurrencies()
+    def getDefaultInfo(self,userID):
+        return json.dumps(self.createDictWithDefaultInfo(userID))
 
+
+    # ---------------------------------------- Bookie Methods ---------------------------------------- #
         
+    def addEvent(self,args):
+        toSend = dict()
+        if args[0] == "GET":
+            toSend["Params"] = self.db.getParameters("Event")
+        
+        else:
+            if self.db.createEvent(args[1],args[2],args[3]):
+                toSend["Message"] = "\n\nEvent added\n"
+            else:
+                toSend["Message"] = "\n\nCould not add Event\n"
+
+        return json.dumps(toSend)
+
+    def addSport(self,args):
+        toSend = dict()
+        if args[0] == "GET":
+            toSend["Params"] = self.db.getParameters("Sport")
+        
+        else:
+            if self.db.createSport(args[1],args[2]):
+                toSend["Message"] = "\n\nSport added\n"
+            else:
+                toSend["Message"] = "\n\nCould not add Sport\n"
+
+        return json.dumps(toSend)
+
+    def addIntervenor(self,args):
+        toSend = dict()
+        if args[0] == "GET":
+            toSend["Params"] = self.db.getParameters("Intervenor")
+        
+        else:
+            if self.db.createIntervenor(args[1]):
+                toSend["Message"] = "\n\nIntervenor added\n"
+            else:
+                toSend["Message"] = "\n\nCould not add Intervenor\n"
+
+        return json.dumps(toSend)
+
+    def startEvent(self,args):
+        pass
+
+    def concludeEvent(self,args):
+        pass
         
 
     

@@ -1,6 +1,7 @@
 import enum
 
-from Data.DataClasses import Sport
+from Data.DataClasses import Sport,Intervenor
+
 class EventState(enum.Enum):
     Open = 1
     Suspended = 2
@@ -10,9 +11,10 @@ class Event:
 
     idGenerator = 1
 
-    def __init__(self,sport : Sport,intervenors : list) -> None:
+    def __init__(self,name,sport : Sport.Sport,intervenors : list[Intervenor.Intervenor]) -> None:
         self.id = Event.idGenerator
         Event.idGenerator += 1
+        self.name = name
         self.state = EventState.Open
         self.sport = sport
         self.intervenors = intervenors
@@ -27,3 +29,14 @@ class Event:
             self.state = EventState.Closed
             self.result = result
             # Notify Bets
+
+    def toJSON(self):
+        toReturn = dict()
+        toReturn["Name"] = self.name
+
+        toReturn["Sport"] = self.sport.toJSON()
+
+        intervenors = list(map(lambda x:x.name,self.intervenors))
+        toReturn["Intervenors"] = intervenors
+
+        return toReturn

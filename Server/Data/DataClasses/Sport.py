@@ -16,3 +16,22 @@ class Sport:
 
     def addEvent(self,eventID):
         self.events.append(eventID)
+
+    def toJSON(self):
+        toReturn = dict()
+
+        toReturn["Name"] = self.name
+        toReturn["Type"] = self.type.name
+
+        return toReturn
+
+    @classmethod
+    def getParameters(cls) -> dict:
+        params = dict()
+        params["Name"] = 0
+        types = []
+        for type in SportType:
+            types.append(type.name)
+
+        params["Type"] = types
+        return params

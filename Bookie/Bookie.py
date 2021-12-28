@@ -1,26 +1,19 @@
-import threading, json
+import threading
 import socket
-import ClientLogic
+import BookieLogic
 
 SERVERHOST = ''
 SERVERPORT = 40000
 
 def main():
     sock = setupConnection()
-    info = getInitialAppInfoFromServer(sock)
-    cl = ClientLogic.ClientLogic(sock,info)
+    cl = BookieLogic.BookieLogic(sock)
     cl.run()
-
-def getInitialAppInfoFromServer(sock):
-    data = sock.recv(2048)
-    data = data.decode("utf-8")
-    info = json.loads(data)
-    return info
 
 def setupConnection():
     sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     sock.connect((SERVERHOST,SERVERPORT))
-    sock.send("client".encode("utf-8"))
+    sock.send("bookie".encode("utf-8"))
     print("Connected with server")
     return sock
 

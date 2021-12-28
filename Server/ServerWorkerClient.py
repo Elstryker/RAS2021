@@ -32,10 +32,8 @@ class ServerWorkerClient:
         threading.Thread(target=self.receiveClientRequests).start()
 
     def sendInitialAppInfoToClient(self):
-        currencies = self.app.getCurrencies()
-        separator = ','
-        currencies = separator.join(currencies)
-        self.sock.send(currencies.encode("utf-8"))
+        message = self.app.getDefaultInfo(self.userID)
+        self.sock.send(message.encode("utf-8"))
 
     def receiveClientRequests(self):
         str_Data = ''

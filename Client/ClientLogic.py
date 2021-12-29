@@ -2,22 +2,27 @@ import socket
 import ClientGUI
 import ClientInfo
 import json
+from rich.console import Console
+from rich import box
+from rich.prompt import Prompt
 
 class ClientLogic:
     
     sock : socket.socket
     clientInfo : ClientInfo.ClientInfo
+    console : Console
 
     def __init__(self,sock,info):
         self.sock = sock
         self.clientInfo = ClientInfo.ClientInfo(info)
+        self.console = Console()
 
     def menu(self):
         inp = ''
         while inp != '0':
-            ClientGUI.showEvents(self.clientInfo.events)
-            ClientGUI.showMenu(self.clientInfo.loggedIn)
-            inp = input(" -> ")
+            #ClientGUI.showEvents(self.clientInfo.events)
+            ClientGUI.showMenu(self.clientInfo.loggedIn, self.console, self.clientInfo.wallet, self.clientInfo.events)
+            inp = self.console.input("Introduza a inicial da opção desejada -> ")
             option = int(inp)
             if self.clientInfo.loggedIn:
                 self.handleInputLoggedIn(option)

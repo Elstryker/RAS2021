@@ -37,7 +37,7 @@ class ServerWorkerClient:
 
     def receiveClientRequests(self):
         str_Data = ''
-        while str_Data != '0':
+        while str_Data != 'S':
             data = self.sock.recv(256)
             str_Data = data.decode("utf-8")
             str_Data = str_Data.strip()
@@ -54,7 +54,7 @@ class ServerWorkerClient:
         operation = tokens[0]
         args = tokens[1:]
         message = ""
-        operation = int(operation)
+        #operation = int(operation)
         print("Operation:", operation)
         print("Args:", args)
         if operation == 1: # Add Bet To Bet Slip
@@ -89,7 +89,7 @@ class ServerWorkerClient:
         elif operation == 11: # Register
             self.getIdForNotLoggedInUser()
             message = self.app.logout(self.userID)
-        elif operation == 0: # Quit
+        elif operation == 'S': # Quit
             replyBye = dict()
             replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"
             message = json.dumps(replyBye)
@@ -103,7 +103,7 @@ class ServerWorkerClient:
         operation = tokens[0]
         args = tokens[1:]
         message = ""
-        operation = int(operation)
+        #operation = int(operation)
         print("Operation:", operation)
         print("Args:", args)
         if operation == 1: # Add Bet To Bet Slip
@@ -126,7 +126,7 @@ class ServerWorkerClient:
             self.eventPage += 1
             self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
             message = "\n\nNext Page!\n"
-        elif operation == 7: # Login
+        elif operation == "F": # Login
             message = self.app.login(self.userID,args[0],args[1])
             dic = json.loads(message)
             if dic['LoggedIn']:
@@ -134,7 +134,7 @@ class ServerWorkerClient:
                 self.loggedIn = True
         elif operation == 8: # Register
             message = self.app.register(args[0],args[1],args[2])
-        elif operation == 0: # Quit
+        elif operation == 'S': # Quit
             replyBye = dict()
             replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"
             message = json.dumps(replyBye)

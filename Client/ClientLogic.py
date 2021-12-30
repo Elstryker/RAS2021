@@ -1,5 +1,5 @@
 import socket
-import ClientGUI
+from ClientGUI import ClientGUI
 import ClientInfo
 import json
 from rich.console import Console
@@ -10,24 +10,39 @@ class ClientLogic:
     
     sock : socket.socket
     clientInfo : ClientInfo.ClientInfo
-    console : Console
+    client_gui : ClientGUI
 
     def __init__(self,sock,info):
         self.sock = sock
         self.clientInfo = ClientInfo.ClientInfo(info)
-        self.console = Console()
+        self.client_gui = ClientGUI()
 
+    def login(self,option):
+        username = self.client_gui.ask_info(self.clientInfo.events, 0)
+        password = self.client_gui.ask_info(self.clientInfo.events, 1)
+        
+        print(f"O username é {username} e a password é {password}")
+
+        args = [option,username,password]
+        response = self.requestServer(args)
+        if response["LoggedIn"]:
+            self.clientInfo.loggedIn = True
+        print(response['Message'])
+    
     def menu(self):
         inp = ''
-        while inp != '0':
+        while inp != 'S':
             #ClientGUI.showEvents(self.clientInfo.events)
-            ClientGUI.showMenu(self.clientInfo.loggedIn, self.console, self.clientInfo.wallet, self.clientInfo.events)
-            inp = self.console.input("Introduza a inicial da opção desejada -> ")
-            option = int(inp)
+            
+            while inp not in ['F', 'f','A', "S", "s", "a", "R", "r"]:
+                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
+            
+            inp = inp.upper()
+
             if self.clientInfo.loggedIn:
-                self.handleInputLoggedIn(option)
+                self.handleInputLoggedIn(inp)
             else:
-                self.handleInputNotLoggedIn(option)
+                self.handleInputNotLoggedIn(inp)
 
     def requestServer(self,args):
         message = ";".join(args)
@@ -45,7 +60,6 @@ class ClientLogic:
         return response
 
     def handleInputNotLoggedIn(self,option):
-        option = str(option)
         actions = {
             "1":self.addBetToBetSlip,
             "2":self.removeBetFromBetSlip,
@@ -53,16 +67,15 @@ class ClientLogic:
             "4":self.showBetSlip,
             "5":self.changePage,
             "6":self.changePage,
-            "7":self.login,
-            "8":self.register,
-            "0":self.quit
+            "F":self.login,
+            "E":self.register,
+            "S":self.quit
         }
 
         toDo = actions.get(option,self.noSuchAction)
         toDo(option)
 
     def handleInputLoggedIn(self,option): # TODO: Exchange currencies
-        option = str(option)
         actions = {
             "1":self.addBetToBetSlip,
             "2":self.removeBetFromBetSlip,
@@ -73,9 +86,7 @@ class ClientLogic:
             "7":self.withdrawMoney,
             "8":self.changePage, # Previous Page
             "9":self.changePage, # Next Page
-            "10":self.login,
-            "11":self.register,
-            "0":self.quit
+            "S":self.quit
         }
         toDo = actions.get(option,self.noSuchAction)
         toDo(option)
@@ -155,31 +166,16 @@ class ClientLogic:
         args = [option]
         self.requestServer(args)
     
-    def login(self,option):
-        ClientGUI.askUserName()
-        username = input("-> ")
-
-        ClientGUI.askPassword()
-        password = input("-> ")
-        
-        args = [option,username,password]
-        response = self.requestServer(args)
-        if response["LoggedIn"]:
-            self.clientInfo.loggedIn = True
-        print(response['Message'])
         
     def logout(self,option):
         args = [option]
         response = self.requestServer(args)
         self.clientInfo.loggedIn = False
-        print(response['Message'])
-
+        
     def register(self,option):
-        ClientGUI.askUserName()
-        username = input("-> ")
-
-        ClientGUI.askPassword()
-        password = input("-> ")
+        username = self.client_gui.ask_info(self.ClientInfo.events, 0)
+        password = self.client_gui.ask_info(self.ClientInfo.event, 1)
+        
 
         ClientGUI.askBirthDate()
         birthdate = input("-> ")
@@ -190,8 +186,11 @@ class ClientLogic:
         print(response['Message'])
     
     def quit(self,option):
+        self.client_gui.goodbye()
+        
         args = [option]
         reply = self.requestServer(args)
+        
         print(reply['Message'])
 
     def run(self):

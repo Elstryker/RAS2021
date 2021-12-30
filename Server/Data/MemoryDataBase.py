@@ -26,11 +26,23 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     def createDefault(self):
         self.createUser("ola","adeus","1/1/1970")
         self.createSport("Futebol",SportType.WinDraw)
+        self.createSport("Golf", SportType.Win)
+        self.createSport("Corrida", SportType.Win)
+
+        self.createIntervenor("Tiger Woods")
+        self.createIntervenor("Jordan Spieth")
+        self.createIntervenor("Rory Mcllroy")
+        self.createIntervenor("Naoko Takahashi")
+        self.createIntervenor("Eliud Kipchoge")
+        self.createIntervenor("Rosa Mota")
         self.createIntervenor("FCPorto")
         self.createIntervenor("FCBarcelona")
         self.createIntervenor("SCBraga")
+
         self.createEvent("Championship","Futebol","FCPorto,SCBraga","1.05,6.21,1.50")
         self.createEvent("Europa","Futebol","FCPorto,FCBarcelona","1.56,3.67,2.00")
+        self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
+        self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
 
     def getCurrencies(self):
         return self.currencies

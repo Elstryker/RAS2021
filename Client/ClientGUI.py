@@ -102,7 +102,7 @@ class ClientGUI:
     def login_layout(self, loggedIn : bool, layout : Layout):
         logo_panel = self.get_logo_panel()
 
-        if loggedIn:
+        if not loggedIn:
             layout["header"].split_row(
                 Layout(logo_panel, name='logo', ratio = 8), 
                 Layout(" ", ratio=2),

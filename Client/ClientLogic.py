@@ -34,11 +34,13 @@ class ClientLogic:
         while inp != 'S':
             #ClientGUI.showEvents(self.clientInfo.events)
             
-            while inp not in ['F', 'f','A', "S", "s", "a", "R", "r"]:
+            inp = ""
+
+            while inp not in ['F', 'f','A', "S", "s", "a", "E", "e"]:
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
             
             inp = inp.upper()
-
+            print(self.clientInfo.loggedIn)
             if self.clientInfo.loggedIn:
                 self.handleInputLoggedIn(inp)
             else:
@@ -53,7 +55,7 @@ class ClientLogic:
         response = json.loads(data.decode('utf-8'))
 
         # Retrieve additional info
-        if args[0] != "0": # See if it just wants to quit
+        if args[0] != "S": # See if it just wants to quit
             self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["DetailedEvent"],response["Currencies"])
             print(self.clientInfo.wallet)
 
@@ -92,7 +94,7 @@ class ClientLogic:
         toDo(option)
 
     def noSuchAction(self,option):
-        raise IOError
+        print("Opção errada:",option)
 
     def addBetToBetSlip(self,option): # TODO
         ClientGUI.askEvent()
@@ -173,8 +175,9 @@ class ClientLogic:
         self.clientInfo.loggedIn = False
         
     def register(self,option):
-        username = self.client_gui.ask_info(self.ClientInfo.events, 0)
-        password = self.client_gui.ask_info(self.ClientInfo.event, 1)
+        username = self.client_gui.ask_info(self.clientInfo.events, 0)
+        password = self.client_gui.ask_info(self.clientInfo.events, 1)
+        birthdate = self.client_gui.ask_info(self.clientInfo.events, 2)
         
 
         ClientGUI.askBirthDate()

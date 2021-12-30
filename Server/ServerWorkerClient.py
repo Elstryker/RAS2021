@@ -86,7 +86,7 @@ class ServerWorkerClient:
             message = "\n\nNext Page!\n"
         elif operation == 10: # See Bet History
             message = self.app.getBetHistory(self.userID)
-        elif operation == 11: # Register
+        elif operation == 'E': # Register
             self.getIdForNotLoggedInUser()
             message = self.app.logout(self.userID)
         elif operation == 'S': # Quit

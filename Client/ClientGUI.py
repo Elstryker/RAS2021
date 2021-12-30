@@ -12,9 +12,11 @@ from rich.pretty import pprint
 class ClientGUI:
     console : Console
     questions : list
+    username : str
 
     def __init__(self):
         self.console = Console()
+        self.username = None
         self.questions = list()
         self.questions.append(Text("""
   _____       _                 _                          _    _                                              
@@ -127,7 +129,7 @@ class ClientGUI:
 
             layout["login"].split_column(
                 Layout(" "),
-                Layout(Panel(Align(Text("Joaquim das Couves", justify='center'),vertical='middle', align='center'), title='[red]Username'))
+                Layout(Panel(Align(Text(self.username, justify='center'),vertical='middle', align='center'), title='[red]Username'))
             )
 
     def get_logo_panel(self):

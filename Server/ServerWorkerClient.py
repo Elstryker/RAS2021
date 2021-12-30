@@ -132,7 +132,7 @@ class ServerWorkerClient:
             if dic['LoggedIn']:
                 self.userID = args[0] # username
                 self.loggedIn = True
-        elif operation == 8: # Register
+        elif operation == "E": # Register
             message = self.app.register(args[0],args[1],args[2])
         elif operation == 'S': # Quit
             replyBye = dict()

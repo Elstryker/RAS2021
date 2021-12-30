@@ -11,6 +11,8 @@ class ClientLogic:
     sock : socket.socket
     clientInfo : ClientInfo.ClientInfo
     client_gui : ClientGUI
+    inputs_logged : str
+    inputs_notlogged : str
 
     def __init__(self,sock,info):
         self.sock = sock
@@ -21,22 +23,23 @@ class ClientLogic:
         username = self.client_gui.ask_info(self.clientInfo.events, 0)
         password = self.client_gui.ask_info(self.clientInfo.events, 1)
         
-        print(f"O username é {username} e a password é {password}")
+        #print(f"O username é {username} e a password é {password}")
 
         args = [option,username,password]
         response = self.requestServer(args)
         if response["LoggedIn"]:
             self.clientInfo.loggedIn = True
-        print(response['Message'])
+            self.client_gui.username = username
+        # print(response['Message'])
     
     def menu(self):
         inp = ''
         while inp != 'S':
             #ClientGUI.showEvents(self.clientInfo.events)
             
-            inp = ""
+            inp = "Q"
 
-            while inp not in ['F', 'f','A', "S", "s", "a", "E", "e"]:
+            while inp not in 'SsFfAaEeRr':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
             
             inp = inp.upper()
@@ -173,16 +176,13 @@ class ClientLogic:
         args = [option]
         response = self.requestServer(args)
         self.clientInfo.loggedIn = False
+        self.username = None
         
     def register(self,option):
         username = self.client_gui.ask_info(self.clientInfo.events, 0)
         password = self.client_gui.ask_info(self.clientInfo.events, 1)
         birthdate = self.client_gui.ask_info(self.clientInfo.events, 2)
         
-
-        ClientGUI.askBirthDate()
-        birthdate = input("-> ")
-
         args = [option,username,password,birthdate]
         response = self.requestServer(args)
 

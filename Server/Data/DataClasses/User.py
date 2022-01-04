@@ -7,7 +7,7 @@ class User:
         self.username = username
         self.password = password
         self.wallet = self.newCurrenciesDict(currencies)
-        self.birtDate = birthDate
+        self.birthDate = birthDate
         self.currentBetSlip = betSlip
         self.currentBetSlip.user = self.username
         self.betSlips = {}

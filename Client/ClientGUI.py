@@ -13,6 +13,7 @@ class ClientGUI:
     console : Console
     questions : list
     username : str
+    wallet : dict
 
     def __init__(self):
         self.console = Console()
@@ -46,6 +47,16 @@ class ClientGUI:
                                                                                               \_\                                                            /_/     
                                                                                                                                                                      
 """))
+        self.questions.append(Text("""
+  _____           _                     __  __             _              _           
+ |_   _|         (_)                   |  \/  |           | |            | |        _ 
+   | |  _ __  ___ _ _ __ __ _    ___   | \  / | ___  _ __ | |_ __ _ _ __ | |_ ___  (_)
+   | | | '_ \/ __| | '__/ _` |  / _ \  | |\/| |/ _ \| '_ \| __/ _` | '_ \| __/ _ \    
+  _| |_| | | \__ \ | | | (_| | | (_) | | |  | | (_) | | | | || (_| | | | | ||  __/  _ 
+ |_____|_| |_|___/_|_|  \__,_|  \___/  |_|  |_|\___/|_| |_|\__\__,_|_| |_|\__\___| (_)
+                                                                                      
+                                                                                      
+"""))
 
     def goodbye(self):
         layout : Layout = Layout()
@@ -75,6 +86,67 @@ class ClientGUI:
 
         self.console.print(layout)
 
+    def invalid_info(self, opcao : int):
+            self.console.clear()
+            mensagem = list()
+
+            mensagem.append(Text("""
+  _____                   _                                       _                          _            _           
+ |  __ \                 (_)                                     | |                        | |          | |        _ 
+ | |__) | __ ___  ___ ___ _  ___  _ __   ___     __ _ _   _  __ _| | __ _ _   _  ___ _ __   | |_ ___  ___| | __ _  (_)
+ |  ___/ '__/ _ \/ __/ __| |/ _ \| '_ \ / _ \   / _` | | | |/ _` | |/ _` | | | |/ _ \ '__|  | __/ _ \/ __| |/ _` |    
+ | |   | | |  __/\__ \__ \ | (_) | | | |  __/  | (_| | |_| | (_| | | (_| | |_| |  __/ |     | ||  __/ (__| | (_| |  _ 
+ |_|   |_|  \___||___/___/_|\___/|_| |_|\___|   \__, |\__,_|\__,_|_|\__, |\__,_|\___|_|      \__\___|\___|_|\__,_| (_)
+                                                   | |                 | |                                            
+                                                   |_|                 |_|                                            
+"""))
+            mensagem.append(Text("""
+  ______                _                 _                             __                      
+ |  ____|              | |               (_)                           / _|                     
+ | |__ __ _  ___ __ _  | |     ___   __ _ _ _ __    _ __   ___  _ __  | |_ __ ___   _____  _ __ 
+ |  __/ _` |/ __/ _` | | |    / _ \ / _` | | '_ \  | '_ \ / _ \| '__| |  _/ _` \ \ / / _ \| '__|
+ | | | (_| | (_| (_| | | |___| (_) | (_| | | | | | | |_) | (_) | |    | || (_| |\ V / (_) | |   
+ |_|  \__,_|\___\__,_| |______\___/ \__, |_|_| |_| | .__/ \___/|_|    |_| \__,_| \_/ \___/|_|   
+             )_)                     __/ |         | |                                          
+                                    |___/          |_|                                          
+"""))
+
+            texto_invalido = Text("""
+   _____            _               _____             __  _ _     _                
+  |  __ \          | |             |_   _|           /_/ | (_)   | |               
+  | |  | | __ _  __| | ___  ___      | |  _ ____   ____ _| |_  __| | ___  ___      
+  | |  | |/ _` |/ _` |/ _ \/ __|     | | | '_ \ \ / / _` | | |/ _` |/ _ \/ __|     
+  | |__| | (_| | (_| | (_) \__ \    _| |_| | | \ V / (_| | | | (_| | (_) \__ \     
+  |_____/ \__,_|\__,_|\___/|___/   |_____|_| |_|\_/ \__,_|_|_|\__,_|\___/|___/     
+   _______         _                                                       _       
+  |__   __|       | |                                                     | |      
+     | | ___ _ __ | |_ ___      _ __   _____   ____ _ _ __ ___   ___ _ __ | |_ ___ 
+     | |/ _ \ '_ \| __/ _ \    | '_ \ / _ \ \ / / _` | '_ ` _ \ / _ \ '_ \| __/ _ \\
+     | |  __/ | | | ||  __/    | | | | (_) \ V / (_| | | | | | |  __/ | | | ||  __/
+     |_|\___|_| |_|\__\___|    |_| |_|\___/ \_/ \__,_|_| |_| |_|\___|_| |_|\__\___|
+                                                                                   
+                                                                                   
+""")
+            for elem in mensagem:
+                elem.stylize("bright green")
+            
+            texto_invalido.stylize("cyan")                                               
+                                                                               
+
+            layout : Layout = Layout()
+
+
+            layout.split_column(
+                Layout(" ", name="empty space"),
+                Layout(name="header", ratio=3),
+                Layout(Align(texto_invalido, align='center'), ratio=9),
+                Layout(pressione_tecla, ratio=3)
+            )
+
+            self.login_layout(False, layout)
+
+            self.console.print(layout)
+            answer = self.console.input("-> ")
 
     def ask_info(self, events : list, question : int):
         answer = ''
@@ -115,7 +187,7 @@ class ClientGUI:
             wallet : dict = {"EUR" : 42, "USD" : 69, "GBP" : 666, "ADA" : 420, "RASCoin" : 0}
             wallet_printable : str = ""
             
-            for currency, amount in wallet.items():
+            for currency, amount in self.wallet.items():
                 wallet_printable+= f'{currency}: {amount}\n'
 
             balance_panel = Panel(Align(Text(wallet_printable, justify='center'), vertical='middle', align='center'), title='[red]Saldo')
@@ -147,43 +219,47 @@ class ClientGUI:
 
         return logo_panel
 
-    def showMenu(self, loggedIn : bool, wallet : dict[str,int], events : list):
+    def pede_moeda(self, events : list, currencies : list):
         self.console.clear()
         layout : Layout = Layout()
         
-        
+        currencies = [Panel(Align(Text(currency, tab_size=8), align='center'), title=f'[red]{index}[/red]') for index,currency in enumerate(currencies)]
 
-        """
-        2 -> Remove Bet From Bet Slip
-        3 -> Cancel Bet Slip
-        4 -> Show Bet Slip
-        5 -> Previous Page
-        6 -> Next Page
-        7 -> Login
-        8 -> Register"""
+        moedas_printable = Columns(currencies, equal=False, expand=True)
+
+        eventos_printable : list = self.showEvents(events)
+        
+        
+        layout.split_column(
+            Layout(" ", name="empty space"),
+            Layout(name="header", ratio=3),
+            Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
+            Layout(Panel(moedas_printable, title='[red]Menu'), name="menu", ratio=3)
+        )
+
+        self.login_layout(True, layout)
+
+        self.console.print(layout)
+
+        return self.console.input("Introduza o número da opção desejada -> ")
+    
+    def showMenu(self, loggedIn : bool, wallet : dict[str,int], events : list):
+        self.console.clear()
+        layout : Layout = Layout()
         
         if not loggedIn:
             menu = [Panel("[red]E[/red]fetuar registo"), Panel("[red]F[/red]azer Login"), 
             Panel("[red]I[/red]ntroduzir Aposta"), Panel("[red]R[/red]emover Aposta"), 
             Panel("[red]C[/red]ancelar Boletim"), Panel("[red]M[/red]ostrar Boletim"), 
-            Panel("[red]V[/red]alidar Boletim"), Panel("[red]D[/red]epositar Dinheiro"), 
-            Panel("[red]L[/red]evantar Dinheiro"), Panel("Página [red]A[/red]nterior"), 
+            Panel("[red]V[/red]alidar Boletim"), Panel("Página [red]A[/red]nterior"), 
             Panel("[red]P[/red]róxima Página"), Panel("[red]S[/red]air")]
         else:
-            menu = Text(
-    """
-    0 -> Quit
-    1 -> Add Bet To Bet Slip
-    2 -> Remove Bet From Bet Slip
-    3 -> Cancel Bet Slip
-    4 -> Show Bet Slip
-    5 -> Conclude Bet Slip
-    6 -> Deposit Money
-    7 -> Withdraw Money
-    8 -> Previous Page
-    9 -> Next Page
-    10 -> See Bet History
-    11 -> Logout""", justify = 'center')
+            menu = [Panel("[red]I[/red]ntroduzir Aposta"), Panel("[red]R[/red]emover Aposta"), 
+            Panel("[red]C[/red]ancelar Boletim"), Panel("[red]M[/red]ostrar Boletim"), 
+            Panel("[red]V[/red]alidar Boletim"), Panel("[red]D[/red]epositar Dinheiro"), 
+            Panel("[red]L[/red]evantar Dinheiro"), Panel("Página [red]A[/red]nterior"), 
+            Panel("[red]P[/red]róxima Página"), Panel("Consultar [red]H[/red]istórico"),
+            Panel("L[red]o[/red]gout"), Panel("[red]S[/red]air")]
 
         menu_printable = Columns(menu, equal=True, expand=True)
 
@@ -201,22 +277,10 @@ class ClientGUI:
 
         self.console.print(layout)
 
-        return self.console.input("Introduza a inicial da opção desejada -> ")
+        return self.console.input("Introduza a letra da opção desejada -> ")
 
         #time.sleep(2)
         #console.clear()
-
-    def askAmount(self):
-        print(
-    """
-    Amount:""")
-
-    def askCurrency(self, availableCurrencies):
-        print(
-    """
-    Choose currency:""")
-        for i,el in enumerate(availableCurrencies):
-            print(f"{i+1} - {el}")
 
     def askEvent(self):
         print("Which event?")

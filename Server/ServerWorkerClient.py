@@ -72,9 +72,9 @@ class ServerWorkerClient:
         elif operation == 5: # Conclude Bet Slip
             self.app.concludeBetSlip(self.userID,args[0],args[1])
             message = "\n\nMoney deposited with success!\n"
-        elif operation == 6: # Deposit Money
+        elif operation == 'D': # Deposit Money
             message = self.app.depositMoney(self.userID,args[0],args[1])
-        elif operation == 7: # Withdraw Money
+        elif operation == 'L': # Withdraw Money
             message = self.app.withdrawMoney(self.userID,args[0],args[1])
         elif operation == 8: # Previous Page
             self.eventPage -= 1 if self.eventPage > 0 else self.eventPage
@@ -86,7 +86,7 @@ class ServerWorkerClient:
             message = "\n\nNext Page!\n"
         elif operation == 10: # See Bet History
             message = self.app.getBetHistory(self.userID)
-        elif operation == 'E': # Register
+        elif operation == 'O': # Logout
             self.getIdForNotLoggedInUser()
             message = self.app.logout(self.userID)
         elif operation == 'S': # Quit

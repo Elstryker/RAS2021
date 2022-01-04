@@ -30,6 +30,8 @@ class ClientLogic:
         if response["LoggedIn"]:
             self.clientInfo.loggedIn = True
             self.client_gui.username = username
+        else:
+            self.client_gui.invalid_info(0)
         # print(response['Message'])
     
     def menu(self):
@@ -39,16 +41,14 @@ class ClientLogic:
             
             inp = "Q"
 
-            while inp not in 'SsFfAaEeRr':
+            while inp not in 'SsFfAaEeRrOoCcDd':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
             
             inp = inp.upper()
             print(self.clientInfo.loggedIn)
-            if self.clientInfo.loggedIn:
-                self.handleInputLoggedIn(inp)
-            else:
-                self.handleInputNotLoggedIn(inp)
-
+            
+            self.handle_input(inp)
+            
     def requestServer(self,args):
         message = ";".join(args)
 
@@ -60,38 +60,28 @@ class ClientLogic:
         # Retrieve additional info
         if args[0] != "S": # See if it just wants to quit
             self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["DetailedEvent"],response["Currencies"])
-            print(self.clientInfo.wallet)
+            self.client_gui.wallet = self.clientInfo.wallet
 
         return response
 
-    def handleInputNotLoggedIn(self,option):
-        actions = {
-            "1":self.addBetToBetSlip,
-            "2":self.removeBetFromBetSlip,
-            "3":self.cancelBetSlip,
-            "4":self.showBetSlip,
-            "5":self.changePage,
-            "6":self.changePage,
-            "F":self.login,
-            "E":self.register,
-            "S":self.quit
-        }
+   
 
-        toDo = actions.get(option,self.noSuchAction)
-        toDo(option)
-
-    def handleInputLoggedIn(self,option): # TODO: Exchange currencies
+    def handle_input(self,option): # TODO: Exchange currencies
         actions = {
             "1":self.addBetToBetSlip,
             "2":self.removeBetFromBetSlip,
             "3":self.cancelBetSlip,
             "4":self.showBetSlip,
             "5":self.concludeBetSlip,
-            "6":self.depositMoney,
-            "7":self.withdrawMoney,
+            "D":self.depositMoney,
+            "L":self.withdrawMoney,
             "8":self.changePage, # Previous Page
             "9":self.changePage, # Next Page
-            "S":self.quit
+            "F":self.login,
+            "E":self.register,
+            "S":self.quit,
+            "O":self.logout
+            #show history
         }
         toDo = actions.get(option,self.noSuchAction)
         toDo(option)
@@ -139,26 +129,19 @@ class ClientLogic:
         self.requestServer(args)
 
     def depositMoney(self,option):
-        ClientGUI.askAmount()
-        amount = input("-> ")
+        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
+        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
+        
+        
+        print(f"O amount é {amount} e a currency é {currency}")
 
-        currency = ''
-        ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
-        currency = input("-> ")
-
-        currency = self.clientInfo.availableCurrencies[int(currency)-1]
-        args = [option,currency,amount]
+        args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
         self.requestServer(args)
         # Update clientInfo
 
     def withdrawMoney(self,option):
-        ClientGUI.askAmount()
-        amount = input("-> ")
-
-        currency = ''
-        ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
-        currency = input("-> ")
-        currency = self.clientInfo.availableCurrencies[int(currency)-1]
+        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
+        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
 
         args = [option,currency,amount]
         self.requestServer(args)
@@ -176,7 +159,7 @@ class ClientLogic:
         args = [option]
         response = self.requestServer(args)
         self.clientInfo.loggedIn = False
-        self.username = None
+        self.client_gui.username = None
         
     def register(self,option):
         username = self.client_gui.ask_info(self.clientInfo.events, 0)

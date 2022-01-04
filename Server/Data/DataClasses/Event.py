@@ -30,8 +30,13 @@ class Event:
             self.result = result
             # Notify Bets
 
+    def getOdd(self,choice):
+        return self.intervenors[choice][0]
+
     def toJSON(self):
         toReturn = dict()
+        toReturn["Id"] = self.id
+
         toReturn["Name"] = self.name
 
         toReturn["Sport"] = self.sport.toJSON()

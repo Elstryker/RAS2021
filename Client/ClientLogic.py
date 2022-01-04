@@ -39,11 +39,10 @@ class ClientLogic:
             
             inp = "Q"
 
-            while inp not in 'SsFfAaEeRr':
+            while inp not in 'SsFfAaEeRrIi':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
             
             inp = inp.upper()
-            print(self.clientInfo.loggedIn)
             if self.clientInfo.loggedIn:
                 self.handleInputLoggedIn(inp)
             else:
@@ -59,15 +58,14 @@ class ClientLogic:
 
         # Retrieve additional info
         if args[0] != "S": # See if it just wants to quit
-            self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["DetailedEvent"],response["Currencies"])
-            print(self.clientInfo.wallet)
+            self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["Currencies"])
 
         return response
 
     def handleInputNotLoggedIn(self,option):
         actions = {
-            "1":self.addBetToBetSlip,
-            "2":self.removeBetFromBetSlip,
+            "I":self.addBetToBetSlip,
+            "R":self.removeBetFromBetSlip,
             "3":self.cancelBetSlip,
             "4":self.showBetSlip,
             "5":self.changePage,
@@ -82,8 +80,8 @@ class ClientLogic:
 
     def handleInputLoggedIn(self,option): # TODO: Exchange currencies
         actions = {
-            "1":self.addBetToBetSlip,
-            "2":self.removeBetFromBetSlip,
+            "I":self.addBetToBetSlip,
+            "R":self.removeBetFromBetSlip,
             "3":self.cancelBetSlip,
             "4":self.showBetSlip,
             "5":self.concludeBetSlip,
@@ -91,6 +89,7 @@ class ClientLogic:
             "7":self.withdrawMoney,
             "8":self.changePage, # Previous Page
             "9":self.changePage, # Next Page
+            "E":self.logout,
             "S":self.quit
         }
         toDo = actions.get(option,self.noSuchAction)
@@ -99,21 +98,33 @@ class ClientLogic:
     def noSuchAction(self,option):
         print("Opção errada:",option)
 
-    def addBetToBetSlip(self,option): # TODO
-        ClientGUI.askEvent()
+    def addBetToBetSlip(self,option):
+        self.client_gui.askEvent()
         eventID = input("-> ")
 
-        ClientGUI.showDetailedEvent()
+        args = [option,"GET",eventID]
+        response = self.requestServer(args)
+
+        print(response["Message"])
+        if not response["Found"]:
+            return
+
+        self.client_gui.showDetailedEvent(response["Event"])
         result = input("-> ")
 
-        args = [option,eventID,result]
-        self.requestServer(args)
+        args = [option,"PUT",eventID,result]
+        response = self.requestServer(args)
 
-    def removeBetFromBetSlip(self,option): # TODO
-        ClientGUI.askEvent()
+        print(response["Message"])
+
+    def removeBetFromBetSlip(self,option):
+        # Should we show betslip before deciding to remove bet?
+        self.client_gui.askEvent()
         eventID = input("-> ")
         args = [option,eventID]
-        self.requestServer(args)
+        response = self.requestServer(args)
+
+        print(response["Message"])
 
     def cancelBetSlip(self,option): # TODO
         args = [option]
@@ -174,7 +185,7 @@ class ClientLogic:
         
     def logout(self,option):
         args = [option]
-        response = self.requestServer(args)
+        self.requestServer(args)
         self.clientInfo.loggedIn = False
         self.username = None
         

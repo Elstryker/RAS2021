@@ -31,7 +31,7 @@ class ClientGUI:
  |_   _|     | |               | |                        |  __ \                                  | |  _ 
    | |  _ __ | |_ _ __ ___   __| |_   _ ______ _    __ _  | |__) |_ _ ___ _____      _____  _ __ __| | (_)
    | | | '_ \| __| '__/ _ \ / _` | | | |_  / _` |  / _` | |  ___/ _` / __/ __\ \ /\ / / _ \| '__/ _` |    
-  _| |_| | | | |_| | | (_) | (_| | |_| |/ / (_| | | (_| | | |  | (_| \__ \__ \\\ V  V / (_) | | | (_| |  _ 
+  _| |_| | | | |_| | | (_) | (_| | |_| |/ / (_| | | (_| | | |  | (_| \__ \__ \\ V  V / (_) | | | (_| |  _ 
  |_____|_| |_|\__|_|  \___/ \__,_|\__,_/___\__,_|  \__,_| |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_| (_)
                                                                                                           
                                                                                                           
@@ -221,13 +221,15 @@ class ClientGUI:
     def askEvent(self):
         print("Which event?")
 
-    def showDetailedEvent(self):
+    def showDetailedEvent(self,event):
         print(
-    """
-    0 - Empate
-    1 - Vitória
-    2 - Derrota
-    """)
+    f"""
+Name - {event["Name"]}
+Sport - {event["Sport"]}""")
+        for i,(odd,intervenor) in enumerate(event["Intervenors"]):
+            print(
+    f"""
+{i} - {intervenor} ({odd})""")
 
     
     def showEvents(self, events : list):

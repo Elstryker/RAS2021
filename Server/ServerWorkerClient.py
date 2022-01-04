@@ -57,12 +57,10 @@ class ServerWorkerClient:
         #operation = int(operation)
         print("Operation:", operation)
         print("Args:", args)
-        if operation == 1: # Add Bet To Bet Slip
-            self.app.addBetToBetSlip(self.userID,args[0],args[1])
-            message = "\n\nBet added with success!\n"
-        elif operation == 2: # Remove Bet From Bet Slip
-            self.app.removeBetFromBetSlip(self.userID,args[0])
-            message = "\n\nBet removed with success!\n"
+        if operation == "I": # Add Bet To Bet Slip
+            message = self.app.addBetToBetSlip(self.userID,args)
+        elif operation == "R": # Remove Bet From Bet Slip
+            message = self.app.removeBetFromBetSlip(self.userID,args[0])
         elif operation == 3: # Cancel Bet Slip
             self.app.cancelBetSlip(self.userID)
             message = "\n\nCancelled Bet Slip with success!\n"
@@ -86,7 +84,7 @@ class ServerWorkerClient:
             message = "\n\nNext Page!\n"
         elif operation == 10: # See Bet History
             message = self.app.getBetHistory(self.userID)
-        elif operation == 'E': # Register
+        elif operation == 'E': # Logout
             self.getIdForNotLoggedInUser()
             message = self.app.logout(self.userID)
         elif operation == 'S': # Quit
@@ -106,12 +104,10 @@ class ServerWorkerClient:
         #operation = int(operation)
         print("Operation:", operation)
         print("Args:", args)
-        if operation == 1: # Add Bet To Bet Slip
-            self.app.addBetToBetSlip(self.userID,args[0],args[1])
-            message = "\n\nBet added with success!\n"
-        elif operation == 2: # Remove Bet From Bet Slip
-            self.app.removeBetFromBetSlip(self.userID,args[0])
-            message = "\n\nBet removed with success!\n"
+        if operation == "I": # Add Bet To Bet Slip
+            message = self.app.addBetToBetSlip(self.userID,args)
+        elif operation == "R": # Remove Bet From Bet Slip
+            message = self.app.removeBetFromBetSlip(self.userID,args[0])
         elif operation == 3: # Cancel Bet Slip
             self.app.cancelBetSlip(self.userID)
             message = "\n\nCancelled Bet Slip with success!\n"

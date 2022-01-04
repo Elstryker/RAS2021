@@ -23,7 +23,6 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         self.sessionsInfo[userID]["Page"] = events[1]
         toSend["Events"] = list(map(lambda x:x.toJSON(),events[0]))
         toSend["Currencies"] = self.db.getCurrencies()
-        toSend["DetailedEvent"] = None
 
         return toSend
 
@@ -46,11 +45,43 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
         return json.dumps(toSend)
 
-    def addBetToBetSlip(self,userID,eventID,result):
-        print(f"User {userID} bet on event {eventID}, on {result}")
+    def addBetToBetSlip(self,userID,args): # args -> "GET",eventID  ||  "PUT",eventID,result
+        toSend = self.createDictWithDefaultInfo(userID)
+        eventID = int(args[1])
+
+        if args[0] == "GET":
+            event = self.db.getEvent(eventID)
+            if event is None:
+                toSend["Found"] = False
+                toSend["Message"] = "Could not get event"
+            else:
+                toSend["Found"] = True
+                toSend["Event"] = event.toJSON()
+                toSend["Message"] = "Retrieved event"
+        elif args[0] == "PUT":
+            result = int(args[2])
+            success = self.db.addBetToBetSlip(userID,eventID,result)
+            if success:
+                toSend["Message"] = "Bet added to bet slip"
+            else:
+                toSend["Message"] = "Problem adding bet to bet slip"
+        else:
+            print("WTF, this is not supposed to happen")
+
+        return json.dumps(toSend)
+        
 
     def removeBetFromBetSlip(self,userID,eventID):
-        print(f"User {userID} removed bett on event {eventID}")
+        toSend = self.createDictWithDefaultInfo(userID)
+        eventID = int(eventID)
+
+        success = self.db.removeBetFromBetSlip(userID,eventID)
+        if success:
+            toSend["Message"] = "Bet removed successfully"
+        else:
+            toSend["Message"] = "Could not remove bet"
+
+        return json.dumps(toSend)
 
     def getBetSlip(self,userID): # TODO: Create one if it does not exist
         betSlip = self.db.getBetSlip(userID)

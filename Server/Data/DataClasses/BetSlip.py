@@ -25,12 +25,16 @@ class BetSlip:
     def addBet(self,bet : Bet.Bet):
         if self.state is BetSlipState.Creating:
             allBets = self.bets['Unfinished']
-            allBets[bet.id] = bet
+            allBets[bet.eventID] = bet
 
-    def removeBet(self,betID):
+    def removeBet(self,eventID):
         if self.state is BetSlipState.Creating:
             allBets = self.bets['Unfinished']
-            del allBets[betID]
+            if eventID in allBets:
+                del allBets[eventID]
+                return True
+            else:
+                return False
 
     def applyBetSlip(self):
         self.inStake = 1

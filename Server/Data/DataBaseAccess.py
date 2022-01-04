@@ -1,4 +1,4 @@
-from Data.DataClasses import BetSlip
+from Data.DataClasses import BetSlip,Event
 
 class DataBaseAccess:
     
@@ -43,4 +43,13 @@ class DataBaseAccess:
         pass
 
     def createEvent(self,name,sport,intervenors,odds) -> bool:
+        pass
+
+    def getEvent(self,eventID) -> Event.Event:
+        pass
+
+    def addBetToBetSlip(self,username,eventID,result) -> bool:
+        pass
+
+    def removeBetFromBetSlip(self,username,eventID) -> bool:
         pass

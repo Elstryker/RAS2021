@@ -44,6 +44,9 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
 
+        for event in self.events["Available"].values():
+            print(f"{event.id} - {event.name}")
+
     def getCurrencies(self):
         return self.currencies
 
@@ -177,9 +180,37 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
             return False
         
         oddsWithIntervenors = list(zip(eventOdds,eventIntervenors))
-        oddsWithIntervenors.append((eventOdds[-1],None))
+
+        if eventSport.type is SportType.WinDraw:
+            oddsWithIntervenors.append((eventOdds[-1],None))
+        
         newEvent = Event.Event(name,eventSport,oddsWithIntervenors)
         self.events["Available"][newEvent.id] = newEvent
         return True
         
+    def getEvent(self,eventID):
+        try:
+            event = self.events["Available"][eventID]
+            return event
+        except:
+            return None
+
         
+    def addBetToBetSlip(self,username,eventID,result):
+        event = self.events["Available"][eventID]
+        betslip = self.betslips[username]
+
+        if result >= len(event.intervenors):
+            return False
+        
+        newBet = Bet.Bet(result,event.getOdd(result),event.id,betslip.id)
+        self.bets[newBet.id] = newBet
+
+        betslip.addBet(newBet)
+
+        return True
+        
+    def removeBetFromBetSlip(self,username,eventID):
+        betslip = self.betslips[username]
+
+        return betslip.removeBet(eventID)

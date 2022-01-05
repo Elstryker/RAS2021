@@ -1,19 +1,27 @@
 import enum
+from DataClasses import Sport, Intervenor_Event
+from sqlalchemy import Column, String, Integer, ForeignKey, Enum
+from sqlalchemy.orm import relationship, backref
+from Database import Base
 
-from Data.DataClasses import Sport,Intervenor
 
 class EventState(enum.Enum):
     Open = 1
     Suspended = 2
     Closed = 3
 
-class Event:
+class Event(Base):
+    __tablename__ = "Evento"
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
+    name = Column("nome", String(45))
+    state = Column("estado", Enum(EventState))
+    sport_id = Column("desporto_id", Integer,ForeignKey('Desporto.id'))
+    sport = relationship(Sport.Sport, backref=backref("events", uselist=True))
+    intervenors = relationship('Intervenor_Event', back_populates='event')
+    result = Column("resultado", Integer)
 
-    idGenerator = 1
+    def __init__(self,name,sport : Sport.Sport,intervenors : list[Intervenor_Event.Intervenor_Event]) -> None:
 
-    def __init__(self,name,sport : Sport.Sport,intervenors : list[tuple[float,Intervenor.Intervenor]]) -> None:
-        self.id = Event.idGenerator
-        Event.idGenerator += 1
         self.name = name
         self.state = EventState.Open
         self.sport = sport

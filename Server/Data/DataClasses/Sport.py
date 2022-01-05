@@ -1,15 +1,22 @@
 import enum
+from Database import Base
+from enum import unique
+from sqlalchemy import Column, String, Integer, Enum
+from sqlalchemy.ext.declarative import declarative_base
+
+
 class SportType(enum.Enum):
     Win = 1
     WinDraw = 2
 
-class Sport:
+class Sport(Base):
+    __tablename__ = "Desporto"
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
+    name = Column("nome", String(45))
+    type = Column("tipo", Enum(SportType))
     
-    idGenerator = 1
 
     def __init__(self,type : SportType,name) -> None:
-        self.id = Sport.idGenerator
-        Sport.idGenerator += 1
         self.name = name
         self.type = type
         self.events = []

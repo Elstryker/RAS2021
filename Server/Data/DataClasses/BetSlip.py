@@ -1,4 +1,10 @@
-from Data.DataClasses import Bet
+from DataClasses.Bet import Bet
+
+from enum import unique
+from sqlalchemy import Column, Enum, Integer, ForeignKey
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.sql.sqltypes import Boolean, Float
+from Database import Base
 import enum
 
 class BetSlipState(enum.Enum):
@@ -6,23 +12,28 @@ class BetSlipState(enum.Enum):
     InCourse = 2 # Waiting event results
     Finished = 3 # Finished bet
 
-class BetSlip:
-    
-    idGenerator = 1
+class BetSlip(Base):
+    __tablename__ = "Boletim"
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
+    user_id = Column("utilizador_id", Integer,ForeignKey('Utilizador.id'))
+    user = relationship('User', backref=backref('betslips', uselist=True))
+    amount = Column("montante",Float)
+    win_value = Column("valor_vitoria",Float)
+    won = Column("acertou",Boolean)
+    state = Column("estado", Enum(BetSlipState))
 
-    def __init__(self) -> None:
-        self.id = BetSlip.idGenerator
-        BetSlip.idGenerator += 1
-        self.user = -1
-        self.amount = 0
+
+    def __init__(self,user,amount,win_value,won):
+        self.user = user
+        self.amount = amount
         self.currency = ''
-        self.winValue = 0
-        self.bets = {'Finished':dict(),'Unfinished':dict()}
+        self.win_value = win_value
+        self.bets = []
         self.state = BetSlipState.Creating
         self.inStake = 0
-        self.won = 1
+        self.won = won
 
-    def addBet(self,bet : Bet.Bet):
+    def addBet(self,bet : Bet):
         if self.state is BetSlipState.Creating:
             allBets = self.bets['Unfinished']
             allBets[bet.eventID] = bet

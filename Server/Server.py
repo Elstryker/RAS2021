@@ -1,12 +1,12 @@
 import threading, socket, ServerWorkerClient, RASBetFacade, RASBetLN, ServerWorkerBookie
-from Data import DataBaseAccess, Database
+from Data import DataBaseAccess, MemoryDataBase
 
 HOST = ''
 PORT = 40000
 
 def setupApplication():
     db : DataBaseAccess
-    db = Database.DataBase
+    db = MemoryDataBase.MemoryDataBase()
     app : RASBetFacade
     app = RASBetLN.RASBetLN(db)
     return app

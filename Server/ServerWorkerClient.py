@@ -25,7 +25,7 @@ class ServerWorkerClient:
             self.userID = random.randint(1,10000) # Not scalable
             result = self.app.getBetSlip(self.userID)
             dic = json.loads(result)
-            exist = dic["Exists"]
+            exist = dic["Success"]
 
     def run(self):
         self.sendInitialAppInfoToClient()
@@ -41,15 +41,12 @@ class ServerWorkerClient:
             data = self.sock.recv(256)
             str_Data = data.decode("utf-8")
             str_Data = str_Data.strip()
-            if self.loggedIn:
-                self.processRequestLoggedIn(str_Data)
-            else:
-                self.processRequestNotLoggedIn(str_Data)
+            self.processRequest(str_Data)
         print("Bye!")
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
-    def processRequestLoggedIn(self,req : str):
+    def processRequest(self,req : str):
         tokens = req.split(";")
         operation = tokens[0]
         args = tokens[1:]
@@ -61,75 +58,29 @@ class ServerWorkerClient:
             message = self.app.addBetToBetSlip(self.userID,args)
         elif operation == "R": # Remove Bet From Bet Slip
             message = self.app.removeBetFromBetSlip(self.userID,args[0])
-        elif operation == 3: # Cancel Bet Slip
-            self.app.cancelBetSlip(self.userID)
-            message = "\n\nCancelled Bet Slip with success!\n"
-        elif operation == 4: # Show Bet Slip
-            self.app.showBetSlip(self.userID)
-            message = "\n\nSent Bet Slip!\n"
-        elif operation == 5: # Conclude Bet Slip
-            self.app.concludeBetSlip(self.userID,args[0],args[1])
-            message = "\n\nMoney deposited with success!\n"
+        elif operation == "C": # Cancel Bet Slip
+            message = self.app.cancelBetSlip(self.userID)
+        elif operation == "M": # Show Bet Slip
+            message = self.app.getBetSlip(self.userID)
+        elif operation == "V": # Conclude Bet Slip
+            message = self.app.concludeBetSlip(self.userID,args[0],args[1])
         elif operation == 'D': # Deposit Money
             message = self.app.depositMoney(self.userID,args[0],args[1])
         elif operation == 'L': # Withdraw Money
             message = self.app.withdrawMoney(self.userID,args[0],args[1])
-        elif operation == 8: # Previous Page
-            self.eventPage -= 1 if self.eventPage > 0 else self.eventPage
-            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
-            message = "\n\nPrevious Page!\n"
-        elif operation == 9: # Next Page
-            self.eventPage += 1
-            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
-            message = "\n\nNext Page!\n"
-        elif operation == 10: # See Bet History
+        elif operation == "H": # See Bet History
             message = self.app.getBetHistory(self.userID)
-        elif operation == 'O': # Logout
-            self.getIdForNotLoggedInUser()
-            message = self.app.logout(self.userID)
-        elif operation == 'S': # Quit
-            replyBye = dict()
-            replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"
-            message = json.dumps(replyBye)
-        else:
-            message = "Invalid input"
-        self.sock.send(message.encode("utf-8"))
-
-
-    def processRequestNotLoggedIn(self,req : str):
-        tokens = req.split(";")
-        operation = tokens[0]
-        args = tokens[1:]
-        message = ""
-        #operation = int(operation)
-        print("Operation:", operation)
-        print("Args:", args)
-        if operation == "I": # Add Bet To Bet Slip
-            message = self.app.addBetToBetSlip(self.userID,args)
-        elif operation == "R": # Remove Bet From Bet Slip
-            message = self.app.removeBetFromBetSlip(self.userID,args[0])
-        elif operation == 3: # Cancel Bet Slip
-            self.app.cancelBetSlip(self.userID)
-            message = "\n\nCancelled Bet Slip with success!\n"
-        elif operation == 4: # Show Bet Slip
-            self.app.showBetSlip(self.userID)
-            message = "\n\nSent Bet Slip!\n"
-        elif operation == 5: # Previous Page
-            self.eventPage -= 1 if self.eventPage > 0 else self.eventPage
-            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
-            message = "\n\nPrevious Page!\n"
-        elif operation == 6: # Next Page
-            self.eventPage += 1
-            self.app.getAvailableEvents(self.eventPage,self.eventsPerPage)
-            message = "\n\nNext Page!\n"
+        elif operation == "E": # Register
+            message = self.app.register(args[0],args[1],args[2])
         elif operation == "F": # Login
             message = self.app.login(self.userID,args[0],args[1])
             dic = json.loads(message)
             if dic['LoggedIn']:
                 self.userID = args[0] # username
                 self.loggedIn = True
-        elif operation == "E": # Register
-            message = self.app.register(args[0],args[1],args[2])
+        elif operation == 'O': # Logout
+            self.getIdForNotLoggedInUser()
+            message = self.app.logout(self.userID)
         elif operation == 'S': # Quit
             replyBye = dict()
             replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"

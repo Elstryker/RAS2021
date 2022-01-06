@@ -56,6 +56,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     def createUser(self,username,password,birthdate):
         betSlip = BetSlip.BetSlip()
         user = User.User(username,password,self.currencies,birthdate,betSlip)
+        betSlip.user = user.username
         self.betslips[user.username] = betSlip
         self.users[user.username] = user
         print(f"Created user {username} with betslip with id {betSlip.id}")
@@ -110,19 +111,13 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         else:
             return 0
 
-    def getAvailableEvents(self,page,eventsPerPage):
+    def getAvailableEvents(self):
         availableEvents = self.events["Available"]
         availableEvents = availableEvents.values()
-
-        if len(availableEvents) < (page * eventsPerPage):
-            page -= 1
         
         availableEvents = sorted(availableEvents,key=lambda x: x.id)
-        returnEvents = availableEvents[page*eventsPerPage:(page+1)*eventsPerPage]
 
-        return (returnEvents,page)
-
-
+        return availableEvents
     
 
     def getParameters(self,obj):
@@ -203,7 +198,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         if result >= len(event.intervenors):
             return False
         
-        newBet = Bet.Bet(result,event.getOdd(result),event.id,betslip.id)
+        newBet = Bet.Bet(result,event.getOdd(result),event,betslip.id)
         self.bets[newBet.id] = newBet
 
         betslip.addBet(newBet)
@@ -214,3 +209,19 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         betslip = self.betslips[username]
 
         return betslip.removeBet(eventID)
+
+    def cancelBetSlip(self,username):
+        betslip = self.betslips[username]
+        betslip.cancel()
+
+    def concludeBetSlip(self,username,amount,currency) -> None:
+        betslip = self.betslips[username]
+        betslip.applyBetSlip(amount,currency)
+
+        user = self.users[username]
+
+        newBetSlip = BetSlip.BetSlip()
+        newBetSlip.user = user.username
+        self.betslips[user.username] = newBetSlip
+
+        user.concludeBetSlip(newBetSlip)

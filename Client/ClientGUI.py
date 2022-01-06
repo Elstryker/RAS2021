@@ -57,6 +57,16 @@ class ClientGUI:
                                                                                       
                                                                                       
 """))
+        self.questions.append(Text("""
+ _____      _                 _                                               _              _                _           _           
+|_   _|    | |               | |                                             | |            | |              (_)         | |        _ 
+  | | _ __ | |_ _ __ ___   __| |_   _ ______ _    ___     _____   _____ _ __ | |_ ___     __| | ___  ___  ___ _  __ _  __| | ___   (_)
+  | || '_ \| __| '__/ _ \ / _` | | | |_  / _` |  / _ \   / _ \ \ / / _ \ '_ \| __/ _ \   / _` |/ _ \/ __|/ _ \ |/ _` |/ _` |/ _ \     
+ _| || | | | |_| | | (_) | (_| | |_| |/ / (_| | | (_) | |  __/\ V /  __/ | | | || (_) | | (_| |  __/\__ \  __/ | (_| | (_| | (_) |  _ 
+ \___/_| |_|\__|_|  \___/ \__,_|\__,_/___\__,_|  \___/   \___| \_/ \___|_| |_|\__\___/   \__,_|\___||___/\___| |\__,_|\__,_|\___/  (_)
+                                                                                                            _/ |                      
+                                                                                                           |__/                       
+"""))
 
     def goodbye(self):
         layout : Layout = Layout()
@@ -111,7 +121,7 @@ class ClientGUI:
                                     |___/          |_|                                          
 """))
 
-            texto_invalido = Text("""
+            mensagem.append(Text("""
    _____            _               _____             __  _ _     _                
   |  __ \          | |             |_   _|           /_/ | (_)   | |               
   | |  | | __ _  __| | ___  ___      | |  _ ____   ____ _| |_  __| | ___  ___      
@@ -126,21 +136,18 @@ class ClientGUI:
      |_|\___|_| |_|\__\___|    |_| |_|\___/ \_/ \__,_|_| |_| |_|\___|_| |_|\__\___|
                                                                                    
                                                                                    
-""")
+"""))
             for elem in mensagem:
-                elem.stylize("bright green")
-            
-            texto_invalido.stylize("cyan")                                               
-                                                                               
+                elem.stylize("bold red")
+                                                                              
 
             layout : Layout = Layout()
-
 
             layout.split_column(
                 Layout(" ", name="empty space"),
                 Layout(name="header", ratio=3),
-                Layout(Align(texto_invalido, align='center'), ratio=9),
-                Layout(pressione_tecla, ratio=3)
+                Layout(Panel(Align(mensagem[opcao], align='center', vertical="middle")), ratio=9),
+                Layout(mensagem[0], ratio=3)
             )
 
             self.login_layout(False, layout)
@@ -148,7 +155,7 @@ class ClientGUI:
             self.console.print(layout)
             answer = self.console.input("-> ")
 
-    def ask_info(self, events : list, question : int):
+    def ask_info(self, loggedIn : bool, events : list, question : int):
         answer = ''
         eventos_printable : list = self.showEvents(events)
         prompt = self.questions[question]
@@ -167,7 +174,7 @@ class ClientGUI:
                 Layout(prompt, ratio=3)
             )
 
-            self.login_layout(False, layout)
+            self.login_layout(loggedIn, layout)
 
             self.console.print(layout)
             answer = self.console.input("-> ")
@@ -199,8 +206,12 @@ class ClientGUI:
                 Layout(balance_panel, name='balance', ratio = 1)
             )
 
+            
+            logout = Text("Logout", justify='center')
+            logout.stylize("red", 1,2)
+
             layout["login"].split_column(
-                Layout(" "),
+                Layout(Panel(Align(logout,vertical='middle', align='center'))),
                 Layout(Panel(Align(Text(self.username, justify='center'),vertical='middle', align='center'), title='[red]Username'))
             )
 
@@ -258,8 +269,8 @@ class ClientGUI:
             Panel("[red]C[/red]ancelar Boletim"), Panel("[red]M[/red]ostrar Boletim"), 
             Panel("[red]V[/red]alidar Boletim"), Panel("[red]D[/red]epositar Dinheiro"), 
             Panel("[red]L[/red]evantar Dinheiro"), Panel("Página [red]A[/red]nterior"), 
-            Panel("[red]P[/red]róxima Página"), Panel("Consultar [red]H[/red]istórico"),
-            Panel("L[red]o[/red]gout"), Panel("[red]S[/red]air")]
+            Panel("[red]P[/red]róxima Página"), Panel("Consultar [red]H[/red]istórico"), 
+            Panel("Cambio Mo[red]e[/red]da"), Panel("[red]S[/red]air")]
 
         menu_printable = Columns(menu, equal=True, expand=True)
 
@@ -279,33 +290,103 @@ class ClientGUI:
 
         return self.console.input("Introduza a letra da opção desejada -> ")
 
-        #time.sleep(2)
-        #console.clear()
 
     def askEvent(self):
         print("Which event?")
 
-    def showDetailedEvent(self,event):
-        print(
-    f"""
-Name - {event["Name"]}
-Sport - {event["Sport"]}""")
-        for i,(odd,intervenor) in enumerate(event["Intervenors"]):
-            print(
-    f"""
-{i} - {intervenor} ({odd})""")
+    def conclude_betslip(self, loggedIn, eventos):
+        self.console.clear()
 
+        if loggedIn:
+            layout : Layout = Layout()
+
+            eventos_printable : list = self.showEvents(eventos)
+            
+            prompt = Text("""
+    _   _       _ _     _             ______       _      _   _          ___    _____    ___   _ 
+    | | | |     | (_)   | |            | ___ \     | |    | | (_)        |__ \  /  ___|  / / \ | |
+    | | | | __ _| |_  __| | __ _ _ __  | |_/ / ___ | | ___| |_ _ _ __ ___   ) | \ `--.  / /|  \| |
+    | | | |/ _` | | |/ _` |/ _` | '__| | ___ \/ _ \| |/ _ \ __| | '_ ` _ \ / /   `--. \/ / | . ` |
+    \ \_/ / (_| | | | (_| | (_| | |    | |_/ / (_) | |  __/ |_| | | | | | |_|   /\__/ / /  | |\  |
+    \___/ \__,_|_|_|\__,_|\__,_|_|    \____/ \___/|_|\___|\__|_|_| |_| |_(_)   \____/_/   \_| \_/
+                                                                                                
+                                                                                                
+    """)
     
+            layout.split_column(
+                Layout(" ", name="empty space"),
+                Layout(name="header", ratio=3),
+                Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
+                Layout(prompt, ratio=3)
+            )
+
+            self.login_layout(True, layout)
+
+            self.console.print(layout)
+
+            resposta = self.console.input("->")
+
+        else:
+            self.invalid_info(1)
+            resposta = "N"
+
+        return resposta 
+
+    def showDetailedEvent(self, loggedIn, eventos,event):
+        self.console.clear()
+        layout : Layout = Layout()
+        participants : list = list()
+
+        print(f'evento: {event["Sport"]["Type"]}')
+        
+        if event["Sport"]["Type"] == "WinDraw":
+            participants.append(Panel(f"[bold yellow]{event['Intervenors'][0][0]}[/] -- {event['Intervenors'][0][1]}", title=f"[red]{0}[/red]"))
+            participants.append(Panel(f"[bold yellow]{event['Intervenors'][2][0]}[/] -- {event['Intervenors'][2][1]}", title=f"[red]{1}[/red]"))
+            participants.append(Panel(f"[bold yellow]{event['Intervenors'][1][0]}[/] -- {event['Intervenors'][1][1]}", title=f"[red]{2}[/red]"))
+        else:
+            for i,(odd,intervenor) in enumerate(event["Intervenors"]):
+                participants.append(Panel(f"[bold yellow]{odd}[/] -- {intervenor}", title=f"[red]{i}[/red]"))
+
+        participants_printable = Columns(participants, equal=True, expand=True, align='center')
+
+
+        eventos_printable : list = self.showEvents(eventos)
+        
+        opcoes_layout : Layout = Layout()
+
+        opcoes_layout.split_column(
+            Layout(Text(event["Name"], justify='center'), ratio=2),
+            Layout(participants_printable, ratio=3)
+        )
+
+        opcoes : Layout = Layout(Panel(opcoes_layout, title=f'[red]{event["Sport"]["Name"]}[/red]'), name="menu", ratio=3)
+
+        layout.split_column(
+            Layout(" ", name="empty space"),
+            Layout(name="header", ratio=3),
+            Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
+            opcoes
+        )
+
+        self.login_layout(loggedIn, layout)
+
+        self.console.print(layout)
+
+        return self.console.input("Introduza o número da aposta desejada -> ")
+
     def showEvents(self, events : list):
         eventos_formatted = []
         
         for event in events:
+            
             table_painel = Table()
-            table_painel.add_column(Text(event["Sport"]["Name"], justify='center'))
+            texto = Text(str(event["Id"]) + " | " + event["Sport"]["Name"], justify='center')
+            texto.stylize("bold red", 0, 2)
+            table_painel.add_column(texto)
 
             table = Table()
 
-            table_painel.add_row(Text(event["Name"], justify='center'))
+            table_painel.add_row(Text(event['Name'], justify='center'))
 
             intervenors = [x[1] for x in event["Intervenors"]]
             odds = [str(x[0]) for x in event["Intervenors"]]

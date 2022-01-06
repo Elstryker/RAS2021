@@ -13,15 +13,19 @@ class ClientLogic:
     client_gui : ClientGUI
     inputs_logged : str
     inputs_notlogged : str
+    opcoes : list
 
     def __init__(self,sock,info):
         self.sock = sock
         self.clientInfo = ClientInfo.ClientInfo(info)
         self.client_gui = ClientGUI()
+        self.opcoes = list()
+        self.opcoes.append('SsAaRrOoCcDdIiVvLl') #logged in
+        self.opcoes.append('SsFfAaEeRrCcIiVv') #not logged
 
     def login(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.events, 0)
-        password = self.client_gui.ask_info(self.clientInfo.events, 1)
+        username = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 0)
+        password = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 1)
         
         #print(f"O username é {username} e a password é {password}")
 
@@ -31,7 +35,7 @@ class ClientLogic:
             self.clientInfo.loggedIn = True
             self.client_gui.username = username
         else:
-            self.client_gui.invalid_info(0)
+            self.client_gui.invalid_info(2)
         # print(response['Message'])
     
     def menu(self):
@@ -41,9 +45,12 @@ class ClientLogic:
             
             inp = "Q"
 
-            while inp not in 'SsFfAaEeRrOoCcDdIi':
-                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
-            
+            if self.clientInfo.loggedIn:
+                while inp not in self.opcoes[0]:
+                    inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
+            else:
+                while inp not in self.opcoes[1]:
+                    inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)    
             inp = inp.upper()
             
             self.handle_input(inp)
@@ -66,12 +73,13 @@ class ClientLogic:
    
 
     def handle_input(self,option): # TODO: Exchange currencies
+        #print(f"A opcao é {option}")
         actions = {
             "I":self.addBetToBetSlip,
             "R":self.removeBetFromBetSlip,
             "3":self.cancelBetSlip,
             "4":self.showBetSlip,
-            "5":self.concludeBetSlip,
+            "V":self.concludeBetSlip,
             "D":self.depositMoney,
             "L":self.withdrawMoney,
             "8":self.changePage, # Previous Page
@@ -89,20 +97,29 @@ class ClientLogic:
         print("Opção errada:",option)
 
     def addBetToBetSlip(self,option):
-        self.client_gui.askEvent()
-        eventID = input("-> ")
-
+        eventID = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 4)
+        
         args = [option,"GET",eventID]
         response = self.requestServer(args)
 
+        #TODO: reagir diferente dependendo da resposta
         print(response["Message"])
+
         if not response["Found"]:
             return
 
-        self.client_gui.showDetailedEvent(response["Event"])
-        result = input("-> ")
+        aposta = -1
 
-        args = [option,"PUT",eventID,result]
+        while int(aposta) < 0 or int(aposta) > len(response["Event"]["Intervenors"])-1:
+            aposta = self.client_gui.showDetailedEvent(self.clientInfo.loggedIn, self.clientInfo.events, response["Event"])
+     
+        if response["Event"]["Sport"]["Type"] == "WinDraw":
+            if int(aposta) == 2:
+                aposta = "1"
+            elif int(aposta) == 1:
+                aposta = "2"
+        print(f"Adding aposta {aposta}")
+        args = [option,"PUT",eventID,aposta]
         response = self.requestServer(args)
 
         print(response["Message"])
@@ -125,11 +142,10 @@ class ClientLogic:
         self.requestServer(args)
 
     def concludeBetSlip(self,option): # TODO
-        args = self.handleInput(4)
-        data = args.encode('utf-8')
-        self.sock.send(data)
-        data = self.sock.recv(256)
-        print(data.decode("utf-8"))
+        self.client_gui.conclude_betslip(self.clientInfo.loggedIn, self.clientInfo.events) #mudar para o betslip do gajo
+        
+        self.client_gui.pede_moeda(self.clientInfo)
+        """
         ClientGUI.askAmount()
         amount = input("-> ")
         currency = ''
@@ -138,24 +154,34 @@ class ClientLogic:
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
         args = [option,amount,currency]
         self.requestServer(args)
-
+        """
     def depositMoney(self,option):
-        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
-        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
-        
-        
-        print(f"O amount é {amount} e a currency é {currency}")
+        currency = ""
+        amount = ""
 
+        while not currency.isdigit() or int(currency) <= 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
+            currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
+
+        while not amount.isdigit() or int(amount) <= 0:    
+            amount = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 3)
+        
         args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
         self.requestServer(args)
         # Update clientInfo
 
     def withdrawMoney(self,option):
-        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
-        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
+        currency = -1
+        amount = -1
 
-        args = [option,currency,amount]
-        self.requestServer(args)
+        while not currency.isdigit() or currency <= 0 or currency >= len(self.clientInfo.availableCurrencies):
+            currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
+        
+        while not amount.isdigit() or int(amount) <= 0:    
+            amount = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 3)
+        
+        args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
+        mensagem = self.requestServer(args)
+        print(mensagem["Message"])
 
     def changePage(self,option): # TODO
         args = [option]
@@ -173,9 +199,9 @@ class ClientLogic:
         self.client_gui.username = None
         
     def register(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.events, 0)
-        password = self.client_gui.ask_info(self.clientInfo.events, 1)
-        birthdate = self.client_gui.ask_info(self.clientInfo.events, 2)
+        username = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 0)
+        password = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 1)
+        birthdate = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 2)
         
         args = [option,username,password,birthdate]
         response = self.requestServer(args)

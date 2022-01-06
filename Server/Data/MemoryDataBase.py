@@ -28,7 +28,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createSport("Futebol",SportType.WinDraw)
         self.createSport("Golf", SportType.Win)
         self.createSport("Corrida", SportType.Win)
-
+        self.createSport("Tenis", SportType.WinDraw)
+        
         self.createIntervenor("Tiger Woods")
         self.createIntervenor("Jordan Spieth")
         self.createIntervenor("Rory Mcllroy")
@@ -38,11 +39,14 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createIntervenor("FCPorto")
         self.createIntervenor("FCBarcelona")
         self.createIntervenor("SCBraga")
+        self.createIntervenor("Pete Sampras")
+        self.createIntervenor("Ze Caricas")
 
         self.createEvent("Championship","Futebol","FCPorto,SCBraga","1.05,6.21,1.50")
         self.createEvent("Europa","Futebol","FCPorto,FCBarcelona","1.56,3.67,2.00")
         self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
+        self.createEvent("Torneio Quim Fintas", "Tenis", "Pete Sampras,Ze Caricas", "1.2, 4.3, 8.8")
 
         for event in self.events["Available"].values():
             print(f"{event.id} - {event.name}")
@@ -113,17 +117,16 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     def getAvailableEvents(self,page,eventsPerPage):
         availableEvents = self.events["Available"]
         availableEvents = availableEvents.values()
-
+        """
         if len(availableEvents) < (page * eventsPerPage):
             page -= 1
         
         availableEvents = sorted(availableEvents,key=lambda x: x.id)
         returnEvents = availableEvents[page*eventsPerPage:(page+1)*eventsPerPage]
+        """
+        return (availableEvents,page)
+        #return (returnEvents,page)
 
-        return (returnEvents,page)
-
-
-    
 
     def getParameters(self,obj):
         if obj == "Sport":

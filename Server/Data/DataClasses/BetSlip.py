@@ -98,4 +98,7 @@ class BetSlip:
         if self.inStake != 0:
             jsonToSend["InStake"] = self.inStake
 
+        if self.state is BetSlipState.Finished:
+            jsonToSend["Won"] = self.winning
+
         return jsonToSend

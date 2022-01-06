@@ -20,8 +20,8 @@ class ClientLogic:
         self.client_gui = ClientGUI()
 
     def login(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.events, 0)
-        password = self.client_gui.ask_info(self.clientInfo.events, 1)
+        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
+        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
         
         #print(f"O username é {username} e a password é {password}")
 
@@ -37,12 +37,12 @@ class ClientLogic:
     def menu(self):
         inp = ''
         while inp != 'S':
-            #ClientGUI.showEvents(self.clientInfo.events)
+            #ClientGUI.showEvents(self.clientInfo.getEvents())
             
             inp = "Q"
 
             while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPp':
-                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
+                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents())
             
             inp = inp.upper()
             
@@ -146,8 +146,8 @@ class ClientLogic:
         print(response["Message"])
 
     def depositMoney(self,option):
-        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
-        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
+        currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
         
         
         print(f"O amount é {amount} e a currency é {currency}")
@@ -159,8 +159,8 @@ class ClientLogic:
 
 
     def withdrawMoney(self,option):
-        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
-        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
+        currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
 
         args = [option,currency,amount]
         self.requestServer(args)
@@ -181,9 +181,9 @@ class ClientLogic:
         self.client_gui.username = None
         
     def register(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.events, 0)
-        password = self.client_gui.ask_info(self.clientInfo.events, 1)
-        birthdate = self.client_gui.ask_info(self.clientInfo.events, 2)
+        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
+        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
+        birthdate = self.client_gui.ask_info(self.clientInfo.getEvents(), 2)
         
         args = [option,username,password,birthdate]
         response = self.requestServer(args)

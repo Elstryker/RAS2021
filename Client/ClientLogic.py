@@ -43,9 +43,6 @@ class ClientLogic:
 
             while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPp':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
-
-            print(self.clientInfo.page)
-            print(self.clientInfo.getEvents())
             
             inp = inp.upper()
             

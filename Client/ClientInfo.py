@@ -15,15 +15,16 @@ class ClientInfo:
         self.availableCurrencies = info["Currencies"]
         self.page = 0
         self.eventsPerPage = 2
+        self.totalPages = ceil(len(self.events)/self.eventsPerPage)
 
     def updateInfo(self,wallet,events,currencies):
         self.wallet = wallet
         self.events = events
         self.availableCurrencies = currencies
+        self.totalPages = ceil(len(self.events)/self.eventsPerPage)
 
     def nextPage(self):
-        totalPages = ceil(len(self.events)/self.eventsPerPage)
-        if self.page < totalPages - 1:
+        if self.page < self.totalPages - 1:
             self.page += 1
 
     def previousPage(self):

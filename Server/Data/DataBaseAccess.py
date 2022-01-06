@@ -30,7 +30,7 @@ class DataBaseAccess:
     def getUserTotalBalance(self,username) -> dict:
         pass
 
-    def getAvailableEvents(self,page,eventsPerPage) -> list:
+    def getAvailableEvents(self) -> list:
         pass
 
     def getParameters(self,obj) -> dict:
@@ -52,4 +52,10 @@ class DataBaseAccess:
         pass
 
     def removeBetFromBetSlip(self,username,eventID) -> bool:
+        pass
+
+    def cancelBetSlip(self,username) -> None:
+        pass
+
+    def concludeBetSlip(self,username,amount,currency) -> None:
         pass

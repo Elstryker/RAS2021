@@ -20,8 +20,8 @@ class ClientLogic:
         self.client_gui = ClientGUI()
 
     def login(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.events, 0)
-        password = self.client_gui.ask_info(self.clientInfo.events, 1)
+        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
+        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
         
         #print(f"O username é {username} e a password é {password}")
 
@@ -37,12 +37,12 @@ class ClientLogic:
     def menu(self):
         inp = ''
         while inp != 'S':
-            #ClientGUI.showEvents(self.clientInfo.events)
+            #ClientGUI.showEvents(self.clientInfo.getEvents())
             
             inp = "Q"
 
-            while inp not in 'SsFfAaEeRrOoCcDdIi':
-                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.events)
+            while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPp':
+                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents())
             
             inp = inp.upper()
             
@@ -69,18 +69,19 @@ class ClientLogic:
         actions = {
             "I":self.addBetToBetSlip,
             "R":self.removeBetFromBetSlip,
-            "3":self.cancelBetSlip,
-            "4":self.showBetSlip,
-            "5":self.concludeBetSlip,
+            "C":self.cancelBetSlip,
+            "M":self.showBetSlip,
+            "V":self.concludeBetSlip,
             "D":self.depositMoney,
             "L":self.withdrawMoney,
-            "8":self.changePage, # Previous Page
-            "9":self.changePage, # Next Page
+            "A":self.changePage, # Previous Page
+            "P":self.changePage, # Next Page
             "F":self.login,
             "E":self.register,
             "S":self.quit,
             "O":self.logout
             #show history
+            #money exchange
         }
         toDo = actions.get(option,self.noSuchAction)
         toDo(option)
@@ -96,7 +97,7 @@ class ClientLogic:
         response = self.requestServer(args)
 
         print(response["Message"])
-        if not response["Found"]:
+        if not response["Success"]:
             return
 
         self.client_gui.showDetailedEvent(response["Event"])
@@ -108,7 +109,6 @@ class ClientLogic:
         print(response["Message"])
 
     def removeBetFromBetSlip(self,option):
-        # Should we show betslip before deciding to remove bet?
         self.client_gui.askEvent()
         eventID = input("-> ")
         args = [option,eventID]
@@ -116,50 +116,58 @@ class ClientLogic:
 
         print(response["Message"])
 
-    def cancelBetSlip(self,option): # TODO
+    def cancelBetSlip(self,option):
         args = [option]
-        self.requestServer(args)
+        response = self.requestServer(args)
 
-    def showBetSlip(self,option): # TODO
+        print(response["Message"])
+
+    def showBetSlip(self,option):
         args = [option]
-        self.requestServer(args)
+        response = self.requestServer(args)
+
+        print(response["Message"])
+        print(response["BetSlip"])
 
     def concludeBetSlip(self,option): # TODO
-        args = self.handleInput(4)
-        data = args.encode('utf-8')
-        self.sock.send(data)
-        data = self.sock.recv(256)
-        print(data.decode("utf-8"))
-        ClientGUI.askAmount()
+        self.showBetSlip("M")
+        # Não consegui testar por causa dos prints :/
+        #ClientGUI.askAmount()
         amount = input("-> ")
+
         currency = ''
-        ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
+        #ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
         currency = input("-> ")
         currency = self.clientInfo.availableCurrencies[int(currency)-1]
+
         args = [option,amount,currency]
-        self.requestServer(args)
+        response = self.requestServer(args)
+
+        print(response["Message"])
 
     def depositMoney(self,option):
-        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
-        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
+        currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
         
         
         print(f"O amount é {amount} e a currency é {currency}")
 
         args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
-        self.requestServer(args)
-        # Update clientInfo
+        response = self.requestServer(args)
+
+        print(response["Message"])
+
 
     def withdrawMoney(self,option):
-        currency = self.client_gui.pede_moeda(self.clientInfo.events, self.clientInfo.availableCurrencies)
-        amount = self.client_gui.ask_info(self.clientInfo.events, 3)
+        currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
 
         args = [option,currency,amount]
         self.requestServer(args)
 
-    def changePage(self,option): # TODO
-        args = [option]
-        self.requestServer(args)
+    def changePage(self,option):
+        self.clientInfo.previousPage() if option == "A" else self.clientInfo.nextPage()
+
 
     def showBetHistory(self,option): # TODO
         args = [option]
@@ -173,9 +181,9 @@ class ClientLogic:
         self.client_gui.username = None
         
     def register(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.events, 0)
-        password = self.client_gui.ask_info(self.clientInfo.events, 1)
-        birthdate = self.client_gui.ask_info(self.clientInfo.events, 2)
+        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
+        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
+        birthdate = self.client_gui.ask_info(self.clientInfo.getEvents(), 2)
         
         args = [option,username,password,birthdate]
         response = self.requestServer(args)

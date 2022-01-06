@@ -1,5 +1,3 @@
-from Data.DataClasses import BetSlip
-
 
 class RASBetFacade:
     
@@ -15,16 +13,13 @@ class RASBetFacade:
     def removeBetFromBetSlip(self,userID,eventID):
         pass
 
-    def showBetSlip(self,userID):
+    def getBetSlip(self,userID):
         pass
 
     def getBetSlip(self,userID):
         pass
     
     def concludeBetSlip(self,userID,amount,currency):
-        pass
-    
-    def getEvents(self,offset,numOfEvents):
         pass
 
     def getBetHistory(self,userID):

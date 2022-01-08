@@ -98,7 +98,7 @@ class ClientLogic:
         print("Opção errada:",option)
 
     def addBetToBetSlip(self,option):
-        eventID = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.events, 4)
+        eventID = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 4)
         
         args = [option,"GET",eventID]
         response = self.requestServer(args)
@@ -111,7 +111,7 @@ class ClientLogic:
         aposta = -1
 
         while int(aposta) < 0 or int(aposta) > len(response["Event"]["Intervenors"])-1:
-            aposta = self.client_gui.showDetailedEvent(self.clientInfo.loggedIn, self.clientInfo.events, response["Event"])
+            aposta = self.client_gui.showDetailedEvent(self.clientInfo.loggedIn, self.clientInfo.getEvents(), response["Event"])
      
         if response["Event"]["Sport"]["Type"] == "WinDraw":
             if int(aposta) == 2:
@@ -125,12 +125,14 @@ class ClientLogic:
         print(response["Message"])
 
     def removeBetFromBetSlip(self,option):
-        self.client_gui.askEvent()
-        eventID = input("-> ")
-        args = [option,eventID]
+        args = ["M"]
         response = self.requestServer(args)
 
-        print(response["Message"])
+        aposta = self.client_gui.show_betslip(response, 6)
+        args = [option,aposta]
+        response = self.requestServer(args)
+
+        print(response)
 
     def cancelBetSlip(self,option):
         args = [option]
@@ -142,31 +144,34 @@ class ClientLogic:
         args = [option]
         response = self.requestServer(args)
 
-        print(response["Message"])
+        self.client_gui.show_betslip(response, 5)
         print(response["BetSlip"])
 
     def concludeBetSlip(self,option): # TODO
-        self.client_gui.conclude_betslip(self.clientInfo.loggedIn, self.clientInfo.events) #mudar para o betslip do gajo
+        currency = ""
+        amount = ""
+
+        args = ["M"]
+        response = self.requestServer(args)
         
-        self.client_gui.pede_moeda(self.clientInfo)
-        """
-        ClientGUI.askAmount()
-        amount = input("-> ")
+        if self.client_gui.conclude_betslip(self.clientInfo.loggedIn, response) == 'S':
+            while not currency.isdigit() or int(currency) < 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
+                currency = self.client_gui.pede_moeda(response, self.clientInfo.availableCurrencies, True)
+            
+            while not amount.isdigit() or int(amount) <= 0:    
+                amount = self.client_gui.ask_amount(response)
 
-        currency = ''
-        #ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
-        currency = input("-> ")
-        currency = self.clientInfo.availableCurrencies[int(currency)-1]
+            args = [option,amount,self.clientInfo.availableCurrencies[int(currency)]]
+            message = self.requestServer(args)
+            
+            print(message)
 
-        args = [option,amount,currency]
-        self.requestServer(args)
-        """
     def depositMoney(self,option):
         currency = ""
         amount = ""
 
-        while not currency.isdigit() or int(currency) <= 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
-            currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        while not currency.isdigit() or int(currency) < 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
+            currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies, False)
 
         while not amount.isdigit() or int(amount) <= 0:    
             amount = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 3)
@@ -178,11 +183,11 @@ class ClientLogic:
 
 
     def withdrawMoney(self,option):
-        currency = -1
-        amount = -1
+        currency = ""
+        amount = ""
 
-        while not currency.isdigit() or currency <= 0 or currency >= len(self.clientInfo.availableCurrencies):
-            currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        while not currency.isdigit() or currency < 0 or currency >= len(self.clientInfo.availableCurrencies):
+            currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies, False)
         
         while not amount.isdigit() or int(amount) <= 0:    
             amount = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 3)
@@ -214,7 +219,7 @@ class ClientLogic:
         args = [option,username,password,birthdate]
         response = self.requestServer(args)
 
-        print(response['Message'])
+        print(response['Success'])
     
     def quit(self,option):
         self.client_gui.goodbye()

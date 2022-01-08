@@ -68,6 +68,27 @@ class ClientGUI:
                                                                                                            |__/                       
 """))
 
+        self.questions.append(Text("""
+  _____                   _                                       _                          _            _           
+ |  __ \                 (_)                                     | |                        | |          | |        _ 
+ | |__) | __ ___  ___ ___ _  ___  _ __   ___     __ _ _   _  __ _| | __ _ _   _  ___ _ __   | |_ ___  ___| | __ _  (_)
+ |  ___/ '__/ _ \/ __/ __| |/ _ \| '_ \ / _ \   / _` | | | |/ _` | |/ _` | | | |/ _ \ '__|  | __/ _ \/ __| |/ _` |    
+ | |   | | |  __/\__ \__ \ | (_) | | | |  __/  | (_| | |_| | (_| | | (_| | |_| |  __/ |     | ||  __/ (__| | (_| |  _ 
+ |_|   |_|  \___||___/___/_|\___/|_| |_|\___|   \__, |\__,_|\__,_|_|\__, |\__,_|\___|_|      \__\___|\___|_|\__,_| (_)
+                                                   | |                 | |                                            
+                                                   |_|                 |_|                                            
+"""))
+        self.questions.append(Text("""
+ _____          _                     ___________       _                               _            
+|_   _|        (_)                   |_   _|  _  \     | |                             | |         _ 
+  | | _ __  ___ _ _ __ __ _    ___     | | | | | |   __| | __ _    __ _ _ __   ___  ___| |_ __ _  (_)
+  | || '_ \/ __| | '__/ _` |  / _ \    | | | | | |  / _` |/ _` |  / _` | '_ \ / _ \/ __| __/ _` |    
+ _| || | | \__ \ | | | (_| | | (_) |  _| |_| |/ /  | (_| | (_| | | (_| | |_) | (_) \__ \ || (_| |  _ 
+ \___/_| |_|___/_|_|  \__,_|  \___/   \___/|___/    \__,_|\__,_|  \__,_| .__/ \___/|___/\__\__,_| (_)
+                                                                       | |                           
+                                                                       |_|                           
+"""))
+
     def goodbye(self):
         layout : Layout = Layout()
         
@@ -100,16 +121,7 @@ class ClientGUI:
             self.console.clear()
             mensagem = list()
 
-            mensagem.append(Text("""
-  _____                   _                                       _                          _            _           
- |  __ \                 (_)                                     | |                        | |          | |        _ 
- | |__) | __ ___  ___ ___ _  ___  _ __   ___     __ _ _   _  __ _| | __ _ _   _  ___ _ __   | |_ ___  ___| | __ _  (_)
- |  ___/ '__/ _ \/ __/ __| |/ _ \| '_ \ / _ \   / _` | | | |/ _` | |/ _` | | | |/ _ \ '__|  | __/ _ \/ __| |/ _` |    
- | |   | | |  __/\__ \__ \ | (_) | | | |  __/  | (_| | |_| | (_| | | (_| | |_| |  __/ |     | ||  __/ (__| | (_| |  _ 
- |_|   |_|  \___||___/___/_|\___/|_| |_|\___|   \__, |\__,_|\__,_|_|\__, |\__,_|\___|_|      \__\___|\___|_|\__,_| (_)
-                                                   | |                 | |                                            
-                                                   |_|                 |_|                                            
-"""))
+            mensagem.append(self.questions[5])
             mensagem.append(Text("""
   ______                _                 _                             __                      
  |  ____|              | |               (_)                           / _|                     
@@ -154,6 +166,27 @@ class ClientGUI:
 
             self.console.print(layout)
             answer = self.console.input("-> ")
+
+    def show_betslip(self, ):
+        self.console.clear()
+        layout : Layout = Layout()
+
+        menu_printable = Columns(menu, equal=True, expand=True)
+
+        eventos_printable : list = self.showEvents(events)
+        
+        layout.split_column(
+            Layout(" ", name="empty space"),
+            Layout(name="header", ratio=3),
+            Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
+            Layout(Panel(menu_printable, title='[red]Menu'), name="menu", ratio=3)
+        )
+
+        self.login_layout(loggedIn, layout)
+
+        self.console.print(layout)
+
+        return self.console.input("Introduza a letra da opção desejada -> ")
 
     def ask_info(self, loggedIn : bool, events : list, question : int):
         answer = ''
@@ -230,30 +263,69 @@ class ClientGUI:
 
         return logo_panel
 
-    def pede_moeda(self, events : list, currencies : list):
+    
+
+    def pede_moeda(self, events : list, currencies : list, conclude : bool):
         self.console.clear()
         layout : Layout = Layout()
         
         currencies = [Panel(Align(Text(currency, tab_size=8), align='center'), title=f'[red]{index}[/red]') for index,currency in enumerate(currencies)]
 
         moedas_printable = Columns(currencies, equal=False, expand=True)
-
-        eventos_printable : list = self.showEvents(events)
+        
+        if conclude:
+            eventos_printable : list = self.showEventsSlip(events["BetSlip"]['Bets'])
+            
+            layout.split_column(
+                Layout(" ", name="empty space"),
+                Layout(name="header", ratio=3),
+                Layout(Panel(eventos_printable, title='[red]Boletim'), name="events", ratio=8),
+                Layout(Align("[bold yellow] ODD FINAL:[/bold yellow] " + str(events["BetSlip"]['MultipliedOdd']), align='center')),
+                Layout(Panel(moedas_printable, title='[red]Menu'), name="menu", ratio=3)
+            )
+        else:    
+            eventos_printable : list = self.showEvents(events)
+            
+            layout.split_column(
+                Layout(" ", name="empty space"),
+                Layout(name="header", ratio=3),
+                Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
+                Layout(Panel(moedas_printable, title='[red]Menu'), name="menu", ratio=3)
+            )
         
         
-        layout.split_column(
-            Layout(" ", name="empty space"),
-            Layout(name="header", ratio=3),
-            Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
-            Layout(Panel(moedas_printable, title='[red]Menu'), name="menu", ratio=3)
-        )
 
         self.login_layout(True, layout)
 
         self.console.print(layout)
 
         return self.console.input("Introduza o número da opção desejada -> ")
-    
+ 
+
+    def show_betslip(self, events, opcao):
+        self.console.clear()
+
+        layout : Layout = Layout()
+
+        prompt = self.questions[opcao]
+        prompt.stylize("bold yellow")
+
+        eventos_printable : list = self.showEventsSlip(events["BetSlip"]['Bets'])
+        
+        layout.split_column(
+            Layout(" ", name="empty space"),
+            Layout(name="header", ratio=3),
+            Layout(Panel(eventos_printable, title='[red]Boletim'), name="events", ratio=8),
+            Layout(Align("[bold yellow] ODD FINAL:[/bold yellow] " + str(events["BetSlip"]['MultipliedOdd']), align='center')),
+            Layout(Align(prompt, align='center'), name="menu", ratio=3)
+        )
+
+        self.login_layout(True, layout)
+
+        self.console.print(layout)
+
+        return self.console.input("->")
+
     def showMenu(self, loggedIn : bool, wallet : dict[str,int], events : list):
         self.console.clear()
         layout : Layout = Layout()
@@ -291,33 +363,32 @@ class ClientGUI:
         return self.console.input("Introduza a letra da opção desejada -> ")
 
 
-    def askEvent(self):
-        print("Which event?")
-
-    def conclude_betslip(self, loggedIn, eventos):
+    def conclude_betslip(self, loggedIn, events):
         self.console.clear()
 
         if loggedIn:
             layout : Layout = Layout()
 
-            eventos_printable : list = self.showEvents(eventos)
-            
             prompt = Text("""
-    _   _       _ _     _             ______       _      _   _          ___    _____    ___   _ 
+     _   _       _ _     _             ______       _      _   _          ___    _____    ___   _ 
     | | | |     | (_)   | |            | ___ \     | |    | | (_)        |__ \  /  ___|  / / \ | |
     | | | | __ _| |_  __| | __ _ _ __  | |_/ / ___ | | ___| |_ _ _ __ ___   ) | \ `--.  / /|  \| |
     | | | |/ _` | | |/ _` |/ _` | '__| | ___ \/ _ \| |/ _ \ __| | '_ ` _ \ / /   `--. \/ / | . ` |
     \ \_/ / (_| | | | (_| | (_| | |    | |_/ / (_) | |  __/ |_| | | | | | |_|   /\__/ / /  | |\  |
-    \___/ \__,_|_|_|\__,_|\__,_|_|    \____/ \___/|_|\___|\__|_|_| |_| |_(_)   \____/_/   \_| \_/
+     \___/ \__,_|_|_|\__,_|\__,_|_|    \____/ \___/|_|\___|\__|_|_| |_| |_(_)   \____/_/   \_| \_/
                                                                                                 
                                                                                                 
     """)
-    
+            prompt.stylize("bold yellow")
+
+            eventos_printable : list = self.showEventsSlip(events["BetSlip"]['Bets'])
+            
             layout.split_column(
                 Layout(" ", name="empty space"),
                 Layout(name="header", ratio=3),
-                Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
-                Layout(prompt, ratio=3)
+                Layout(Panel(eventos_printable, title='[red]Boletim'), name="events", ratio=8),
+                Layout(Align("[bold yellow] ODD FINAL:[/bold yellow] " + str(events["BetSlip"]['MultipliedOdd']), align='center')),
+                Layout(Align(prompt, align='center'), name="menu", ratio=3)
             )
 
             self.login_layout(True, layout)
@@ -332,6 +403,29 @@ class ClientGUI:
 
         return resposta 
 
+    def ask_amount(self, events):
+        self.console.clear()
+
+        layout : Layout = Layout()
+        prompt = self.questions[3]
+        prompt.stylize("bold yellow")
+
+        eventos_printable : list = self.showEventsSlip(events["BetSlip"]['Bets'])
+        
+        layout.split_column(
+            Layout(" ", name="empty space"),
+            Layout(name="header", ratio=3),
+            Layout(Panel(eventos_printable, title='[red]Boletim'), name="events", ratio=8),
+            Layout(Align("[bold yellow] ODD FINAL:[/bold yellow] " + str(events["BetSlip"]['MultipliedOdd']), align='center')),
+            Layout(Align(prompt, align='center'), name="menu", ratio=3)
+        )
+
+        self.login_layout(True, layout)
+
+        self.console.print(layout)
+
+        return self.console.input("->")
+        
     def showDetailedEvent(self, loggedIn, eventos,event):
         self.console.clear()
         layout : Layout = Layout()
@@ -374,6 +468,30 @@ class ClientGUI:
 
         return self.console.input("Introduza o número da aposta desejada -> ")
 
+    def showEventsSlip(self, events : list):
+        eventos_formatted = []
+        
+        for event in events:
+            table_painel =  Table()
+            texto = Text(str(event["EventID"]) + " | " + event["EventName"], justify='center')
+            texto.stylize("red", 0, 2)
+            table_painel.add_column(texto)
+            
+            table = Table()
+
+            table.add_column(str("Aposta"), justify="center", style="cyan", no_wrap=True)
+            table.add_column(str("Odd"), justify="center", style="bold yellow", no_wrap=True)
+            
+            
+            table.add_row(str(event["Choice"]), str(event["Odd"]))
+
+            table_painel.add_row(table)
+
+            eventos_formatted.append(table_painel)
+        
+
+        return Columns(eventos_formatted, equal=False, align='center')
+
     def showEvents(self, events : list):
         eventos_formatted = []
         
@@ -408,9 +526,5 @@ class ClientGUI:
             table_painel.add_row(table)
 
             eventos_formatted.append(table_painel)
-            #string = " vs ".join(intervenors)
-            #print(string)
-            #string = " ; ".join(odds)
-            #print(string)
-            #print("______________________________")
+       
         return Columns(eventos_formatted, equal=False, expand=True, align='center')

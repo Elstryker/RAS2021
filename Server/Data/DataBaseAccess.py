@@ -15,12 +15,14 @@ class DataBaseAccess:
         pass
 
     # Replaces non logged in user bet slip with the logged in user one
+    # devia estar no lado do client
     def updateBetSlip(self,prevID,username) -> None:
         pass
 
     def getBetSlip(self,username) -> BetSlip.BetSlip:
         pass
 
+    # se calhar queremos este metodo a devolver bool porque é um deposito?
     def depositMoney(self,username,currency,amount) -> None:
         pass
 

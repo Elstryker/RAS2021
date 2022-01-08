@@ -1,4 +1,5 @@
 from DataClasses.BetSlip import BetSlip
+from DataClasses.User_Currency import User_Currency
 from enum import unique
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref, sessionmaker, Session
@@ -18,11 +19,12 @@ class User(Base):
     password = Column("password", String(45), nullable=False)
     messages = Column("mensagens", String(2000))
     #falta tabela para wallet
-    wallet = Column("saldo",Float)
+    wallet = relationship('User_Currency', back_populates='user')
+    #wallet = Column("saldo",Float)
     #wallet = newCurrenciesDict(currencies)
     birthDate = Column("data_nascimento", Date)
 
-    def __init__(self,username,email,password,wallet,birthDate,messages) -> None:
+    def __init__(self,username,password,email,birthDate,wallet) -> None:
         self.username = username
         self.password = password
         self.email = email
@@ -31,7 +33,7 @@ class User(Base):
         #self.currentBetSlip = betSlip
         #self.currentBetSlip.user = self.username
 
-        self.messages = messages
+        self.messages = ""
         self.betSlips = {}
 
     def newCurrenciesDict(self,currencies : list):

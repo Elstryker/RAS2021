@@ -15,4 +15,11 @@ class Intervenor_Event(Base):
     invervenor_id = Column("interveniente_id",Integer,ForeignKey('Interveniente.id'),primary_key=True)
     event = relationship("Event", back_populates="intervenors")
     intervenor = relationship("Intervenor", back_populates="events")
-    odd = Column("odd", Integer)
+    odd = Column("odd", Float)
+
+
+    def __init__(self,intervenor,event,odd) -> None:
+        self.intervenor = intervenor
+        self.event = event
+        self.odd = odd
+        #self.events = []

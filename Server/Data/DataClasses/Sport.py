@@ -1,5 +1,5 @@
 import enum
-from Database import Base
+from Data.Database import Base
 from enum import unique
 from sqlalchemy import Column, String, Integer, Enum
 from sqlalchemy.ext.declarative import declarative_base

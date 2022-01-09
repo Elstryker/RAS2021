@@ -9,15 +9,15 @@ from sqlalchemy.sql.expression import false
 
 Base = declarative_base()
 
-from DataClasses.User import User
-from DataClasses.Event import Event, EventState
-from DataClasses.Sport import Sport, SportType
-from DataClasses.Intervenor import Intervenor
-from DataClasses.Intervenor_Event import Intervenor_Event
-from DataClasses.BetSlip import BetSlip, BetSlipState
-from DataClasses.Bet import Bet
-from DataClasses.Currency import Currency
-from DataClasses.User_Currency import User_Currency
+from Data.DataClasses.User import User
+from Data.DataClasses.Event import Event, EventState
+from Data.DataClasses.Sport import Sport, SportType
+from Data.DataClasses.Intervenor import Intervenor
+from Data.DataClasses.Intervenor_Event import Intervenor_Event
+from Data.DataClasses.BetSlip import BetSlip, BetSlipState
+from Data.DataClasses.Bet import Bet
+from Data.DataClasses.Currency import Currency
+from Data.DataClasses.User_Currency import User_Currency
 
 
 
@@ -44,7 +44,7 @@ class DataBase():
         futebol = self.createSport("Futebol",SportType.WinDraw)
         golf = self.createSport("Golf", SportType.Win)
         corrida = self.createSport("Corrida", SportType.Win)
-        empate = self.createIntervenor("Empate")
+        empate = self.createIntervenor("Draw")
         tiger = self.createIntervenor("Tiger Woods")
         jordan = self.createIntervenor("Jordan Spieth")
         rory = self.createIntervenor("Rory Mcllroy")
@@ -112,7 +112,7 @@ class DataBase():
 
         return False
 
-    def getBetslip(self, username) -> BetSlip:
+    def getBetSlip(self, username) -> BetSlip:
         user = self.session.query(User)\
                            .filter(User.username == username)\
                            .one_or_none()
@@ -186,7 +186,7 @@ class DataBase():
             if start<=i and end>i:
                 acc.append(event)
             i+=1
-        return acc
+        return (acc,page)
 
     # ? tf does this do
     def getParameters(self,obj):

@@ -22,7 +22,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         events = self.db.getAvailableEvents(sessionInfo["Page"],sessionInfo["EventsPerPage"])
         self.sessionsInfo[userID]["Page"] = events[1]
         toSend["Events"] = list(map(lambda x:x.toJSON(),events[0]))
-        toSend["Currencies"] = self.db.getCurrencies()
+        toSend["Currencies"] = list(map(lambda x:x.toJSON(),self.db.getCurrencies()))
 
         return toSend
 

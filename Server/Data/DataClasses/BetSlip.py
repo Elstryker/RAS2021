@@ -1,11 +1,13 @@
-from DataClasses.Bet import Bet
+
 
 from enum import unique
 from sqlalchemy import Column, Enum, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql.sqltypes import Boolean, Float
-from Database import Base
+from Data.Database import Base
+from Data.DataClasses.Bet import Bet
 import enum
+
 
 class BetSlipState(enum.Enum):
     Creating = 1 # Didn't bet yet

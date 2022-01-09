@@ -1,4 +1,3 @@
-from Data.DataClasses import BetSlip,Event
 
 class DataBaseAccess:
     
@@ -19,7 +18,7 @@ class DataBaseAccess:
     def updateBetSlip(self,prevID,username) -> None:
         pass
 
-    def getBetSlip(self,username) -> BetSlip.BetSlip:
+    def getBetSlip(self,username) -> object:
         pass
 
     # se calhar queremos este metodo a devolver bool porque é um deposito?
@@ -47,7 +46,7 @@ class DataBaseAccess:
     def createEvent(self,name,sport,intervenors,odds) -> bool:
         pass
 
-    def getEvent(self,eventID) -> Event.Event:
+    def getEvent(self,eventID) -> object:
         pass
 
     #acho que nao precisamos deste metodo, quando criamos a bet já é ligada automaticamente ao betslip correspondente

@@ -1,8 +1,8 @@
 import enum
-from DataClasses import Sport, Intervenor_Event
+from Data.DataClasses import Sport, Intervenor_Event
 from sqlalchemy import Column, String, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship, backref
-from Database import Base
+from Data.Database import Base
 
 
 class EventState(enum.Enum):
@@ -50,11 +50,9 @@ class Event(Base):
         toReturn["Sport"] = self.sport.toJSON()
 
         intervenors = []
-        for odd, intervenor in self.intervenors:
-            if intervenor != None:
-                intervenors.append([odd,intervenor.name])
-            else:
-                intervenors.append([odd,"Draw"])
+        for intervenor_event in self.intervenors:
+            if intervenor_event != None:
+                intervenors.append([intervenor_event.odd,intervenor_event.intervenor.name])
         toReturn["Intervenors"] = intervenors
 
         return toReturn

@@ -1,7 +1,7 @@
 from enum import unique
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref
-from Database import Base
+from Data.Database import Base
 
 class Bet(Base):
     __tablename__ = "Aposta"

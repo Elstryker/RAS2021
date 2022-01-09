@@ -7,7 +7,7 @@ from sqlalchemy.types import Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.util.langhelpers import memoized_instancemethod
 from sqlalchemy_utils import database_exists, create_database
-from Database import Base
+from Data.Database import Base
 
 class Intervenor_Event(Base):
     __tablename__ = "Interveniente_Evento"

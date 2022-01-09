@@ -48,11 +48,7 @@ class BetSlip(Base):
                 return False
 
     def applyBetSlip(self):
-        self.inStake = 1
         self.state = BetSlipState.InCourse
-        for value in self.bets['Unfinished'].values():
-            self.inStake *= value.odd
-        self.inStake *= self.amount
 
     def updateBet(self,betID,result):
         if self.state is BetSlipState.InCourse:

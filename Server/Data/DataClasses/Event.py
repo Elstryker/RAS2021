@@ -13,7 +13,7 @@ class EventState(enum.Enum):
 class Event(Base):
     __tablename__ = "Evento"
     id = Column("id", Integer, primary_key=True, autoincrement=True)
-    name = Column("nome", String(45))
+    name = Column("nome", String(45),primary_key=True)
     state = Column("estado", Enum(EventState))
     sport_id = Column("desporto_id", Integer,ForeignKey('Desporto.id'))
     sport = relationship(Sport.Sport, backref=backref("events", uselist=True))

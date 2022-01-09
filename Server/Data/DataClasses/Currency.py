@@ -13,7 +13,7 @@ from Database import Base
 class Currency(Base):
     __tablename__ = "Moeda"
     id = Column("id", Integer, primary_key=True, autoincrement=True)
-    name = Column("nome", String(45))
+    name = Column("nome", String(45),primary_key=True, unique=True)
     value = Column("valor", Float)
     users = relationship('User_Currency', back_populates='currency')
 

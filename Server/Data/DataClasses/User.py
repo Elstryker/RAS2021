@@ -15,7 +15,7 @@ class User(Base):
     __tablename__ = 'Utilizador'
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     email = Column("email", String(45), primary_key=True, unique=True)
-    username = Column("nome", String(45))
+    username = Column("nome", String(45), primary_key=True, unique=True)
     password = Column("password", String(45), nullable=False)
     messages = Column("mensagens", String(2000))
     #falta tabela para wallet

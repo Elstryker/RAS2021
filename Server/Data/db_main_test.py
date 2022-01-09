@@ -25,8 +25,10 @@ def init_db():
 
     print("Initialized the db")
 
-    database.createDefault()
-    #print(database.existsUser("olas"))
+    #database.createDefault()
+    b = database.getBetslip("ola")
+    for a in b:
+        print(a.id)
 """ 
     new_sport = Sport(name="Futebol", type=SportType.WinDraw)
     new_intervenor = Intervenor(name="Intervenor1")

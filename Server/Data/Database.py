@@ -3,7 +3,7 @@ from datetime import date
 import datetime
 from enum import unique
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
-from sqlalchemy.orm import relationship, backref, sessionmaker, Session
+from sqlalchemy.orm import relationship, backref, session, sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import false
 
@@ -30,11 +30,20 @@ class DataBase():
         self.session = Session(self.engine)
 
     def createDefault(self):
-        self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
+
+        #criação de user e moeda
+        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
+
+        dolar = self.createCurrency("dolar",1)
+        euro = self.createCurrency("euro",1.12)
+
+        self.createUser_Currency(user,dolar,25)
+        self.createUser_Currency(user,euro,13.45)
+
+        #criação de intervenientes e eventos
         futebol = self.createSport("Futebol",SportType.WinDraw)
         golf = self.createSport("Golf", SportType.Win)
         corrida = self.createSport("Corrida", SportType.Win)
-
         empate = self.createIntervenor("Empate")
         tiger = self.createIntervenor("Tiger Woods")
         jordan = self.createIntervenor("Jordan Spieth")
@@ -45,7 +54,6 @@ class DataBase():
         porto = self.createIntervenor("FCPorto")
         barca = self.createIntervenor("FCBarcelona")
         braga = self.createIntervenor("SCBraga")
-
 
         e1 = self.createEvent("Championship",futebol,[])
         e2 = self.createEvent("Europa",futebol,[])
@@ -65,6 +73,17 @@ class DataBase():
         self.createIntervenor_Event(naoko,e4,2.3)
         self.createIntervenor_Event(rosa,e4,8.1)
 
+        #criação de bets
+
+        betSlip1 = self.createBetSlip(user,5,5,False)
+
+        b1 = self.createBet(betSlip1,e1,empate)
+        self.createBet(betSlip1,e2,porto)
+
+        self.removeBet(b1)
+
+
+
     def existsUser(self,username) -> bool:
         user = self.session.query(User)\
                            .filter(User.username == username)\
@@ -83,7 +102,6 @@ class DataBase():
         self.addUser(user)
         return user
 
-    #por testar
     def authenticateUser(self,username,password) -> bool:
         user = self.session.query(User)\
                            .filter(User.username == username)\
@@ -94,20 +112,18 @@ class DataBase():
 
         return False
 
-    #por testar
-    def getBetslip(self, username) -> BetSlip.BetSlip:
+    def getBetslip(self, username) -> BetSlip:
         user = self.session.query(User)\
                            .filter(User.username == username)\
                            .one_or_none()
         if user:
             betslip = self.session.query(BetSlip)\
-                                  .filter(BetSlip.user_id == user.id & BetSlip.state==BetSlipState.Creating)\
+                                  .filter(BetSlip.user_id == user.id , BetSlip.state==BetSlipState.Creating)\
                                   .all()
             print("Getting user " + username + " betslips")
             return betslip
         return None
 
-    #por testar
     # se calhar queremos este metodo a devolver bool porque é um deposito?
     def depositMoney(self,username,currency,amount) -> None:
         user = self.session.query(User)\
@@ -118,10 +134,10 @@ class DataBase():
                                .one_or_none()
         if user!=None and currency!=None:
             self.session.query(User_Currency)\
-                        .filter(User_Currency.user_id == user.id & User_Currency.currency_id == currency.id)\
+                        .filter(User_Currency.user_id == user.id , User_Currency.currency_id == currency.id)\
                         .update({User_Currency.amount: User_Currency.amount + amount})
+            self.session.commit()
 
-    #por testar
     def withdrawMoney(self,username,currency,amount) -> bool:
         user = self.session.query(User)\
                            .filter(User.username == username)\
@@ -130,19 +146,18 @@ class DataBase():
                                .filter(Currency.name == currency)\
                                .one_or_none()
         if user!=None and currency!=None:
-            self.session.query(User_Currency)\
-                        .filter(User_Currency.user_id == user.id & User_Currency.currency_id == currency.id & User_Currency.amount-amount >= 0)\
+            r = self.session.query(User_Currency)\
+                        .filter(User_Currency.user_id == user.id, User_Currency.currency_id == currency.id, User_Currency.amount-amount >= 0)\
                         .update({User_Currency.amount: User_Currency.amount - amount})
-
+            self.session.commit()
             # o update nao retorna nada por isso faço uma segunda consulta da mesma cena para ver se alterou o dinheiro (convém ver se há outra maneira)
             check = self.session.query(User_Currency)\
-                                       .filter(User_Currency.user_id == user.id & User_Currency.currency_id == currency.id )\
+                                       .filter(User_Currency.user_id == user.id, User_Currency.currency_id == currency.id )\
                                        .one_or_none()
-            if check!=None and check.amount-amount >=0:
+            if check!=None and check.amount >=0:
                 return True
         return False
 
-    #por testar
     def getUserTotalBalance(self,username) -> dict:
         acc = {}
         user = self.session.query(User)\
@@ -159,8 +174,6 @@ class DataBase():
                 acc.update({currency.name:user_currency.amount})
         return acc
 
-    
-    #por testar
     def getAvailableEvents(self,page,eventsPerPage) -> list:
         acc = []
         event_list = self.session.query(Event)\
@@ -176,8 +189,56 @@ class DataBase():
         return acc
 
     # ? tf does this do
-    def getParameters(self,obj) -> dict:
-        pass
+    def getParameters(self,obj):
+        if obj == "Sport":
+            return Sport.Sport.getParameters()
+        elif obj == "Intervenor":
+            return Intervenor.Intervenor.getParameters()
+        elif obj == "Event":
+            params = dict()
+            
+            params["Name"] = 0
+            sports=[]
+            q1 = self.getSports()
+            for sport in q1:
+                sports.append(sport.name)
+            params["Sport"] = sports
+
+            intervenors = []
+            q2 = self.getIntervenors()
+            for intervenor in q2:
+                intervenors.append(intervenor.name)
+            params["Intervenors"] = intervenors
+
+            params["Odds"] = 0
+
+            return params
+
+    def getEvent(self,eventID) -> Event:
+        event = self.session.query(Event)\
+                           .filter(Event.id == eventID)\
+                           .one_or_none()
+        return event
+
+    #por testar acho que nao precisamos deste metodo, quando criamos a bet já é ligada automaticamente ao betslip correspondente
+    def addBetToBetSlip(self,username,eventID,result) -> bool:
+
+        user = self.session.query(User)\
+                           .filter(User.username == username)\
+                           .one_or_none()
+
+        event = self.session.query(Event)\
+                           .filter(Event.id == eventID)\
+                           .one_or_none()
+        
+        betslip = self.session.query(BetSlip)\
+                              .filter(BetSlip.user_id == user.id, BetSlip.state == BetSlipState.Creating)\
+                              .one_or_none()
+
+        if event!=None and betslip!=None:
+            bet = Bet(betslip,event)
+            self.addBet(bet)
+        return False
 
 
     def createSport(self, name, type: SportType):
@@ -195,97 +256,94 @@ class DataBase():
         self.addEvent(event)
         return event
 
-    #por testar
-    def getEvent(self,eventID) -> Event.Event:
-        event = self.session.query(Event)\
-                           .filter(Event.id == eventID)\
-                           .one_or_none()
-        return event
+    def createIntervenor_Event(self,intervenor,event,odd):
+        intervenor_Event = Intervenor_Event(intervenor,event,odd)
+        self.addIntervenor_Event(intervenor_Event)
+        return intervenor_Event
 
-    def addBetToBetSlip(self,username,eventID,result) -> bool:
+    def createCurrency(self,name,value):
+        currency = Currency(name,value)
+        self.addCurrency(currency)
+        return currency
 
-        user = self.session.query(User)\
-                           .filter(User.username == username)\
-                           .one_or_none()
+    def createUser_Currency(self,user,currency,amount):
+        user_Currency = User_Currency(user,currency,amount)
+        self.addUser_Currency(user_Currency)
+        return user_Currency
 
-        event = self.session.query(Event)\
-                           .filter(Event.id == eventID)\
-                           .one_or_none()
-        
-        betslip = self.session.query(BetSlip)\
-                              .filter(BetSlip.user_id == user.id & BetSlip.state == BetSlipState.Creating)\
-                              .one_or_none()
+    
+    def createBetSlip(self,user,amount,win_value,won):
+        betSlip = BetSlip(user,amount,win_value,won)
+        self.addBetSlip(betSlip)
+        return betSlip
 
-        if event!=None and betslip!=None:
-            bet = Bet(betslip,event)
-            self.addBet(bet)
-        return False
+    def createBet(self,betSlip,event,intervenor):
+        bet = Bet(betSlip,event,intervenor)
+        self.addBet(bet)
 
+        return bet
 
     def addUser(self, user: User):
-        self.session.add(user)    
-        self.session.commit() 
-        """ try:
+        try:
             self.session.add(user)    
             self.session.commit() 
-            print("Added user " +  user.username)
         except:
             print("Erro na inserção de User")
-            self.session.rollback() """
-        
-    
+            self.session.rollback()
 
     def addIntervenor(self, intervenor: Intervenor):
-
-        self.session.add(intervenor)    
-        self.session.commit() 
-        """ try:
+        try:
             self.session.add(intervenor)    
             self.session.commit() 
         except:
             print("Erro na inserção de Intervenor")
-            self.session.rollback() """
+            self.session.rollback()
 
     def addEvent(self, event: Event):
-
-        self.session.add(event)    
-        self.session.commit()
-        """ try:
+        try:
             self.session.add(event)    
             self.session.commit() 
         except:
             print("Erro na inserção de Event")
-            self.session.rollback() """
-
-    def createIntervenor_Event(self, intervenor, event, odd):
-        intervenor_Event = Intervenor_Event(intervenor, event, odd)
-        self.addIntervenor_Event(intervenor_Event)
+            self.session.rollback()
 
     def addIntervenor_Event(self, intervenor_Event: Intervenor_Event):
-        self.session.add(intervenor_Event)    
-        self.session.commit() 
-        """ try:
+        try:
             self.session.add(intervenor_Event)    
             self.session.commit() 
         except:
             print("Erro na inserção de Intervenor_Event")
             self.session.rollback()
- """
+
+    def addCurrency(self, currency: Currency):
+        try:
+            self.session.add(currency)    
+            self.session.commit() 
+        except:
+            print("Erro na inserção de Currency")
+            self.session.rollback()
+
+    def addUser_Currency(self, user_currency: User_Currency):
+        try:
+            self.session.add(user_currency)    
+            self.session.commit() 
+        except:
+            print("Erro na inserção de User_Currency")
+            self.session.rollback()
 
     def addBetSlip(self, new_betslip: BetSlip):
         try:
             self.session.add(new_betslip)
-            print("Added betslip " + str(new_betslip.winValue))
+            self.session.commit()        
         except:
             print("Erro na inserção de Betslip")
             self.session.rollback()
-        self.session.commit()        
        
 
     def addSport(self, new_sport: Sport):
         try:
             self.session.add(new_sport)
-            print("Added sport " + str(new_sport.name))
+            print("Added sport " + str(new_sport.name)) 
         except:
             print("Erro na inserção de Sport")
             self.session.rollback()
@@ -309,6 +367,19 @@ class DataBase():
             self.session.rollback()
         self.session.commit()  
 
+
+    
+    def removeBet(self, bet: Bet):
+        try:
+            self.session.delete(bet)
+        except:
+            print("Erro na inserção de Bet")
+            self.session.rollback()
+        self.session.commit()  
+
+
+
+
     def getUser(self, user_id: Integer) -> User:
         user = self.session.query(User).filter(User.id == user_id).one()
         print(user.email)
@@ -329,11 +400,11 @@ class DataBase():
         return currencies
 
 
-    """ def addCurrency(self, currency: Currency):
-        try:
-            self.session.add(currency)    
-            self.session.commit() 
-            print("Added currency " +  currency.name)
-        except:
-            print("Erro na inserção de Currency")
-            self.session.rollback() """
+    def getIntervenors(self):
+        intervenors = self.session.query(Intervenor).all()
+        return intervenors
+
+
+    def getSports(self):
+        sports = self.session.query(Sports).all()
+        return sports

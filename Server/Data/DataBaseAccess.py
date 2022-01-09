@@ -50,6 +50,7 @@ class DataBaseAccess:
     def getEvent(self,eventID) -> Event.Event:
         pass
 
+    #acho que nao precisamos deste metodo, quando criamos a bet já é ligada automaticamente ao betslip correspondente
     def addBetToBetSlip(self,username,eventID,result) -> bool:
         pass
 

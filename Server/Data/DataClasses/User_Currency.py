@@ -1,6 +1,7 @@
 from enum import unique
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.sql.sqltypes import Boolean, Float
 from Database import Base
 
 class User_Currency(Base):
@@ -9,4 +10,10 @@ class User_Currency(Base):
     currency_id = Column("moeda_id",Integer,ForeignKey('Moeda.id'),primary_key=True)
     user = relationship("User", back_populates="wallet")
     currency = relationship("Currency", back_populates="users")
-    amount = Column("quantidade", Integer)
+    amount = Column("quantidade", Float)
+
+
+    def __init__(self,user,currency,amount) -> None:
+        self.user = user
+        self.currency = currency
+        self.amount = amount

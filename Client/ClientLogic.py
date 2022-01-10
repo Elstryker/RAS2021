@@ -19,20 +19,6 @@ class ClientLogic:
         self.clientInfo = ClientInfo.ClientInfo(info)
         self.client_gui = ClientGUI()
 
-    def login(self,option):
-        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
-        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
-        
-        #print(f"O username é {username} e a password é {password}")
-
-        args = [option,username,password]
-        response = self.requestServer(args)
-        if response["LoggedIn"]:
-            self.clientInfo.loggedIn = True
-            self.client_gui.username = username
-        else:
-            self.client_gui.invalid_info(0)
-        # print(response['Message'])
     
     def menu(self):
         inp = ''
@@ -41,7 +27,7 @@ class ClientLogic:
             
             inp = "Q"
 
-            while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPp':
+            while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPpHhNnLl':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents())
             
             inp = inp.upper()
@@ -76,12 +62,12 @@ class ClientLogic:
             "L":self.withdrawMoney,
             "A":self.changePage, # Previous Page
             "P":self.changePage, # Next Page
+            "H":self.showBetHistory,
+            "N":self.exchangeCurrency,
             "F":self.login,
             "E":self.register,
             "S":self.quit,
             "O":self.logout
-            #show history
-            #money exchange
         }
         toDo = actions.get(option,self.noSuchAction)
         toDo(option)
@@ -162,18 +148,49 @@ class ClientLogic:
         currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
         amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
 
-        args = [option,currency,amount]
+        args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
         self.requestServer(args)
 
     def changePage(self,option):
         self.clientInfo.previousPage() if option == "A" else self.clientInfo.nextPage()
 
 
-    def showBetHistory(self,option): # TODO
+    def showBetHistory(self,option):
         args = [option]
-        self.requestServer(args)
+        response = self.requestServer(args)
+
+        print(response["Message"])
+        print(response["History"])
+
+        # Falta GUI e decisões
+
+    def exchangeCurrency(self,option):
+        fromCurrency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        toCurrency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+
+        amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
+
+        args = [option,self.clientInfo.availableCurrencies[int(fromCurrency)],self.clientInfo.availableCurrencies[int(toCurrency)],amount]
+        response = self.requestServer(args)
+
+        print(response["Message"])
     
+    
+    def login(self,option):
+        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
+        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
         
+        #print(f"O username é {username} e a password é {password}")
+
+        args = [option,username,password]
+        response = self.requestServer(args)
+        if response["LoggedIn"]:
+            self.clientInfo.loggedIn = True
+            self.client_gui.username = username
+        else:
+            self.client_gui.invalid_info(0)
+        # print(response['Message'])
+
     def logout(self,option):
         args = [option]
         self.requestServer(args)

@@ -14,7 +14,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         toSend["Wallet"] = self.db.getUserTotalBalance(userID)
         events = self.db.getAvailableEvents()
         toSend["Events"] = list(map(lambda x:x.toJSON(),events))
-        toSend["Currencies"] = self.db.getCurrencies()
+        toSend["Currencies"] = list(self.db.getCurrencies().keys())
 
         return toSend
 
@@ -55,6 +55,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         elif args[0] == "PUT":
             result = int(args[2])
             success = self.db.addBetToBetSlip(userID,eventID,result)
+            toSend = self.createDictWithDefaultInfo(userID)
             if success:
                 toSend["Message"] = "Bet added to bet slip"
                 toSend["Success"] = True
@@ -68,10 +69,10 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         
 
     def removeBetFromBetSlip(self,userID,eventID):
-        toSend = self.createDictWithDefaultInfo(userID)
         eventID = int(eventID)
 
         success = self.db.removeBetFromBetSlip(userID,eventID)
+        toSend = self.createDictWithDefaultInfo(userID)
         if success:
             toSend["Message"] = "Bet removed successfully"
             toSend["Success"] = True
@@ -97,19 +98,19 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         return json.dumps(toSend)
 
     def cancelBetSlip(self,userID):
-        toSend = self.createDictWithDefaultInfo(userID)
-
         self.db.cancelBetSlip(userID)
+
+        toSend = self.createDictWithDefaultInfo(userID)
 
         toSend["Message"] = "\n\nCancelled bet slip\n"
 
         return json.dumps(toSend)
 
     def concludeBetSlip(self,userID,amount,currency):
-        toSend = self.createDictWithDefaultInfo(userID)
         amount = int(amount)
         success = self.db.withdrawMoney(userID,currency,amount)
 
+        toSend = self.createDictWithDefaultInfo(userID)
         if not success:
             toSend["Success"] = False
             toSend["Message"] = "\n\nNot enough funds\n"
@@ -124,7 +125,40 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
 
     def getBetHistory(self,username):
-        print("History retrieved!")
+        toSend = self.createDictWithDefaultInfo(username)
+
+        history = self.db.getUserHistory(username)
+        history.sort(key=lambda x:x.id)
+
+        toSend["History"] = [x.toJSON() for x in history]
+        toSend["Message"] = "\n\nHistory retrieved\n"
+
+        return json.dumps(toSend)
+
+    def exchangeMoney(self,userID,fromCur,toCur,amount):
+        currencies = self.db.getCurrencies()
+        fromCurrency = currencies[fromCur]
+        toCurrency = currencies[toCur]
+        amount = int(amount)
+
+        success = self.db.withdrawMoney(userID,fromCur,amount)
+        if not success:
+            toSend = self.createDictWithDefaultInfo(userID)
+            toSend["Success"] = False
+            toSend["Message"] = "\n\nInvalid amount\n"
+
+            return json.dumps(toSend)
+        
+        totalEUR = fromCurrency.convertToEUR(amount)
+        total = toCurrency.convertFromEUR(totalEUR)
+
+        self.db.depositMoney(userID,toCur,total)
+        
+        toSend = self.createDictWithDefaultInfo(userID)
+        toSend["Success"] = True
+        toSend["Message"] = "\n\nExchange complete\n"
+
+        return json.dumps(toSend)
 
     def login(self,prevID,username,password):
         authenticated = self.db.authenticateUser(username,password)

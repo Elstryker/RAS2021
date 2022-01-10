@@ -1,9 +1,9 @@
-from Data.DataClasses import BetSlip,User,Event,Bet,Intervenor,Sport
+from Data.DataClasses import BetSlip,User,Event,Bet,Intervenor,Sport,Currency
 from Data import DataBaseAccess
 from Data.DataClasses.Sport import SportType
 class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
-    currencies : list[str]
+    currencies : dict[str,Currency.Currency]
     users : dict[str,User.User] # username to user
     events : dict[int,dict[int,Event.Event]] # id to event
     bets : dict[int,Bet.Bet] # id to bet
@@ -12,7 +12,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     sports : dict[str,Sport.Sport] # name to sport
 
     def __init__(self) -> None:
-        self.currencies = ['EUR','USD','GBP','ADA']
+        self.currencies = {}
         self.users = {}
         self.events = {"Available":dict(),"Suspended":dict(),"Ended":dict()}
         self.bets = {}
@@ -24,6 +24,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
 
     def createDefault(self):
+        self.currencies = {'EUR':Currency.Currency('EUR',1), 'USD':Currency.Currency('USD',0.84), 'GBP':Currency.Currency('GBP',1.20), 'ADA':Currency.Currency('ADA',1.03)}
         self.createUser("ola","adeus","1/1/1970")
         self.createSport("Futebol",SportType.WinDraw)
         self.createSport("Golf", SportType.Win)
@@ -59,7 +60,6 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         betSlip.user = user.username
         self.betslips[user.username] = betSlip
         self.users[user.username] = user
-        print(f"Created user {username} with betslip with id {betSlip.id}")
 
     def authenticateUser(self,username,password):
         ret = False
@@ -92,16 +92,13 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     def depositMoney(self,username,currency,amount):
         user = self.users[username]
         user.wallet[currency] += amount
-        print(f"Deposited {amount} {currency}. Total: {user.wallet[currency]}")
 
     def withdrawMoney(self,username,currency,amount):
         user = self.users[username]
         if user.wallet[currency] < amount:
-            print(f"Yo u don't have all that, only {user.wallet[currency]} {currency}")
             return False
         else:
             user.wallet[currency] -= amount
-            print(f"You're rich m8, there you have it, total: {user.wallet[currency]} {currency}")
             return True
 
     def getUserTotalBalance(self,username):
@@ -225,3 +222,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.betslips[user.username] = newBetSlip
 
         user.concludeBetSlip(newBetSlip)
+
+    def getUserHistory(self,username):
+        user = self.users[username]
+        return list(user.betSlips.values())

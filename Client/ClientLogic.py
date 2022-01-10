@@ -154,6 +154,9 @@ class ClientLogic:
     def changePage(self,option):
         self.clientInfo.previousPage() if option == "A" else self.clientInfo.nextPage()
 
+        args = [option]
+        self.requestServer(args)
+
 
     def showBetHistory(self,option):
         args = [option]

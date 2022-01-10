@@ -70,6 +70,8 @@ class ServerWorkerClient:
             message = self.app.getBetHistory(self.userID)
         elif operation == "N": # Exchange Money
             message = self.app.exchangeMoney(self.userID,args[0],args[1],args[2])
+        elif operation == "A" or operation == "P": # Update Info
+            message = self.app.getDefaultInfo(self.userID)
         elif operation == "E": # Register
             message = self.app.register(args[0],args[1],args[2])
         elif operation == "F": # Login

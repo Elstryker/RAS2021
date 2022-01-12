@@ -94,11 +94,10 @@ class DataBase():
     
     def createUser(self,name,password,email,birthDate):
         currencies = self.getCurrencies()
+        user = User(name,password,email,birthDate)
         wallet_list = []
         for currency in currencies:
-            new_user_currency = User_Currency(currency=currency,amount=0)
-            wallet_list.append(new_user_currency)
-        user = User(name,password,email,birthDate,wallet_list)
+            new_user_currency = User_Currency(user=user,currency=currency,amount=0)        
         self.addUser(user)
         return user
 

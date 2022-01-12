@@ -16,11 +16,11 @@ class User(Base):
     #wallet = newCurrenciesDict(currencies)
     birthDate = Column("data_nascimento", Date)
 
-    def __init__(self,username,password,email,birthDate,wallet) -> None:
+    def __init__(self,username,password,email,birthDate) -> None:
         self.username = username
         self.password = password
         self.email = email
-        self.wallet = wallet
+        self.wallet = []
         self.birthDate = birthDate
         #self.currentBetSlip = betSlip
         #self.currentBetSlip.user = self.username
@@ -28,6 +28,7 @@ class User(Base):
         self.messages = ""
         self.betSlips = {}
 
+    #não recomendado
     def newCurrenciesDict(self,currencies : list):
         wallet = dict()
         for currency in currencies:

@@ -1,14 +1,14 @@
-from Database import Base, DataBase
-from DataClasses.Currency import Currency
-from DataClasses.User_Currency import User_Currency
+from Data.Database import Base, DataBase
+from Data.DataClasses.Currency import Currency
+from Data.DataClasses.User_Currency import User_Currency
 from sqlalchemy_utils import database_exists, create_database
-from DataClasses.User import User
-from DataClasses.Event import Event
-from DataClasses.Sport import Sport, SportType
-from DataClasses.Intervenor import Intervenor
-from DataClasses.Intervenor_Event import Intervenor_Event
-from DataClasses.BetSlip import BetSlip
-from DataClasses.Bet import Bet
+from Data.DataClasses.User import User
+from Data.DataClasses.Event import Event
+from Data.DataClasses.Sport import Sport, SportType
+from Data.DataClasses.Intervenor import Intervenor
+from Data.DataClasses.Intervenor_Event import Intervenor_Event
+from Data.DataClasses.BetSlip import BetSlip
+from Data.DataClasses.Bet import Bet
 import datetime
 
 
@@ -26,9 +26,11 @@ def init_db():
     print("Initialized the db")
 
     #database.createDefault()
-    b = database.getBetslip("ola")
-    for a in b:
-        print(a.id)
+    user = database.getUser(1)
+    user.password = "novapassword"
+    database.session.commit()
+    user2 = database.getUser(1)
+    print(user2.password)
 """ 
     new_sport = Sport(name="Futebol", type=SportType.WinDraw)
     new_intervenor = Intervenor(name="Intervenor1")

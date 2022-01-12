@@ -51,6 +51,7 @@ class BetSlip(Base):
 
     def applyBetSlip(self):
         self.state = BetSlipState.InCourse
+        
 
     def updateBet(self,betID,result):
         if self.state is BetSlipState.InCourse:

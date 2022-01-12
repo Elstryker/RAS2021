@@ -82,7 +82,28 @@ class DataBase():
 
         self.removeBet(b1)
 
+    #inacabado
+    def updateBetSlip(self,prevID,username):
+        curBetSlip = self.getBetSlipById(prevID)
+        #numBets = len(curBetSlip.bets['Unfinished'])
+        numBets = 0
+        for bet in curBetSlip.bets:
+            #if unfinished bet
+                #numBets += 1
+            pass
+        
+        if numBets == 0: # If no bets, get previous bet slip from user
+            del self.betslips[prevID]
+        else: # Replaces previous user bet slip with the current one
+            self.betslips[username] = curBetSlip
+            curBetSlip.user = username
+            user = self.users[username]
+            user.currentBetSlip = curBetSlip
 
+    def getBetSlipById(self, betslipId):
+        return self.session.query(BetSlip)\
+                           .filter(BetSlip.id == betslipId)\
+                           .one_or_none()
 
     def existsUser(self,username) -> bool:
         user = self.session.query(User)\
@@ -105,7 +126,8 @@ class DataBase():
         user = self.session.query(User)\
                            .filter(User.username == username)\
                            .one_or_none()
-        if user!=None:
+        #print("got user " + user.username + " with password " + user.password)
+        if user:
             if user.password == password:
                 return True
 

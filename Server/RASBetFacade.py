@@ -25,6 +25,9 @@ class RASBetFacade:
     def getBetHistory(self,userID):
         pass
 
+    def exchangeMoney(self,userID,fromCur,toCur,amount):
+        pass
+
     def login(self,prevID,userID,password):
         pass
     
@@ -52,4 +55,10 @@ class RASBetFacade:
         pass
 
     def concludeEvent(self,args):
+        pass
+
+    def addCurrency(self,currency,toEUR):
+        pass
+    
+    def removeCurrency(self,currency):
         pass

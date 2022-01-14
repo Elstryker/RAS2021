@@ -43,9 +43,13 @@ class ServerWorkerBookie:
         elif operation == 3: # Add Intervenor
             message = self.app.addIntervenor(args)
         elif operation == 4: # Start Event
-            message = self.app.startEvent(args)
+            message = self.app.startEvent(args[0])
         elif operation == 5: # Conclude Event
             message = self.app.concludeEvent(args)
+        elif operation == 6: # Add Currency
+            message = self.app.addCurrency(args[0],args[1])
+        elif operation == 7: # Remove Currency
+            message = self.app.removeCurrency(args[0])
         elif operation == 0: # Quit
             replyBye = dict()
             replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"

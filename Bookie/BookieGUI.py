@@ -6,7 +6,9 @@ def showMenu():
 2 -> Add Sport
 3 -> Add Intervenor
 4 -> Start Event
-5 -> Conclude Event""")
+5 -> Conclude Event
+6 -> Add Currency
+7 -> Remove Currency""")
 
 def askParam(param):
     print(f"{param}: ")
@@ -19,3 +21,6 @@ def askLimitedParam(paramName,param,chooseMultiple = False):
     for i,el in enumerate(param):
         print(f"{i+1} - {el}")
 
+def printEvents(events):
+    for i,event in enumerate(events):
+        print(f"{i} - {event['Name']}")

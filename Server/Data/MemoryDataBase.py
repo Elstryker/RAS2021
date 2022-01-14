@@ -1,9 +1,9 @@
-from Data.DataClasses import BetSlip,User,Event,Bet,Intervenor,Sport
+from Data.DataClasses import BetSlip,User,Event,Bet,Intervenor,Sport,Currency
 from Data import DataBaseAccess
 from Data.DataClasses.Sport import SportType
 class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
-    currencies : list[str]
+    currencies : dict[str,Currency.Currency]
     users : dict[str,User.User] # username to user
     events : dict[int,dict[int,Event.Event]] # id to event
     bets : dict[int,Bet.Bet] # id to bet
@@ -12,7 +12,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     sports : dict[str,Sport.Sport] # name to sport
 
     def __init__(self) -> None:
-        self.currencies = ['EUR','USD','GBP','ADA']
+        self.currencies = {}
         self.users = {}
         self.events = {"Available":dict(),"Suspended":dict(),"Ended":dict()}
         self.bets = {}
@@ -24,6 +24,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
 
     def createDefault(self):
+        self.currencies = {'EUR':Currency.Currency('EUR',1), 'USD':Currency.Currency('USD',0.84), 'GBP':Currency.Currency('GBP',1.20), 'ADA':Currency.Currency('ADA',1.03)}
         self.createUser("ola","adeus","1/1/1970")
         self.createSport("Futebol",SportType.WinDraw)
         self.createSport("Golf", SportType.Win)
@@ -44,6 +45,11 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
 
+        self.addBetToBetSlip("ola",1,1)
+        self.depositMoney("ola","EUR",20)
+        self.concludeBetSlip("ola",10,"EUR")
+        self.withdrawMoney("ola","EUR",10)
+
         for event in self.events["Available"].values():
             print(f"{event.id} - {event.name}")
 
@@ -57,9 +63,9 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         betSlip = BetSlip.BetSlip()
         user = User.User(username,password,self.currencies,birthdate,betSlip)
         betSlip.user = user.username
+        betSlip.attach(user)
         self.betslips[user.username] = betSlip
         self.users[user.username] = user
-        print(f"Created user {username} with betslip with id {betSlip.id}")
 
     def authenticateUser(self,username,password):
         ret = False
@@ -92,16 +98,13 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     def depositMoney(self,username,currency,amount):
         user = self.users[username]
         user.wallet[currency] += amount
-        print(f"Deposited {amount} {currency}. Total: {user.wallet[currency]}")
 
     def withdrawMoney(self,username,currency,amount):
         user = self.users[username]
         if user.wallet[currency] < amount:
-            print(f"Yo u don't have all that, only {user.wallet[currency]} {currency}")
             return False
         else:
             user.wallet[currency] -= amount
-            print(f"You're rich m8, there you have it, total: {user.wallet[currency]} {currency}")
             return True
 
     def getUserTotalBalance(self,username):
@@ -195,6 +198,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         event = self.events["Available"][eventID]
         betslip = self.betslips[username]
 
+        event.attach(betslip)
+
         if result >= len(event.intervenors):
             return False
         
@@ -222,6 +227,61 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
         newBetSlip = BetSlip.BetSlip()
         newBetSlip.user = user.username
+        newBetSlip.attach(user)
         self.betslips[user.username] = newBetSlip
 
         user.concludeBetSlip(newBetSlip)
+
+    def getUserHistory(self,username):
+        user = self.users[username]
+        return list(user.betSlips.values())
+
+    def addCurrency(self,currency,toEUR):
+        if currency in self.currencies:
+            return False
+
+        self.currencies[currency] = Currency.Currency(currency,toEUR)
+
+        for user in self.users.values():
+            user.wallet[currency] = 0
+
+        return True
+
+    def removeCurrency(self,currency):
+        curr = self.currencies.pop(currency)
+        
+        for user in self.users.values():
+            amount = user.wallet.pop(currency)
+            amount = curr.convertToEUR(amount)
+            user.wallet["EUR"] += amount
+
+    def startEvent(self,eventID):
+        if eventID not in self.events["Available"]:
+            return False
+
+        event = self.events["Available"].pop(eventID)
+        event.initiateEvent()
+        self.events["Suspended"][eventID] = event
+
+        return True
+
+    def getSuspendedEvents(self):
+        suspendedEvents = self.events["Suspended"]
+        suspendedEvents = suspendedEvents.values()
+        
+        suspendedEvents = sorted(suspendedEvents,key=lambda x: x.id)
+
+        return suspendedEvents
+
+    def concludeEvent(self,eventID,result):
+        event = self.events["Suspended"].pop(eventID)
+        event.terminateEvent(result)
+        self.events["Ended"][eventID] = event
+
+    def retrieveNotifications(self,username):
+        if username in self.users:
+            user = self.users[username]
+            return user.retrieveNotifications()
+
+        print("Not retrieved!")
+        return []

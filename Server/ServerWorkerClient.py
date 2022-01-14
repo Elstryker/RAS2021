@@ -8,7 +8,6 @@ class ServerWorkerClient:
     sock : socket.socket
     info : dict
     app : RASBetFacade.RASBetFacade
-    loggedIn : bool
     
     def __init__(self,sock,info,app : RASBetFacade.RASBetFacade):
         self.sock = sock
@@ -19,7 +18,6 @@ class ServerWorkerClient:
         self.getIdForNotLoggedInUser()
 
     def getIdForNotLoggedInUser(self):
-        self.loggedIn = False
         exist = True
         while exist:
             self.userID = random.randint(1,10000) # Not scalable
@@ -70,6 +68,10 @@ class ServerWorkerClient:
             message = self.app.withdrawMoney(self.userID,args[0],args[1])
         elif operation == "H": # See Bet History
             message = self.app.getBetHistory(self.userID)
+        elif operation == "N": # Exchange Money
+            message = self.app.exchangeMoney(self.userID,args[0],args[1],args[2])
+        elif operation == "A" or operation == "P": # Update Info
+            message = self.app.getDefaultInfo(self.userID)
         elif operation == "E": # Register
             message = self.app.register(args[0],args[1],args[2])
         elif operation == "F": # Login
@@ -77,7 +79,6 @@ class ServerWorkerClient:
             dic = json.loads(message)
             if dic['LoggedIn']:
                 self.userID = args[0] # username
-                self.loggedIn = True
         elif operation == 'O': # Logout
             self.getIdForNotLoggedInUser()
             message = self.app.logout(self.userID)

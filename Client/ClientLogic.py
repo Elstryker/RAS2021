@@ -24,9 +24,8 @@ class ClientLogic:
         inp = ''
         while inp != 'S':
             #ClientGUI.showEvents(self.clientInfo.getEvents())
-            
             inp = "Q"
-
+            print(self.clientInfo.getNotifications(2))
             while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPpHhNnLl':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents())
             
@@ -44,7 +43,7 @@ class ClientLogic:
 
         # Retrieve additional info
         if args[0] != "S": # See if it just wants to quit
-            self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["Currencies"])
+            self.clientInfo.updateInfo(response)
             self.client_gui.wallet = self.clientInfo.wallet
 
         return response

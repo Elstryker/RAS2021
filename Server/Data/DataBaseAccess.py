@@ -45,6 +45,15 @@ class DataBaseAccess:
     def createEvent(self,name,sport,intervenors,odds) -> bool:
         pass
 
+    def startEvent(self,eventID) -> bool:
+        pass
+
+    def concludeEvent(self,eventID,result) -> None:
+        pass
+
+    def getSuspendedEvents(self) -> list:
+        pass
+    
     def getEvent(self,eventID) -> Event.Event:
         pass
 
@@ -61,4 +70,14 @@ class DataBaseAccess:
         pass
 
     def getUserHistory(self,username) -> list[BetSlip.BetSlip]:
+        pass
+
+
+    def addCurrency(self,currency,toEUR) -> bool:
+        pass
+
+    def removeCurrency(self,currency) -> None:
+        pass
+
+    def retrieveNotifications(self,username) -> list:
         pass

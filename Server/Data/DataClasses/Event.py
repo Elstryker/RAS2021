@@ -1,15 +1,18 @@
 import enum
 
 from Data.DataClasses import Sport,Intervenor
+from Data import Observable,Observer
 
 class EventState(enum.Enum):
     Open = 1
     Suspended = 2
     Closed = 3
 
-class Event:
+class Event(Observable.Observable):
 
     idGenerator = 1
+
+    observers: list[Observer.Observer] = []
 
     def __init__(self,name,sport : Sport.Sport,intervenors : list[tuple[float,Intervenor.Intervenor]]) -> None:
         self.id = Event.idGenerator
@@ -28,7 +31,7 @@ class Event:
         if self.state is EventState.Suspended:
             self.state = EventState.Closed
             self.result = result
-            # Notify Bets
+            self.notify()
 
     def getOdd(self,choice):
         return self.intervenors[choice][0]
@@ -50,3 +53,19 @@ class Event:
         toReturn["Intervenors"] = intervenors
 
         return toReturn
+
+    def attach(self, observer: Observer.Observer) -> None:
+        print("Event: Attached an observer.")
+        if observer not in self.observers:
+            self.observers.append(observer)
+
+    def detach(self, observer: Observer.Observer) -> None:
+        print("Event: Detached an observer.")
+        self.observers.remove(observer)
+
+    def notify(self) -> None:
+
+        print("Event: Notifying observers...")
+        print(self.observers)
+        for observer in self.observers:
+            observer.update(self)

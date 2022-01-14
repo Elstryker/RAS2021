@@ -56,3 +56,9 @@ class RASBetFacade:
 
     def concludeEvent(self,args):
         pass
+
+    def addCurrency(self,currency,toEUR):
+        pass
+    
+    def removeCurrency(self,currency):
+        pass

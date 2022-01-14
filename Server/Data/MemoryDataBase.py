@@ -45,6 +45,11 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
 
+        self.addBetToBetSlip("ola",1,1)
+        self.depositMoney("ola","EUR",20)
+        self.concludeBetSlip("ola",10,"EUR")
+        self.withdrawMoney("ola","EUR",10)
+
         for event in self.events["Available"].values():
             print(f"{event.id} - {event.name}")
 
@@ -58,6 +63,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         betSlip = BetSlip.BetSlip()
         user = User.User(username,password,self.currencies,birthdate,betSlip)
         betSlip.user = user.username
+        betSlip.attach(user)
         self.betslips[user.username] = betSlip
         self.users[user.username] = user
 
@@ -192,6 +198,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         event = self.events["Available"][eventID]
         betslip = self.betslips[username]
 
+        event.attach(betslip)
+
         if result >= len(event.intervenors):
             return False
         
@@ -219,6 +227,7 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
         newBetSlip = BetSlip.BetSlip()
         newBetSlip.user = user.username
+        newBetSlip.attach(user)
         self.betslips[user.username] = newBetSlip
 
         user.concludeBetSlip(newBetSlip)
@@ -226,3 +235,53 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
     def getUserHistory(self,username):
         user = self.users[username]
         return list(user.betSlips.values())
+
+    def addCurrency(self,currency,toEUR):
+        if currency in self.currencies:
+            return False
+
+        self.currencies[currency] = Currency.Currency(currency,toEUR)
+
+        for user in self.users.values():
+            user.wallet[currency] = 0
+
+        return True
+
+    def removeCurrency(self,currency):
+        curr = self.currencies.pop(currency)
+        
+        for user in self.users.values():
+            amount = user.wallet.pop(currency)
+            amount = curr.convertToEUR(amount)
+            user.wallet["EUR"] += amount
+
+    def startEvent(self,eventID):
+        if eventID not in self.events["Available"]:
+            return False
+
+        event = self.events["Available"].pop(eventID)
+        event.initiateEvent()
+        self.events["Suspended"][eventID] = event
+
+        return True
+
+    def getSuspendedEvents(self):
+        suspendedEvents = self.events["Suspended"]
+        suspendedEvents = suspendedEvents.values()
+        
+        suspendedEvents = sorted(suspendedEvents,key=lambda x: x.id)
+
+        return suspendedEvents
+
+    def concludeEvent(self,eventID,result):
+        event = self.events["Suspended"].pop(eventID)
+        event.terminateEvent(result)
+        self.events["Ended"][eventID] = event
+
+    def retrieveNotifications(self,username):
+        if username in self.users:
+            user = self.users[username]
+            return user.retrieveNotifications()
+
+        print("Not retrieved!")
+        return []

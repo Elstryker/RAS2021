@@ -13,7 +13,7 @@ class RASBetFacade:
     def removeBetFromBetSlip(self,userID,eventID):
         pass
 
-    def showBetSlip(self,userID):
+    def getBetSlip(self,userID):
         pass
 
     def getBetSlip(self,userID):
@@ -21,11 +21,11 @@ class RASBetFacade:
     
     def concludeBetSlip(self,userID,amount,currency):
         pass
-    
-    def getEvents(self,offset,numOfEvents):
-        pass
 
     def getBetHistory(self,userID):
+        pass
+
+    def exchangeMoney(self,userID,fromCur,toCur,amount):
         pass
 
     def login(self,prevID,userID,password):
@@ -55,4 +55,10 @@ class RASBetFacade:
         pass
 
     def concludeEvent(self,args):
+        pass
+
+    def addCurrency(self,currency,toEUR):
+        pass
+    
+    def removeCurrency(self,currency):
         pass

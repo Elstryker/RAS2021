@@ -70,7 +70,6 @@ class DataBaseAccess:
     def getUserHistory(self,username):
         pass
 
-
     def addCurrency(self,currency,toEUR) -> bool:
         pass
 

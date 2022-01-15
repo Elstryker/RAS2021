@@ -2,6 +2,7 @@ from sqlalchemy import Column, Enum, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql.sqltypes import Boolean, Float
 import enum
+from Data import Observer,Observable
 
 class BetSlipState(enum.Enum):
     Creating = 1 # Didn't bet yet
@@ -83,7 +84,55 @@ class BetSlip(Base):
             
             if len(unfinishedBets) == 0:
                 self.state = BetSlipState.Finished
-                # Notify Users
+                self.notify()
+
+    def cancel(self):
+        self.bets.clear()
+        self.bets = {'Finished':dict(),'Unfinished':dict()}
+        self.multipliedOdd = 1
+
+    def toJSON(self):
+        jsonToSend = dict()
+
+        bets = self.bets["Unfinished"]
+        bets.update(self.bets["Finished"])
+
+        jsonToSend["Id"] = self.id
+
+        jsonToSend["Bets"] = [x.toJSON() for x in bets.values()]
+        if self.amount != 0:
+            jsonToSend["Amount"] = self.amount
+        
+        if self.currency != '':
+            jsonToSend["Currency"] = self.currency
+
+        jsonToSend["MultipliedOdd"] = self.multipliedOdd
+
+        jsonToSend["State"] = self.state.name
+
+        if self.inStake != 0:
+            jsonToSend["InStake"] = self.inStake
+
+        if self.state is BetSlipState.Finished:
+            jsonToSend["Won"] = self.winning
+
+        return jsonToSend
+
+    def attach(self, observer: Observer.Observer) -> None:
+        print(f"BetSlip {self.id}: Attached an observer.")
+        if observer not in self.observers:
+            self.observers.append(observer)
+        print(self.observers)
+
+    def detach(self, observer: Observer.Observer) -> None:
+        print("BetSlip: Detached an observer.")
+        self.observers.remove(observer)
+
+    def notify(self) -> None:
+        print("BetSlip: Notifying observers...")
+        info = {"InStake":self.inStake,"Won":self.winning,"Currency":self.currency}
+        for observer in self.observers:
+            observer.update(info)
 
     def toJSON(self):
         jsonToSend = dict()

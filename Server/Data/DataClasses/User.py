@@ -23,6 +23,7 @@ class User(Base):
 
         self.messages = ""
         self.betSlips = {}
+        self.notifications = []
 
     #não recomendado
     #currencies já são adicionadas automaticamente
@@ -51,5 +52,19 @@ class User(Base):
         notifs = self.messages.split("|")
         self.messages = ""
         return notifs
+
+    def update(self, info: dict) -> None:
+        currency = info["Currency"]
+        total = info["InStake"]
+        won = info["Won"]
+        print(f"InStake: {total}")
+        if won:
+            self.wallet[currency] += total
+            self.notifications.append(f"Won {total} {currency} from a bet slip")
+        else:
+            self.notifications.append("One of your bet slips did not win")
+        print("User: Update requested!")
+
+    
 
     

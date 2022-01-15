@@ -1,47 +1,45 @@
+from audioop import tostereo
 import RASBetFacade
 from Data import DataBaseAccess
 import datetime, json
 
 class RASBetLN(RASBetFacade.RASBetFacade):
-    # TODO: Have memory structure to have client session data for correct continuous data fetching
 
     db : DataBaseAccess.DataBaseAccess
-    sessionsInfo : dict # userID -> ["Page"]
 
     def __init__(self,db : DataBaseAccess.DataBaseAccess) -> None:
         self.db = db
-        self.sessionsInfo = dict()
 
     def createDictWithDefaultInfo(self,userID):
-        if userID not in self.sessionsInfo:
-            self.sessionsInfo[userID] = {"Page":0,"EventsPerPage":5}
-
-        sessionInfo = self.sessionsInfo[userID]
         toSend = dict()
         toSend["Wallet"] = self.db.getUserTotalBalance(userID)
-        events = self.db.getAvailableEvents(sessionInfo["Page"],sessionInfo["EventsPerPage"])
-        self.sessionsInfo[userID]["Page"] = events[1]
-        toSend["Events"] = list(map(lambda x:x.toJSON(),events[0]))
-        toSend["Currencies"] = list(map(lambda x:x.toJSON(),self.db.getCurrencies()))
+        events = self.db.getAvailableEvents()
+        toSend["Events"] = list(map(lambda x:x.toJSON(),events))
+        toSend["Currencies"] = list(self.db.getCurrencies().keys())
+        toSend["Notifications"] = self.db.retrieveNotifications(userID)
+        print(f"Sent! {userID}")
+        print(toSend["Notifications"])
 
         return toSend
 
     def depositMoney(self,userID,currency,amount):
-        self.db.depositMoney(userID,currency,int(amount))
+        self.db.depositMoney(userID,currency,float(amount))
         toSend = self.createDictWithDefaultInfo(userID)
         toSend['Message'] = "\n\nMoney deposited successfully!\n"
         
         return json.dumps(toSend)
 
     def withdrawMoney(self,userID,currency,amount):
-        success = self.db.withdrawMoney(userID,currency,int(amount))
+        success = self.db.withdrawMoney(userID,currency,float(amount))
         toSend = self.createDictWithDefaultInfo(userID)
 
         if success:
             toSend['Message'] = "\n\nMoney withdrawn successfully!\n"
+            toSend["Success"] = True
 
         else:
             toSend['Message'] = "\n\nNot enough money on wallet!\n"
+            toSend["Success"] = False
 
         return json.dumps(toSend)
 
@@ -52,19 +50,22 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         if args[0] == "GET":
             event = self.db.getEvent(eventID)
             if event is None:
-                toSend["Found"] = False
+                toSend["Success"] = False
                 toSend["Message"] = "Could not get event"
             else:
-                toSend["Found"] = True
+                toSend["Success"] = True
                 toSend["Event"] = event.toJSON()
                 toSend["Message"] = "Retrieved event"
         elif args[0] == "PUT":
             result = int(args[2])
             success = self.db.addBetToBetSlip(userID,eventID,result)
+            toSend = self.createDictWithDefaultInfo(userID)
             if success:
                 toSend["Message"] = "Bet added to bet slip"
+                toSend["Success"] = True
             else:
                 toSend["Message"] = "Problem adding bet to bet slip"
+                toSend["Success"] = False
         else:
             print("WTF, this is not supposed to happen")
 
@@ -72,14 +73,16 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         
 
     def removeBetFromBetSlip(self,userID,eventID):
-        toSend = self.createDictWithDefaultInfo(userID)
         eventID = int(eventID)
 
         success = self.db.removeBetFromBetSlip(userID,eventID)
+        toSend = self.createDictWithDefaultInfo(userID)
         if success:
             toSend["Message"] = "Bet removed successfully"
+            toSend["Success"] = True
         else:
             toSend["Message"] = "Could not remove bet"
+            toSend["Success"] = False
 
         return json.dumps(toSend)
 
@@ -88,27 +91,78 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         toSend = self.createDictWithDefaultInfo(userID)
 
         if betSlip == None:
-            toSend['Exists'] = False
+            toSend['Success'] = False
             toSend['Message'] = "\n\nError getting bet slip\n"
         
         else:
-            toSend['Exists'] = True
+            toSend['Success'] = True
             toSend['Message'] = "\n\nData Retrieved Successfully"
-            toSend['Data'] = None # TODO
+            toSend['BetSlip'] = betSlip.toJSON()
 
         return json.dumps(toSend)
 
     def cancelBetSlip(self,userID):
-        print(f"User {userID} cancelled his bet slip")
+        self.db.cancelBetSlip(userID)
+
+        toSend = self.createDictWithDefaultInfo(userID)
+
+        toSend["Message"] = "\n\nCancelled bet slip\n"
+
+        return json.dumps(toSend)
 
     def concludeBetSlip(self,userID,amount,currency):
-        print(f"Concluded Bet Slip")
+        amount = int(amount)
+        success = self.db.withdrawMoney(userID,currency,amount)
 
-    def getAvailableEvents(self,offset,numOfEvents):
-        print(f"Presenting page {offset} with {numOfEvents} events")
+        toSend = self.createDictWithDefaultInfo(userID)
+        if not success:
+            toSend["Success"] = False
+            toSend["Message"] = "\n\nNot enough funds\n"
+            return json.dumps(toSend)
+        
+        self.db.concludeBetSlip(userID,amount,currency)
+
+        toSend["Success"] = True
+        toSend["Message"] = "\n\nBet slip concluded\n"
+
+        return json.dumps(toSend)
+
 
     def getBetHistory(self,username):
-        print("History retrieved!")
+        toSend = self.createDictWithDefaultInfo(username)
+
+        history = self.db.getUserHistory(username)
+        history.sort(key=lambda x:x.id)
+
+        toSend["History"] = [x.toJSON() for x in history]
+        toSend["Message"] = "\n\nHistory retrieved\n"
+
+        return json.dumps(toSend)
+
+    def exchangeMoney(self,userID,fromCur,toCur,amount):
+        currencies = self.db.getCurrencies()
+        fromCurrency = currencies[fromCur]
+        toCurrency = currencies[toCur]
+        amount = int(amount)
+
+        success = self.db.withdrawMoney(userID,fromCur,amount)
+        if not success:
+            toSend = self.createDictWithDefaultInfo(userID)
+            toSend["Success"] = False
+            toSend["Message"] = "\n\nInvalid amount\n"
+
+            return json.dumps(toSend)
+        
+        totalEUR = fromCurrency.convertToEUR(amount)
+        total = toCurrency.convertFromEUR(totalEUR)
+
+        self.db.depositMoney(userID,toCur,total)
+        
+        toSend = self.createDictWithDefaultInfo(userID)
+        toSend["Success"] = True
+        toSend["Message"] = "\n\nExchange complete\n"
+
+        return json.dumps(toSend)
 
     def login(self,prevID,username,password):
         authenticated = self.db.authenticateUser(username,password)
@@ -123,7 +177,6 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             toSend['LoggedIn'] = True
             toSend['Message'] = f"\n\nAuthenticated! Welcome {username}!\n"
 
-            del self.sessionsInfo[prevID]
             self.db.updateBetSlip(prevID,username)
 
         return json.dumps(toSend)
@@ -150,9 +203,11 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
             print("Could not create user")
             toSend['Message'] = "\n\nCould not register user\n"
+            toSend["Success"] = False
         else:
             self.db.createUser(username,password,birthdate)
             toSend['Message'] = "\n\nUser registered with success!\n"
+            toSend["Success"] = True
             
         return json.dumps(toSend)
 
@@ -201,11 +256,61 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
         return json.dumps(toSend)
 
-    def startEvent(self,args):
-        pass
+    def startEvent(self,eventID):
+        toSend = dict()
+        eventID = int(eventID)
+        success = self.db.startEvent(eventID)
+
+        if success:
+            toSend["Message"] = "\n\nStarted event"
+
+        else:
+            toSend["Message"] = "\n\nCould not start event"
+
+        return json.dumps(toSend)
+
 
     def concludeEvent(self,args):
-        pass
+        toSend = dict()
+        if args[0] == "GET":
+            events = self.db.getSuspendedEvents()
+            events = [x.toJSON() for x in events]
+            toSend["Events"] = events
+        
+        else:
+            eventID = int(args[1])
+            result = int(args[2])
+            self.db.concludeEvent(eventID,result)
+            toSend["Message"] = "\n\nEvent terminated\n"
+
+        return json.dumps(toSend)
+
+    def addCurrency(self,currency,toEUR):
+        toSend = dict()
+        toEUR = float(toEUR)
+        success = self.db.addCurrency(currency,toEUR)
+        if success:
+            toSend["Message"] = "\n\nCurrency added\n"
+
+        else:
+            toSend["Message"] = "\n\nCould not add currency\n"
+
+        return json.dumps(toSend)
+
+    def removeCurrency(self, currency):
+        toSend = dict()
+        currencies = self.db.getCurrencies()
+
+        if currency in currencies:
+            self.db.removeCurrency(currency)
+            toSend["Message"] = "\n\nCurrency removed successfully\n"
+        
+        else:
+            toSend["Message"] = "\n\nCould not remove currency\n"
+
+        return json.dumps(toSend)
+
+
         
 
     

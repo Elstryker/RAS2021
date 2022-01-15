@@ -75,7 +75,7 @@ class DataBase():
 
         #criação de bets
 
-        betSlip1 = self.createBetSlip(user,5,5,False)
+        betSlip1 = self.createBetSlip(user,5,5,False,euro)
 
         b1 = self.createBet(betSlip1,e1,empate)
         self.createBet(betSlip1,e2,porto)
@@ -293,8 +293,8 @@ class DataBase():
         return user_Currency
 
     
-    def createBetSlip(self,user,amount,win_value,won):
-        betSlip = BetSlip(user,amount,win_value,won)
+    def createBetSlip(self,user,amount,win_value,won, currency):
+        betSlip = BetSlip(user,amount,win_value,won, currency)
         self.addBetSlip(betSlip)
         return betSlip
 

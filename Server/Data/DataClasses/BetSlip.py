@@ -23,12 +23,14 @@ class BetSlip(Base):
     win_value = Column("valor_vitoria",Float)
     won = Column("acertou",Boolean)
     state = Column("estado", Enum(BetSlipState))
+    currency_id = Column("moeda_id", Integer,ForeignKey('Moeda.id'))
+    currency = relationship('Currency')
 
 
-    def __init__(self,user,amount,win_value,won):
+    def __init__(self,user,amount,win_value,won, currency):
         self.user = user
         self.amount = amount
-        self.currency = ''
+        self.currency = currency
         self.win_value = win_value
         self.bets = []
         self.state = BetSlipState.Creating
@@ -55,7 +57,9 @@ class BetSlip(Base):
 
     def updateBet(self,betID,result):
         if self.state is BetSlipState.InCourse:
-            
+            for bet in self.bets:
+                #if(bet.event.)
+                pass
             unfinishedBets = self.bets['Unfinished']
             bet = unfinishedBets.pop(betID)
             

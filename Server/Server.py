@@ -23,7 +23,7 @@ def setupApplication():
 
     print("Initialized the db")
 
-    #db.createDefault()
+    db.createDefault()
     return app
 
 def main():

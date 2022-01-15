@@ -1,7 +1,5 @@
-#import DataBaseAccess
-from datetime import date
+from Data import DataBaseAccess
 import datetime
-from enum import unique
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref, session, sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
@@ -21,24 +19,23 @@ from Data.DataClasses.User_Currency import User_Currency
 
 
 
-""" class DataBase(DataBaseAccess.DataBaseAccess): """
-class DataBase():
 
+""" class DataBase(): """
+class DataBase(DataBaseAccess.DataBaseAccess):
     def __init__(self) -> None:
-
         self.engine = create_engine("mysql://admin:password@localhost/rasbetDB", connect_args= dict(host='localhost', port=3306))
         self.session = Session(self.engine)
 
     def createDefault(self):
-
         #criação de user e moeda
-        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
 
         dolar = self.createCurrency("dolar",1)
         euro = self.createCurrency("euro",1.12)
 
-        self.createUser_Currency(user,dolar,25)
-        self.createUser_Currency(user,euro,13.45)
+        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
+
+        self.depositMoney(user.username,dolar.name,25)
+        self.depositMoney(user.username,euro.name,13.45)
 
         #criação de intervenientes e eventos
         futebol = self.createSport("Futebol",SportType.WinDraw)
@@ -61,9 +58,9 @@ class DataBase():
         e4 = self.createEvent("Torneio José Figueiras", corrida,[])
 
         self.createIntervenor_Event(porto,e1,1.05)
-        self.createIntervenor_Event(empate,e1,6.21)
+        empate_intervernor_event = self.createIntervenor_Event(empate,e1,6.21)
         self.createIntervenor_Event(braga,e1,1.50)
-        self.createIntervenor_Event(porto,e2,1.56)
+        porto_int_ev = self.createIntervenor_Event(porto,e2,1.56)
         self.createIntervenor_Event(empate,e2,3.67)
         self.createIntervenor_Event(barca,e2,2.00)
         self.createIntervenor_Event(tiger,e3,4.2)
@@ -75,12 +72,31 @@ class DataBase():
 
         #criação de bets
 
-        betSlip1 = self.createBetSlip(user,5,5,False,euro)
-
-        b1 = self.createBet(betSlip1,e1,empate)
-        self.createBet(betSlip1,e2,porto)
+        betSlip1 = self.createBetSlipEmpty(user)
+        b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
+        self.createBet(betSlip1,e2,porto,porto_int_ev.odd)
 
         self.removeBet(b1)
+
+    def getUserHistory(self,username):
+        user = self.getUserByUsername(username=username)
+        return user.getHistory()
+
+    def concludeBetSlip(self,username,amount,currency_name) -> None:
+        betslip = self.getBetSlip(username)
+        currency = self.getCurrency(currency_name)
+        betslip.applyBetSlip(amount,currency)
+
+        user = self.getUserByUsername(username=username)
+
+        self.createBetSlipEmpty(user)
+
+
+    def getCurrency(self, currency_name) -> Currency:
+        currency = self.session.query(Currency)\
+                           .filter(Currency.name == currency_name)\
+                           .one_or_none()
+        return currency
 
     #inacabado
     def updateBetSlip(self,prevID,username):
@@ -116,9 +132,9 @@ class DataBase():
     def createUser(self,name,password,email,birthDate):
         currencies = self.getCurrencies()
         user = User(name,password,email,birthDate)
-        wallet_list = []
         for currency in currencies:
-            new_user_currency = User_Currency(user=user,currency=currency,amount=0)        
+            new_user_currency = User_Currency(user=user,currency=currency,amount=0)
+            #user.wallet.append(new_user_currency)     
         self.addUser(user)
         return user
 
@@ -282,9 +298,17 @@ class DataBase():
         self.addIntervenor_Event(intervenor_Event)
         return intervenor_Event
 
+    def getUsers(self):
+        users = self.session.query(User).all()
+        return users
+
+    #creates currency and updates all user's wallets
     def createCurrency(self,name,value):
         currency = Currency(name,value)
         self.addCurrency(currency)
+        users = self.getUsers()
+        for user in users:
+            self.createUser_Currency(user, currency,0)
         return currency
 
     def createUser_Currency(self,user,currency,amount):
@@ -292,25 +316,29 @@ class DataBase():
         self.addUser_Currency(user_Currency)
         return user_Currency
 
+    def createBetSlipEmpty(self, user):
+        bet_slip = BetSlip(user)
+        self.addBetSlip(bet_slip)
+        return bet_slip
     
     def createBetSlip(self,user,amount,win_value,won, currency):
         betSlip = BetSlip(user,amount,win_value,won, currency)
         self.addBetSlip(betSlip)
         return betSlip
 
-    def createBet(self,betSlip,event,intervenor):
-        bet = Bet(betSlip,event,intervenor)
+    def createBet(self,betSlip,event,intervenor, odd):
+        bet = Bet(betSlip,event,intervenor,odd)
         self.addBet(bet)
 
         return bet
 
     def addUser(self, user: User):
-        try:
-            self.session.add(user)    
-            self.session.commit() 
-        except:
+        """ try: """
+        self.session.add(user)    
+        self.session.commit() 
+        """ except:
             print("Erro na inserção de User")
-            self.session.rollback()
+            self.session.rollback() """
 
     def addIntervenor(self, intervenor: Intervenor):
         try:
@@ -340,17 +368,16 @@ class DataBase():
         try:
             self.session.add(currency)    
             self.session.commit() 
+            print(f"Added {currency.name} with {currency.id}")
         except:
             print("Erro na inserção de Currency")
             self.session.rollback()
 
     def addUser_Currency(self, user_currency: User_Currency):
-        try:
-            self.session.add(user_currency)    
-            self.session.commit() 
-        except:
-            print("Erro na inserção de User_Currency")
-            self.session.rollback()
+        print(f"Added to user {user_currency.user.username}, currency {user_currency.currency.name} with amount {user_currency.amount}")
+        self.session.add(user_currency)    
+        self.session.commit() 
+        
 
     def addBetSlip(self, new_betslip: BetSlip):
         try:
@@ -410,6 +437,11 @@ class DataBase():
         user = self.session.query(User).filter(User.email == user_email).one()
         print(user.email)
         return user
+
+    def getUserByUsername(self, username: str) -> User:
+        user = self.session.query(User).filter(User.username == username).one()
+        print(user.username)
+        return user
         
     def getUserBetslips(self, user_id: Integer):
         betslips = self.session.query(BetSlip).filter(BetSlip.user_id == user_id).all()
@@ -418,6 +450,7 @@ class DataBase():
 
     def getCurrencies(self):
         currencies = self.session.query(Currency).all()
+        #to dict
         return currencies
 
 
@@ -427,5 +460,5 @@ class DataBase():
 
 
     def getSports(self):
-        sports = self.session.query(Sports).all()
+        sports = self.session.query(Sport).all()
         return sports

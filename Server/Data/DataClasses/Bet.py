@@ -1,5 +1,5 @@
 from enum import unique
-from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref
 from Data.Database import Base
 
@@ -12,13 +12,28 @@ class Bet(Base):
     intervenor = relationship("Intervenor", backref=backref('bets', uselist=True))
     betslip_id = Column("boletim_id",Integer,ForeignKey('Boletim.id'),primary_key=True)
     betslip = relationship("BetSlip", backref=backref('bets', uselist=True))
+    #result = Column("resultado",Integer)
+    odd = Column("odd", Float)
     
 
-    def __init__(self,betslip, event, intervenor) -> None:
+    def __init__(self,betslip, event, intervenor, odd) -> None:
         self.event = event
         self.betslip = betslip
         self.intervenor = intervenor
+        #self.result = result
+        self.odd = odd
 
     def checkResult(self,result):
-        return (self.event.result == result)
+        return (self.event.intervenors.index(self.intervenor) == result)
     
+    def toJSON(self):
+        eventJSON = self.event.toJSON()
+
+        jsonToSend = dict()
+
+        jsonToSend["EventID"] = eventJSON["Id"]
+        jsonToSend["EventName"] = eventJSON["Name"]
+        jsonToSend["Choice"] = eventJSON["Intervenors"][self.result][1] # Get the choise with result var and then getting the intervenor name from tuple (odd,intervenor)
+        jsonToSend["Odd"] = self.odd
+
+        return jsonToSend

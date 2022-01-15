@@ -36,10 +36,19 @@ class Event(Base):
         if self.state is EventState.Suspended:
             self.state = EventState.Closed
             self.result = result
+            self.notify()
             # Notify Bets
 
+    def notify(self) -> None:
+        #print("Event: Notifying observers...")
+        #print(self.observers)
+        for bet in self.bets:
+            for betslip in bet:
+                betslip.update(self)
+
     def getOdd(self,choice):
-        return self.intervenors[choice][0]
+        #return self.intervenors[choice][0]
+        pass
 
     def toJSON(self):
         toReturn = dict()

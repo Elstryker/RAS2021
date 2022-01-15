@@ -1,7 +1,6 @@
-
 class DataBaseAccess:
     
-    def getCurrencies(self) -> list:
+    def getCurrencies(self) -> dict:
         pass
 
     def existsUser(self,username) -> bool:
@@ -14,14 +13,12 @@ class DataBaseAccess:
         pass
 
     # Replaces non logged in user bet slip with the logged in user one
-    # devia estar no lado do client
     def updateBetSlip(self,prevID,username) -> None:
         pass
 
-    def getBetSlip(self,username) -> object:
+    def getBetSlip(self,username):
         pass
 
-    # se calhar queremos este metodo a devolver bool porque é um deposito?
     def depositMoney(self,username,currency,amount) -> None:
         pass
 
@@ -31,7 +28,7 @@ class DataBaseAccess:
     def getUserTotalBalance(self,username) -> dict:
         pass
 
-    def getAvailableEvents(self,page,eventsPerPage) -> list:
+    def getAvailableEvents(self) -> list:
         pass
 
     def getParameters(self,obj) -> dict:
@@ -46,12 +43,39 @@ class DataBaseAccess:
     def createEvent(self,name,sport,intervenors,odds) -> bool:
         pass
 
-    def getEvent(self,eventID) -> object:
+    def startEvent(self,eventID) -> bool:
         pass
 
-    #acho que nao precisamos deste metodo, quando criamos a bet já é ligada automaticamente ao betslip correspondente
+    def concludeEvent(self,eventID,result) -> None:
+        pass
+
+    def getSuspendedEvents(self) -> list:
+        pass
+    
+    def getEvent(self,eventID):
+        pass
+
     def addBetToBetSlip(self,username,eventID,result) -> bool:
         pass
 
     def removeBetFromBetSlip(self,username,eventID) -> bool:
+        pass
+
+    def cancelBetSlip(self,username) -> None:
+        pass
+
+    def concludeBetSlip(self,username,amount,currency) -> None:
+        pass
+
+    def getUserHistory(self,username):
+        pass
+
+
+    def addCurrency(self,currency,toEUR) -> bool:
+        pass
+
+    def removeCurrency(self,currency) -> None:
+        pass
+
+    def retrieveNotifications(self,username) -> list:
         pass

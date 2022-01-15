@@ -40,7 +40,7 @@ class DataBaseAccess:
     def createIntervenor(self,name) -> bool:
         pass
 
-    def createEvent(self,name,sport,intervenors,odds) -> bool:
+    def createEvent(self,eventName, sport, intervenors, odds):
         pass
 
     def startEvent(self,eventID) -> bool:

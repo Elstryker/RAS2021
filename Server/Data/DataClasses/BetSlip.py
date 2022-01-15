@@ -71,7 +71,7 @@ class BetSlip(Base):
                     unfinishedBets.append(bet)
             
             for bet in self.bets:
-                if bet.event.id == eventID:
+                if bet.event_id == eventID:
                     update_bet = bet
 
             update_bet : Bet.Bet
@@ -130,9 +130,8 @@ class BetSlip(Base):
 
     def notify(self) -> None:
         print("BetSlip: Notifying observers...")
-        info = {"InStake":self.inStake,"Won":self.winning,"Currency":self.currency}
-        for observer in self.observers:
-            observer.update(info)
+        info = {"InStake":self.win_value,"Won":self.won,"Currency":self.currency.name}
+        self.user.update(info)
 
     def toJSON(self):
         jsonToSend = dict()

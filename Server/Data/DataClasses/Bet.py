@@ -24,7 +24,9 @@ class Bet(Base):
         self.odd = odd
 
     def checkResult(self,result):
-        return (self.event.intervenors.index(self.intervenor) == result)
+        for i, int_event in enumerate(self.event.intervenors):
+            if int_event.intervenor == self.intervenor:
+                return (i == result)
     
     def toJSON(self):
         eventJSON = self.event.toJSON()

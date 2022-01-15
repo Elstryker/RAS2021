@@ -52,10 +52,10 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         barca = self.createIntervenor("FCBarcelona")
         braga = self.createIntervenor("SCBraga")
 
-        e1 = self.createEvent("Championship",futebol,[])
-        e2 = self.createEvent("Europa",futebol,[])
-        e3 = self.createEvent("Taça António Costa", golf,[])
-        e4 = self.createEvent("Torneio José Figueiras", corrida,[])
+        e1 = self.createEventByObjects("Championship",futebol,[])
+        e2 = self.createEventByObjects("Europa",futebol,[])
+        e3 = self.createEventByObjects("Taça António Costa", golf,[])
+        e4 = self.createEventByObjects("Torneio José Figueiras", corrida,[])
 
         self.createIntervenor_Event(porto,e1,1.05)
         empate_intervernor_event = self.createIntervenor_Event(empate,e1,6.21)
@@ -73,10 +73,13 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         #criação de bets
 
         betSlip1 = self.createBetSlipEmpty(user)
-        b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
-        self.createBet(betSlip1,e2,porto,porto_int_ev.odd)
+        #b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
+        b2 = self.createBet(betSlip1,e2,porto,porto_int_ev.odd)
 
-        self.removeBet(b1)
+        #betSlip1.addBet(b1)
+        betSlip1.addBet(b2)
+        self.concludeBetSlip(user.username, 25, "euro")
+
 
     def getUserHistory(self,username):
         user = self.getUserByUsername(username=username)
@@ -130,7 +133,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return False
     
     def createUser(self,name,password,email,birthDate):
-        currencies = self.getCurrencies()
+        currencies = self.getCurrencies().values()
         user = User(name,password,email,birthDate)
         for currency in currencies:
             new_user_currency = User_Currency(user=user,currency=currency,amount=0)
@@ -156,7 +159,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         if user:
             betslip = self.session.query(BetSlip)\
                                   .filter(BetSlip.user_id == user.id , BetSlip.state==BetSlipState.Creating)\
-                                  .all()
+                                  .one_or_none()
             print("Getting user " + username + " betslips")
             return betslip
         return None
@@ -211,26 +214,24 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                 acc.update({currency.name:user_currency.amount})
         return acc
 
-    def getAvailableEvents(self,page,eventsPerPage) -> list:
-        acc = []
+    def getSuspendedEvents(self) -> list:
+        event_list = self.session.query(Event)\
+                                 .filter(Event.state == EventState.Suspended)\
+                                 .all()
+        return event_list
+
+    def getAvailableEvents(self) -> list:
         event_list = self.session.query(Event)\
                                  .filter(Event.state == EventState.Open)\
                                  .all()
-        start = page*eventsPerPage
-        end = (page+1)*eventsPerPage
-        i=0
-        for event in event_list:
-            if start<=i and end>i:
-                acc.append(event)
-            i+=1
-        return (acc,page)
+        return event_list
 
     # ? tf does this do
     def getParameters(self,obj):
         if obj == "Sport":
-            return Sport.Sport.getParameters()
+            return Sport.getParameters()
         elif obj == "Intervenor":
-            return Intervenor.Intervenor.getParameters()
+            return Intervenor.getParameters()
         elif obj == "Event":
             params = dict()
             
@@ -288,7 +289,61 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         self.addIntervenor(intervenor)
         return intervenor
 
-    def createEvent(self,name,sport,intervenors_events):
+    def startEvent(self, eventID) -> bool:
+        event = self.getEvent(eventID)
+        if not event:
+            return False
+        if event.state != EventState.Open:
+            return False
+
+        event.initiateEvent()
+        self.session.commit()
+        return True
+
+    def concludeEvent(self, eventID, result) -> None:
+        event = self.getEvent(eventID)
+        if not event:
+            return False
+        if event.state != EventState.Suspended:
+            return False
+
+        event.terminateEvent(result)
+        self.session.commit()
+        return True
+
+        
+    def getIntervenor(self, name):
+        return self.session.query(Intervenor).filter(Intervenor.name == name).one_or_none()
+
+    def createEvent(self, name, sportName, intervenors, odds) -> bool:
+        eventSport = self.getSport(sportName)
+
+        eventIntervenors = intervenors.split(",")
+        eventOdds = odds.split(",")
+
+        eventIntervenors = list(map(lambda x: self.getIntervenor(x),eventIntervenors))
+        eventOdds = list(map(lambda x: float(x),eventOdds))
+
+        nIntervenors = len(eventIntervenors)
+        if (eventSport.type is SportType.WinDraw and nIntervenors != len(eventOdds)-1) or (eventSport.type is SportType.Win and nIntervenors != len(eventOdds)):
+            return False
+        if nIntervenors < 2:
+            return False
+        if eventSport.type is SportType.WinDraw and nIntervenors > 2:
+            return False
+        
+        if eventSport.type is SportType.WinDraw:
+            eventIntervenors.append(self.getIntervenor("Draw"))
+
+        newEvent = self.createEventByObjects(name,eventSport,[])
+
+        for i,intervenor in enumerate(eventIntervenors):
+            self.createIntervenor_Event(intervenor,newEvent,eventOdds[i])
+
+        return True
+
+
+    def createEventByObjects(self,name,sport,intervenors_events):
         event = Event(name,sport,intervenors_events)
         self.addEvent(event)
         return event
@@ -305,7 +360,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
     #creates currency and updates all user's wallets
     def createCurrency(self,name,value):
         currency = Currency(name,value)
-        self.addCurrency(currency)
+        self.addCurrencyByObject(currency)
         users = self.getUsers()
         for user in users:
             self.createUser_Currency(user, currency,0)
@@ -364,14 +419,27 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             print("Erro na inserção de Intervenor_Event")
             self.session.rollback()
 
-    def addCurrency(self, currency: Currency):
+    def removeCurrency(self, currencyName) -> None:
+        currency = self.getCurrency(currencyName)
+
+        users = self.getUsers()
+        for user in users:
+
+        self.session.delete(currency)
+
+    def addCurrency(self, currencyName, toEUR) -> bool:
+        return self.addCurrencyByObject(self.createCurrency(currencyName,toEUR))
+
+    def addCurrencyByObject(self, currency: Currency):
         try:
             self.session.add(currency)    
             self.session.commit() 
             print(f"Added {currency.name} with {currency.id}")
+            return True
         except:
             print("Erro na inserção de Currency")
             self.session.rollback()
+            return False
 
     def addUser_Currency(self, user_currency: User_Currency):
         print(f"Added to user {user_currency.user.username}, currency {user_currency.currency.name} with amount {user_currency.amount}")
@@ -439,8 +507,9 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return user
 
     def getUserByUsername(self, username: str) -> User:
-        user = self.session.query(User).filter(User.username == username).one()
-        print(user.username)
+        user = self.session.query(User).filter(User.username == username).one_or_none()
+        if user:
+            print(user.username)
         return user
         
     def getUserBetslips(self, user_id: Integer):
@@ -448,17 +517,27 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         print("Getting user id " + str(user_id) + " betslips")
         return betslips
 
-    def getCurrencies(self):
+    def getCurrencies(self) -> dict:
+        ret_dict = {}
         currencies = self.session.query(Currency).all()
-        #to dict
-        return currencies
-
+        for currency in currencies:
+            ret_dict[currency.name] = currency
+        return ret_dict
 
     def getIntervenors(self):
         intervenors = self.session.query(Intervenor).all()
         return intervenors
 
+    def getSport(self, sportName):
+        return self.session.query(Sport).filter(Sport.name == sportName).one_or_none()
 
     def getSports(self):
         sports = self.session.query(Sport).all()
         return sports
+    
+    def retrieveNotifications(self, username) -> list:
+        user = self.getUserByUsername(username)
+        if user != None:
+            return user.retrieveNotifications()
+        return []
+            

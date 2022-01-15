@@ -76,8 +76,6 @@ class Event(Base):
         self.observers.remove(observer) """
 
     def notify(self) -> None:
-
         print("Event: Notifying observers...")
-        print(self.observers)
-        for observer in self.observers:
-            observer.update(self)
+        for bet in self.bets:
+            bet.betslip.update(self)

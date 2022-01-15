@@ -8,7 +8,7 @@ class Intervenor(Base):
     __tablename__ = "Interveniente"
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     name = Column("nome", String(45), primary_key=True)
-    events = relationship('Intervenor_Event', back_populates='intervenor')
+    events = relationship('Intervenor_Event', back_populates='intervenor', uselist=True)
 
     
 

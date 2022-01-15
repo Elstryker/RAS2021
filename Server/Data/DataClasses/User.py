@@ -59,10 +59,19 @@ class User(Base):
         won = info["Won"]
         print(f"InStake: {total}")
         if won:
-            self.wallet[currency] += total
-            self.notifications.append(f"Won {total} {currency} from a bet slip")
+            for u_currency in self.wallet:
+                if u_currency.currency.name == currency:
+                    u_currency.amount += total
+            if len(self.messages) > 0:
+                self.messages += f"|Won {total} {currency} from a bet slip"
+            else:
+                self.messages += f"Won {total} {currency} from a bet slip"
         else:
-            self.notifications.append("One of your bet slips did not win")
+            if len(self.messages) > 0:
+                self.messages += ("|One of your bet slips did not win")
+            else:
+                self.messages += ("One of your bet slips did not win")
+
         print("User: Update requested!")
 
     

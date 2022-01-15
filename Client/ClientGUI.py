@@ -342,7 +342,7 @@ class ClientGUI:
             Panel("[red]V[/red]alidar Boletim"), Panel("[red]D[/red]epositar Dinheiro"), 
             Panel("[red]L[/red]evantar Dinheiro"), Panel("Página [red]A[/red]nterior"), 
             Panel("[red]P[/red]róxima Página"), Panel("Consultar [red]H[/red]istórico"), 
-            Panel("Cambio Mo[red]e[/red]da"), Panel("[red]S[/red]air")]
+            Panel("Co[red]n[/red]verter Moeda"), Panel("[red]S[/red]air")]
 
         menu_printable = Columns(menu, equal=True, expand=True)
 

@@ -23,6 +23,7 @@ class ClientLogic:
         self.opcoes.append('SsAaRrOoCcDdIiVvLlPpMm') #logged in
         self.opcoes.append('SsFfAaEeRrCcIiVvPpMm') #not logged
 
+<<<<<<< HEAD
     def login(self,option):
         username = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 0)
         password = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 1)
@@ -37,13 +38,15 @@ class ClientLogic:
         else:
             self.client_gui.invalid_info(2)
         # print(response['Message'])
+=======
+>>>>>>> main
     
     def menu(self):
         inp = ''
         while inp != 'S':
             #ClientGUI.showEvents(self.clientInfo.getEvents())
-            
             inp = "Q"
+<<<<<<< HEAD
 
             if self.clientInfo.loggedIn:
                 while inp not in self.opcoes[0]:
@@ -51,6 +54,12 @@ class ClientLogic:
             else:
                 while inp not in self.opcoes[1]:
                     inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents())    
+=======
+            print(self.clientInfo.getNotifications(2))
+            while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPpHhNnLl':
+                inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents())
+            
+>>>>>>> main
             inp = inp.upper()
             
             self.handle_input(inp)
@@ -65,7 +74,7 @@ class ClientLogic:
 
         # Retrieve additional info
         if args[0] != "S": # See if it just wants to quit
-            self.clientInfo.updateInfo(response["Wallet"],response["Events"],response["Currencies"])
+            self.clientInfo.updateInfo(response)
             self.client_gui.wallet = self.clientInfo.wallet
 
         return response
@@ -84,12 +93,12 @@ class ClientLogic:
             "L":self.withdrawMoney,
             "A":self.changePage, # Previous Page
             "P":self.changePage, # Next Page
+            "H":self.showBetHistory,
+            "N":self.exchangeCurrency,
             "F":self.login,
             "E":self.register,
             "S":self.quit,
             "O":self.logout
-            #show history
-            #money exchange
         }
         toDo = actions.get(option,self.noSuchAction)
         toDo(option)
@@ -186,6 +195,7 @@ class ClientLogic:
         currency = ""
         amount = ""
 
+<<<<<<< HEAD
         while not currency.isdigit() or currency < 0 or currency >= len(self.clientInfo.availableCurrencies):
             currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies, False)
         
@@ -195,16 +205,54 @@ class ClientLogic:
         args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
         mensagem = self.requestServer(args)
         print(mensagem["Message"])
+=======
+        args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
+        self.requestServer(args)
+>>>>>>> main
 
     def changePage(self,option):
         self.clientInfo.previousPage() if option == "A" else self.clientInfo.nextPage()
 
-
-    def showBetHistory(self,option): # TODO
         args = [option]
         self.requestServer(args)
+
+
+    def showBetHistory(self,option):
+        args = [option]
+        response = self.requestServer(args)
+
+        print(response["Message"])
+        print(response["History"])
+
+        # Falta GUI e decisões
+
+    def exchangeCurrency(self,option):
+        fromCurrency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+        toCurrency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
+
+        amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
+
+        args = [option,self.clientInfo.availableCurrencies[int(fromCurrency)],self.clientInfo.availableCurrencies[int(toCurrency)],amount]
+        response = self.requestServer(args)
+
+        print(response["Message"])
     
+    
+    def login(self,option):
+        username = self.client_gui.ask_info(self.clientInfo.getEvents(), 0)
+        password = self.client_gui.ask_info(self.clientInfo.getEvents(), 1)
         
+        #print(f"O username é {username} e a password é {password}")
+
+        args = [option,username,password]
+        response = self.requestServer(args)
+        if response["LoggedIn"]:
+            self.clientInfo.loggedIn = True
+            self.client_gui.username = username
+        else:
+            self.client_gui.invalid_info(0)
+        # print(response['Message'])
+
     def logout(self,option):
         args = [option]
         self.requestServer(args)

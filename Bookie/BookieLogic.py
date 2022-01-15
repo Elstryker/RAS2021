@@ -36,6 +36,8 @@ class BookieLogic:
             "3":self.addIntervenor,
             "4":self.startEvent,
             "5":self.concludeEvent,
+            "6":self.addCurrency,
+            "7":self.removeCurrency,
             "0":self.quit
         }
         toDo = actions.get(option,self.noSuchAction)
@@ -102,10 +104,58 @@ class BookieLogic:
         print(reply["Message"])
 
     def startEvent(self,option):
-        pass
+        BookieGUI.askParam("Event id to start")
+        eventID = input("-> ")
+
+        args = [option,eventID]
+        reply = self.requestServer(args)
+
+        print(reply["Message"])
 
     def concludeEvent(self,option):
-        pass
+        args = [option,"GET"]
+        reply = self.requestServer(args)
+        
+        if len(reply["Events"]) == 0:
+            print("No events to conclude")
+            return
+        
+        BookieGUI.printEvents(reply["Events"])
+
+        BookieGUI.askParam("Event to start")
+        eventID = int(input("-> "))
+
+        event = reply["Events"][eventID]
+
+        BookieGUI.askLimitedParam("Result",event["Intervenors"])
+        result = input("-> ")
+
+        args = [option,"PUT",str(event["Id"]),result]
+        reply = self.requestServer(args)
+
+        print(reply["Message"])
+
+    def addCurrency(self,option):
+        BookieGUI.askParam("Currency to add")
+        currency = input("-> ")
+
+        BookieGUI.askParam("Conversion to EUR")
+        conversion = input("-> ")
+
+        args = [option,currency,conversion]
+
+        reply = self.requestServer(args)
+        print(reply["Message"])
+
+    def removeCurrency(self,option):
+        BookieGUI.askParam(("Currency to remove"))
+
+        currency = input("-> ")
+
+        args = [option,currency]
+
+        reply = self.requestServer(args)
+        print(reply["Message"])
 
     def noSuchAction(self,option):
         raise IOError

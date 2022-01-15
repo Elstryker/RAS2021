@@ -2,7 +2,7 @@ from Data.DataClasses import BetSlip,Event
 
 class DataBaseAccess:
     
-    def getCurrencies(self) -> list:
+    def getCurrencies(self) -> dict:
         pass
 
     def existsUser(self,username) -> bool:
@@ -45,6 +45,15 @@ class DataBaseAccess:
     def createEvent(self,name,sport,intervenors,odds) -> bool:
         pass
 
+    def startEvent(self,eventID) -> bool:
+        pass
+
+    def concludeEvent(self,eventID,result) -> None:
+        pass
+
+    def getSuspendedEvents(self) -> list:
+        pass
+    
     def getEvent(self,eventID) -> Event.Event:
         pass
 
@@ -58,4 +67,17 @@ class DataBaseAccess:
         pass
 
     def concludeBetSlip(self,username,amount,currency) -> None:
+        pass
+
+    def getUserHistory(self,username) -> list[BetSlip.BetSlip]:
+        pass
+
+
+    def addCurrency(self,currency,toEUR) -> bool:
+        pass
+
+    def removeCurrency(self,currency) -> None:
+        pass
+
+    def retrieveNotifications(self,username) -> list:
         pass

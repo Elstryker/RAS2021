@@ -1,14 +1,17 @@
-from Data.DataClasses import Bet
+from Data.DataClasses import Bet,Event
 import enum
+from Data import Observer,Observable
 
 class BetSlipState(enum.Enum):
     Creating = 1 # Didn't bet yet
     InCourse = 2 # Waiting event results
     Finished = 3 # Finished bet
 
-class BetSlip:
+class BetSlip(Observable.Observable,Observer.Observer):
     
     idGenerator = 1
+
+    observers: list[Observer.Observer]
 
     user : int
     amount : float
@@ -29,6 +32,7 @@ class BetSlip:
         self.multipliedOdd = 1
         self.inStake = 0
         self.winning = True
+        self.observers = []
 
     def addBet(self,bet : Bet.Bet):
         if self.state is BetSlipState.Creating:
@@ -53,11 +57,11 @@ class BetSlip:
         self.inStake = self.amount * self.multipliedOdd
 
 
-    def updateBet(self,betID,result):
+    def updateBet(self,eventID,result):
         if self.state is BetSlipState.InCourse:
             
             unfinishedBets = self.bets['Unfinished']
-            bet = unfinishedBets.pop(betID)
+            bet = unfinishedBets.pop(eventID)
             
             bet : Bet.Bet
             won = bet.checkResult(result)
@@ -69,7 +73,7 @@ class BetSlip:
             
             if len(self.bets['Unfinished']) == 0:
                 self.state = BetSlipState.Finished
-                # Notify Users
+                self.notify()
 
     def cancel(self):
         self.bets.clear()
@@ -102,3 +106,23 @@ class BetSlip:
             jsonToSend["Won"] = self.winning
 
         return jsonToSend
+
+    def attach(self, observer: Observer.Observer) -> None:
+        print(f"BetSlip {self.id}: Attached an observer.")
+        if observer not in self.observers:
+            self.observers.append(observer)
+        print(self.observers)
+
+    def detach(self, observer: Observer.Observer) -> None:
+        print("BetSlip: Detached an observer.")
+        self.observers.remove(observer)
+
+    def notify(self) -> None:
+        print("BetSlip: Notifying observers...")
+        info = {"InStake":self.inStake,"Won":self.winning,"Currency":self.currency}
+        for observer in self.observers:
+            observer.update(info)
+
+    def update(self, info : Event.Event) -> None:
+        print("BetSlip: Update requested!")
+        self.updateBet(info.id,info.result)

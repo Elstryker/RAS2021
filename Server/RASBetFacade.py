@@ -28,7 +28,7 @@ class RASBetFacade:
     def exchangeMoney(self,userID,fromCur,toCur,amount):
         pass
 
-    def login(self,prevID,userID,password):
+    def login(self,userID,password,prevBetSlip): 
         pass
     
     def logout(self,userID):

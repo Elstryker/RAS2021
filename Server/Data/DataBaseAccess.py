@@ -14,10 +14,6 @@ class DataBaseAccess:
     def authenticateUser(self,username,password) -> bool:
         pass
 
-    # Replaces non logged in user bet slip with the logged in user one
-    def updateBetSlip(self,prevID,username) -> None:
-        pass
-
     def getBetSlip(self,username) -> BetSlip.BetSlip:
         pass
 

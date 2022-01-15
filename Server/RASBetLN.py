@@ -14,11 +14,9 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         toSend = dict()
         toSend["Wallet"] = self.db.getUserTotalBalance(userID)
         events = self.db.getAvailableEvents()
-        toSend["Events"] = list(map(lambda x:x.toJSON(),events))
+        toSend["Events"] = [x.toJSON() for x in events]
         toSend["Currencies"] = list(self.db.getCurrencies().keys())
-        toSend["Notifications"] = self.db.retrieveNotifications(userID)
-        print(f"Sent! {userID}")
-        print(toSend["Notifications"])
+        toSend["Notifications"] = self.db.retrieveNotifications(userID) # Convert to win -> (1,(total,currency)) or lose -> (0,None)
 
         return toSend
 
@@ -164,11 +162,11 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
         return json.dumps(toSend)
 
-    def login(self,prevID,username,password):
+    def login(self,username,password,prevBetSlip):
         authenticated = self.db.authenticateUser(username,password)
 
         if not authenticated:
-            toSend = self.createDictWithDefaultInfo(prevID)
+            toSend = self.createDictWithDefaultInfo(None)
             toSend['LoggedIn'] = False
             toSend['Message'] = "\n\nCould not login, check your credentials\n"
         
@@ -176,8 +174,15 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             toSend = self.createDictWithDefaultInfo(username)
             toSend['LoggedIn'] = True
             toSend['Message'] = f"\n\nAuthenticated! Welcome {username}!\n"
+            # "0" if prevBetSlip has no bets or formatted like -> "1,2:3,1:2,1" with ":" as bet separator and (eventID,result)
+            if prevBetSlip != "0":
+                bets = prevBetSlip.split(":")
+                betSlip = [x.split(",") for x in bets]
 
-            self.db.updateBetSlip(prevID,username)
+                self.cancelBetSlip(username)
+                
+                for eventID,result in betSlip:
+                    self.addBetToBetSlip(username,["PUT",eventID,result])
 
         return json.dumps(toSend)
 

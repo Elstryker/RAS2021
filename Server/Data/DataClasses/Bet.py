@@ -35,7 +35,7 @@ class Bet(Base):
 
         jsonToSend["EventID"] = eventJSON["Id"]
         jsonToSend["EventName"] = eventJSON["Name"]
-        jsonToSend["Choice"] = eventJSON["Intervenors"][self.result][1] # Get the choise with result var and then getting the intervenor name from tuple (odd,intervenor)
+        jsonToSend["Choice"] = self.intervenor.name # Get the choice with result var and then getting the intervenor name from tuple (odd,intervenor)
         jsonToSend["Odd"] = self.odd
 
         return jsonToSend

@@ -46,9 +46,21 @@ class Event(Base):
             for betslip in bet:
                 betslip.update(self)
 
+    def getIntervenorEventByIndex(self, choice):
+        intervenors = []
+        for intervenor_event in self.intervenors:
+            if intervenor_event != None:
+                intervenors.append(intervenor_event)
+
+        return intervenors[choice]
+
     def getOdd(self,choice):
-        #return self.intervenors[choice][0]
-        pass
+        odds = []
+        for intervenor_event in self.intervenors:
+            if intervenor_event != None:
+                odds.append(intervenor_event.odd)
+
+        return odds[choice]
 
     def toJSON(self):
         toReturn = dict()

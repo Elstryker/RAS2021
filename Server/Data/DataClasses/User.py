@@ -40,7 +40,7 @@ class User(Base):
 
     def getHistory(self) -> list :
         history = []
-        for betslip in self.betSlips:
+        for betslip in self.betslips:
             if not betslip.isCreating():
                 history.append(betslip)
         return history

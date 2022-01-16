@@ -94,19 +94,17 @@ class BetSlip(Base):
     def toJSON(self):
         jsonToSend = dict()
 
-        bets = self.bets["Unfinished"]
-        bets.update(self.bets["Finished"])
-
+        bets = self.bets
         jsonToSend["Id"] = self.id
 
-        jsonToSend["Bets"] = [x.toJSON() for x in bets.values()]
+        jsonToSend["Bets"] = [x.toJSON() for x in bets]
         if self.amount != 0:
             jsonToSend["Amount"] = self.amount
         
         if self.currency != '':
             jsonToSend["Currency"] = self.currency
 
-        jsonToSend["MultipliedOdd"] = self.multipliedOdd
+        jsonToSend["MultipliedOdd"] = self.multiplied_odd
 
         jsonToSend["State"] = self.state.name
 
@@ -137,7 +135,7 @@ class BetSlip(Base):
 
         jsonToSend["Id"] = self.id
 
-        jsonToSend["Bets"] = [x.toJSON() for x in bets.values()]
+        jsonToSend["Bets"] = [x.toJSON() for x in bets]
         if self.amount != 0:
             jsonToSend["Amount"] = self.amount
         
@@ -148,7 +146,7 @@ class BetSlip(Base):
 
         jsonToSend["State"] = self.state.name
 
-        if self.inStake != 0:
+        if self.win_value!= 0:
             jsonToSend["InStake"] = self.win_value
 
         if self.state is BetSlipState.Finished:

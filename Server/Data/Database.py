@@ -267,7 +267,6 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                            .one_or_none()
         return event
 
-    #por testar acho que nao precisamos deste metodo, quando criamos a bet já é ligada automaticamente ao betslip correspondente
     def addBetToBetSlip(self,username,eventID,result) -> bool:
 
         user = self.session.query(User)\
@@ -281,10 +280,43 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         betslip = self.session.query(BetSlip)\
                               .filter(BetSlip.user_id == user.id, BetSlip.state == BetSlipState.Creating)\
                               .one_or_none()
+        intervenor_event = event.getIntervenorEventByIndex(result)
+        
+        previousBet = self.session.query(Bet)\
+                              .filter(Bet.event_id == eventID, Bet.betslip_id == betslip.id)\
+                              .one_or_none()
 
-        if event!=None and betslip!=None:
-            bet = Bet(betslip,event)
-            self.addBet(bet)
+        if user and event!=None and betslip!=None and previousBet == None:
+            bet = Bet(betslip,event,intervenor_event.intervenor,intervenor_event.odd)
+            betslip.addBet(bet)
+            self.session.commit()
+            return True
+
+        return False
+
+    def removeBetFromBetSlip(self, username, eventID) -> bool:
+        user = self.session.query(User)\
+                           .filter(User.username == username)\
+                           .one_or_none()
+
+        betslip = self.session.query(BetSlip)\
+                              .filter(BetSlip.user_id == user.id, BetSlip.state == BetSlipState.Creating)\
+                              .one_or_none()
+
+        event = self.session.query(Event)\
+                           .filter(Event.id == eventID)\
+                           .one_or_none()
+
+        if user and event and betslip:
+            bet = self.session.query(Bet)\
+                                .filter(Bet.event_id == eventID, Bet.betslip_id == betslip.id)\
+                                .one_or_none()
+            if bet:
+                self.session.delete(bet)
+                self.session.commit()
+                return True
+
+
         return False
 
 
@@ -385,6 +417,25 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         self.addBetSlip(bet_slip)
         return bet_slip
     
+    def cancelBetSlip(self, username):
+        user = self.session.query(User)\
+                           .filter(User.username == username)\
+                           .one_or_none()
+
+        betslip = self.session.query(BetSlip)\
+                              .filter(BetSlip.user_id == user.id, BetSlip.state == BetSlipState.Creating)\
+                              .one_or_none()
+
+        if user and betslip:
+            for bet in betslip.bets:
+                self.removeBetFromBetSlip(username,bet.event_id)
+            self.session.delete(betslip)
+            self.createBetSlipEmpty(user)
+            self.session.commit()
+
+
+        return False
+    
     def createBetSlip(self,user,amount,win_value,won, currency):
         betSlip = BetSlip(user,amount,win_value,won, currency)
         self.addBetSlip(betSlip)
@@ -428,25 +479,36 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             print("Erro na inserção de Intervenor_Event")
             self.session.rollback()
 
+    def currencyInBetSlips(self, currency):
+        betslipsWithCurrency = self.session.query(BetSlip)\
+                                  .filter(BetSlip.currency_id == currency.id)\
+                                  .all()
+        return len(betslipsWithCurrency) > 0
+
     #untested
     def removeCurrency(self, currencyName) -> None:
         currency = self.getCurrency(currencyName)
         print(f"removing currency {currency.name}")
 
-        ##TODO
-        ##Se houver betslips com moeda a ser removida, não remover nada (era demasiado trabalho) 
+        isUsedInBetSlip = self.currencyInBetSlips(currency)
+        if (not isUsedInBetSlip) and currency:
+            users = self.getUsers()
+            for user in users:
+                print(f"removing currency {currency.name} for user {user.username}")
+                user_currencies = self.getUserWallet(user.username)
+                for user_currency in user_currencies:
+                    if user_currency.currency == currency:
+                        new_amount = currency.convertToEUR(user_currency.amount)
+                        self.withdrawMoney(user.username,currencyName,user_currency.amount)
+                        self.depositMoney(user.username,"euro",new_amount)
+                        self.session.delete(user_currency)
 
-        users = self.getUsers()
-        for user in users:
-            print(f"removing currency {currency.name} for user {user.username}")
-            user_currencies = self.getUserWallet(user.username)
-            for user_currency in user_currencies:
-                if user_currency.currency == currency:
-                    self.session.delete(user_currency)
+            self.session.delete(currency)
 
-        self.session.delete(currency)
-
-        self.session.commit()
+            self.session.commit()
+        else:
+            if currency:
+                print(f"Some BetSlips use {currencyName}")
 
     def addCurrency(self, currencyName, toEUR) -> bool:
         return self.addCurrencyByObject(self.createCurrency(currencyName,toEUR))

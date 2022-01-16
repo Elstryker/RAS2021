@@ -61,7 +61,7 @@ class BetSlip(Base):
         self.state = BetSlipState.InCourse
         self.amount = amount
         self.currency = currency
-        self.win_value = self.amount * self.multiplied_odd
+        self.win_value = round(self.amount * self.multiplied_odd,2)
 
     def updateBet(self,eventID,result):
         if self.state is BetSlipState.InCourse:
@@ -119,13 +119,10 @@ class BetSlip(Base):
         return jsonToSend
 
     def attach(self, observer: Observer.Observer) -> None:
-        print(f"BetSlip {self.id}: Attached an observer.")
         if observer not in self.observers:
             self.observers.append(observer)
-        print(self.observers)
 
     def detach(self, observer: Observer.Observer) -> None:
-        print("BetSlip: Detached an observer.")
         self.observers.remove(observer)
 
     def notify(self) -> None:

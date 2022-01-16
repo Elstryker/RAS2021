@@ -66,12 +66,17 @@ class Event(Base):
 
         return toReturn
 
+<<<<<<< HEAD
     """ def attach(self, observer: Observer.Observer) -> None:
         print("Event: Attached an observer.")
+=======
+    def attach(self, observer: Observer.Observer) -> None:
+>>>>>>> main
         if observer not in self.observers:
             self.observers.append(observer)
 
     def detach(self, observer: Observer.Observer) -> None:
+<<<<<<< HEAD
         print("Event: Detached an observer.")
         self.observers.remove(observer) """
 
@@ -79,3 +84,10 @@ class Event(Base):
         print("Event: Notifying observers...")
         for bet in self.bets:
             bet.betslip.update(self)
+=======
+        self.observers.remove(observer)
+
+    def notify(self) -> None:
+        for observer in self.observers:
+            observer.update(self)
+>>>>>>> main

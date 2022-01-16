@@ -45,13 +45,10 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
 
-        self.addBetToBetSlip("ola",1,1)
+        self.addBetToBetSlip("ola",3,1)
         self.depositMoney("ola","EUR",20)
         self.concludeBetSlip("ola",10,"EUR")
         self.withdrawMoney("ola","EUR",10)
-
-        for event in self.events["Available"].values():
-            print(f"{event.id} - {event.name}")
 
     def getCurrencies(self):
         return self.currencies
@@ -74,17 +71,6 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
             if user.password == password:
                 ret = True
         return ret
-
-    def updateBetSlip(self,prevID,username):
-        curBetSlip = self.betslips[prevID]
-        numBets = len(curBetSlip.bets['Unfinished'])
-        if numBets == 0: # If no bets, get previous bet slip from user
-            del self.betslips[prevID]
-        else: # Replaces previous user bet slip with the current one
-            self.betslips[username] = curBetSlip
-            curBetSlip.user = username
-            user = self.users[username]
-            user.currentBetSlip = curBetSlip
 
     def getBetSlip(self,username):
         if username in self.betslips:

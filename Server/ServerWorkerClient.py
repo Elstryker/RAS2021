@@ -13,17 +13,7 @@ class ServerWorkerClient:
         self.sock = sock
         self.info = info
         self.app = app
-        self.eventPage = 0
-        self.eventsPerPage = 5
-        self.getIdForNotLoggedInUser()
-
-    def getIdForNotLoggedInUser(self):
-        exist = True
-        while exist:
-            self.userID = random.randint(1,10000) # Not scalable
-            result = self.app.getBetSlip(self.userID)
-            dic = json.loads(result)
-            exist = dic["Success"]
+        self.userID = ""
 
     def run(self):
         self.sendInitialAppInfoToClient()
@@ -75,12 +65,11 @@ class ServerWorkerClient:
         elif operation == "E": # Register
             message = self.app.register(args[0],args[1],args[2])
         elif operation == "F": # Login
-            message = self.app.login(self.userID,args[0],args[1])
+            message = self.app.login(args[0],args[1],args[2])
             dic = json.loads(message)
             if dic['LoggedIn']:
                 self.userID = args[0] # username
         elif operation == 'O': # Logout
-            self.getIdForNotLoggedInUser()
             message = self.app.logout(self.userID)
         elif operation == 'S': # Quit
             replyBye = dict()

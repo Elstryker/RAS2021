@@ -87,6 +87,16 @@ class ClientLogic:
 
         self.client_gui.showDetailedEvent(response["Event"])
         result = input("-> ")
+        if len(response["Event"]["Intervenors"]) <= int(result) and int(result) >= 0:
+            print("No good input")
+            return
+
+        if not self.clientInfo.loggedIn:
+            self.clientInfo.addBetNotLoggedIn(eventID,result)
+            args = ["P"]
+            self.requestServer(args)
+
+            return
 
         args = [option,"PUT",eventID,result]
         response = self.requestServer(args)
@@ -96,6 +106,14 @@ class ClientLogic:
     def removeBetFromBetSlip(self,option):
         self.client_gui.askEvent()
         eventID = input("-> ")
+
+        if not self.clientInfo.loggedIn:
+            args = ["P"]
+            self.requestServer(args)
+            self.clientInfo.removeBetNotLoggedIn(eventID)
+
+            return
+
         args = [option,eventID]
         response = self.requestServer(args)
 
@@ -105,9 +123,24 @@ class ClientLogic:
         args = [option]
         response = self.requestServer(args)
 
+        if not self.clientInfo.loggedIn:
+            args = ["P"]
+            self.requestServer(args)
+            self.clientInfo.cancelBetSlipNotLoggedIn()
+
+            return
+
         print(response["Message"])
 
     def showBetSlip(self,option):
+        if not self.clientInfo.loggedIn:
+            args = ["P"]
+            self.requestServer(args)
+            betSlip = self.clientInfo.getBetSlipNotLoggedIn()
+            print(betSlip)
+
+            return
+
         args = [option]
         response = self.requestServer(args)
 
@@ -184,11 +217,12 @@ class ClientLogic:
         
         #print(f"O username é {username} e a password é {password}")
 
-        args = [option,username,password]
+        args = [option,username,password,self.clientInfo.getBetSlipNotLoggedInToSend()]
         response = self.requestServer(args)
         if response["LoggedIn"]:
             self.clientInfo.loggedIn = True
             self.client_gui.username = username
+            self.clientInfo.cancelBetSlipNotLoggedIn()
         else:
             self.client_gui.invalid_info(0)
         # print(response['Message'])

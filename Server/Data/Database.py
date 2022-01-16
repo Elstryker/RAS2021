@@ -198,6 +198,15 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                 return True
         return False
 
+    def getUserWallet(self, username):
+        user = self.session.query(User)\
+                           .filter(User.username == username)\
+                           .one_or_none()
+        if user!=None:
+            return self.session.query(User_Currency)\
+                                               .filter(User_Currency.user_id == user.id)\
+                                               .all()
+
     def getUserTotalBalance(self,username) -> dict:
         acc = {}
         user = self.session.query(User)\
@@ -419,13 +428,25 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             print("Erro na inserção de Intervenor_Event")
             self.session.rollback()
 
+    #untested
     def removeCurrency(self, currencyName) -> None:
         currency = self.getCurrency(currencyName)
+        print(f"removing currency {currency.name}")
+
+        ##TODO
+        ##Se houver betslips com moeda a ser removida, não remover nada (era demasiado trabalho) 
 
         users = self.getUsers()
         for user in users:
+            print(f"removing currency {currency.name} for user {user.username}")
+            user_currencies = self.getUserWallet(user.username)
+            for user_currency in user_currencies:
+                if user_currency.currency == currency:
+                    self.session.delete(user_currency)
 
         self.session.delete(currency)
+
+        self.session.commit()
 
     def addCurrency(self, currencyName, toEUR) -> bool:
         return self.addCurrencyByObject(self.createCurrency(currencyName,toEUR))

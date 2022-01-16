@@ -10,11 +10,8 @@ class Intervenor(Base):
     name = Column("nome", String(45), primary_key=True)
     events = relationship('Intervenor_Event', back_populates='intervenor', uselist=True)
 
-    
-
     def __init__(self,name) -> None:
         self.name = name
-        #self.events = []
 
     def addEvent(self,eventID):
         self.events.append(eventID)

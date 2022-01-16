@@ -186,15 +186,12 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                                .filter(Currency.name == currency)\
                                .one_or_none()
         if user!=None and currency!=None:
+            print(f"{user.username} withdraw {amount}")
             r = self.session.query(User_Currency)\
                         .filter(User_Currency.user_id == user.id, User_Currency.currency_id == currency.id, User_Currency.amount-amount >= 0)\
                         .update({User_Currency.amount: User_Currency.amount - amount})
             self.session.commit()
-            # o update nao retorna nada por isso faço uma segunda consulta da mesma cena para ver se alterou o dinheiro (convém ver se há outra maneira)
-            check = self.session.query(User_Currency)\
-                                       .filter(User_Currency.user_id == user.id, User_Currency.currency_id == currency.id )\
-                                       .one_or_none()
-            if check!=None and check.amount >=0:
+            if r > 0:
                 return True
         return False
 
@@ -621,6 +618,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
     def retrieveNotifications(self, username) -> list:
         user = self.getUserByUsername(username)
         if user != None:
-            return user.retrieveNotifications()
+            notifs = user.retrieveNotifications()
+            self.session.commit()
+            return notifs
         return []
-            

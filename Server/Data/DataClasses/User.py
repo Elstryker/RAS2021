@@ -10,7 +10,6 @@ class User(Base):
     username = Column("nome", String(45), primary_key=True, unique=True)
     password = Column("password", String(45), nullable=False)
     messages = Column("mensagens", String(2000))
-    #falta tabela para wallet
     wallet = relationship('User_Currency', back_populates='user')
     birthDate = Column("data_nascimento", Date)
 
@@ -49,9 +48,12 @@ class User(Base):
         self.betSlips.append(newBetSlip)
 
     def retrieveNotifications(self):
-        notifs = self.messages.split("|")
-        self.messages = ""
-        return notifs
+        if len(self.messages) > 0:
+            notifs = self.messages.split("|")
+            self.messages = ""
+            return notifs
+        else:
+            return []
 
     def update(self, info: dict) -> None:
         currency = info["Currency"]

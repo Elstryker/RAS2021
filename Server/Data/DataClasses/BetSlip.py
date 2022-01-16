@@ -67,7 +67,7 @@ class BetSlip(Base):
         if self.state is BetSlipState.InCourse:
             unfinishedBets = []
             for bet in self.bets:
-                if(bet.event.state == EventState.Open):
+                if(bet.event.state != EventState.Closed):
                     unfinishedBets.append(bet)
             
             for bet in self.bets:
@@ -79,8 +79,6 @@ class BetSlip(Base):
 
             if won == False:
                 self.won = False
-            
-            #self.bets['Finished'][bet.id] = bet
             
             if len(unfinishedBets) == 0:
                 self.state = BetSlipState.Finished

@@ -26,7 +26,6 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         toSend["Currencies"] = list(self.db.getCurrencies().keys())
         
         notifs = self.db.retrieveNotifications(userID)
-        print(notifs)
         toSend["Notifications"] = [convertNotification(x) for x in notifs]
 
         return toSend

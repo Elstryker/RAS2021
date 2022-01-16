@@ -55,17 +55,12 @@ class Event(Observable.Observable):
         return toReturn
 
     def attach(self, observer: Observer.Observer) -> None:
-        print("Event: Attached an observer.")
         if observer not in self.observers:
             self.observers.append(observer)
 
     def detach(self, observer: Observer.Observer) -> None:
-        print("Event: Detached an observer.")
         self.observers.remove(observer)
 
     def notify(self) -> None:
-
-        print("Event: Notifying observers...")
-        print(self.observers)
         for observer in self.observers:
             observer.update(self)

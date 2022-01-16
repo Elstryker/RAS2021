@@ -47,11 +47,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
 
         self.addBetToBetSlip("ola",3,1)
         self.depositMoney("ola","EUR",20)
-
-        print(self.betslips)
-
-        for event in self.events["Available"].values():
-            print(f"{event.id} - {event.name}")
+        self.concludeBetSlip("ola",10,"EUR")
+        self.withdrawMoney("ola","EUR",10)
 
     def getCurrencies(self):
         return self.currencies

@@ -54,14 +54,18 @@ class ClientInfo:
         return notifs
 
     def addBetNotLoggedIn(self,eventID,result):
-        hasID = False
+        canAdd = False
         eventID = int(eventID)
         result = int(result)
         for event in self.events:
             if eventID == int(event["Id"]):
-                hasID = True
+                canAdd = True
+
+        for bets in self.nonLoggedInBetSlip:
+            if int(bets[0]) == eventID:
+                canAdd = False
         
-        if hasID:
+        if canAdd:
             self.nonLoggedInBetSlip.append((eventID,result))
     
     def removeBetNotLoggedIn(self,eventID):

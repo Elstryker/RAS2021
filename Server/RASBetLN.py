@@ -11,12 +11,22 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         self.db = db
 
     def createDictWithDefaultInfo(self,userID):
+
+        def convertNotification(notification):
+            tokens = notification.split(" ")
+            if tokens[0] == "Won":
+                return (1,(float(tokens[1]),tokens[2]))
+            else:
+                return (0,None)
+
         toSend = dict()
         toSend["Wallet"] = self.db.getUserTotalBalance(userID)
         events = self.db.getAvailableEvents()
         toSend["Events"] = [x.toJSON() for x in events]
         toSend["Currencies"] = list(self.db.getCurrencies().keys())
-        toSend["Notifications"] = self.db.retrieveNotifications(userID) # Convert to win -> (1,(total,currency)) or lose -> (0,None)
+        
+        notifs = self.db.retrieveNotifications(userID)
+        toSend["Notifications"] = [convertNotification(x) for x in notifs]
 
         return toSend
 
@@ -179,10 +189,10 @@ class RASBetLN(RASBetFacade.RASBetFacade):
                 bets = prevBetSlip.split(":")
                 betSlip = [x.split(",") for x in bets]
 
-                self.cancelBetSlip(username)
+                self.db.cancelBetSlip(username)
                 
                 for eventID,result in betSlip:
-                    self.addBetToBetSlip(username,["PUT",eventID,result])
+                    self.db.addBetToBetSlip(username,int(eventID),int(result))
 
         return json.dumps(toSend)
 

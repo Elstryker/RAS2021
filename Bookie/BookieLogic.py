@@ -66,6 +66,8 @@ class BookieLogic:
                 else:
                     BookieGUI.askLimitedParam(key,value)
                     answer = int(input("-> "))
+                    if answer <= 0 or answer > len(value):
+                        return None
                     answer = value[answer-1]
             else:
                 answer = ""
@@ -75,6 +77,10 @@ class BookieLogic:
 
     def addEvent(self,option):
         answers = self.getAndFillObjectParameters(option)
+
+        if answers is None:
+            print("Error on input")
+            return
 
         args = [option,"PUT"]
         args.extend(answers)
@@ -129,6 +135,11 @@ class BookieLogic:
 
         BookieGUI.askLimitedParam("Result",event["Intervenors"])
         result = input("-> ")
+        result = str(int(result) - 1) # Indexes start at 0
+
+        if len(event["Intervenors"]) <= int(result) or int(result) < 0:
+            print("Wrong input")
+            return
 
         args = [option,"PUT",str(event["Id"]),result]
         reply = self.requestServer(args)

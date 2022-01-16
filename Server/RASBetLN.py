@@ -1,4 +1,4 @@
-from audioop import tostereo
+
 import RASBetFacade
 from Data import DataBaseAccess
 import datetime, json
@@ -119,7 +119,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         return json.dumps(toSend)
 
     def concludeBetSlip(self,userID,amount,currency):
-        amount = int(amount)
+        amount = float(amount)
         success = self.db.withdrawMoney(userID,currency,amount)
 
         toSend = self.createDictWithDefaultInfo(userID)

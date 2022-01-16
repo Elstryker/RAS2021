@@ -59,6 +59,7 @@ class BookieLogic:
                 answer = input("-> ")
             elif isinstance(value, list):
                 if key == "Intervenors":
+                    value.remove("Draw")
                     BookieGUI.askLimitedParam(key,value,True) # To be able to choose more than one intervenor
                     answer = input("-> ").split(",")
                     answer = list(map(lambda x: value[int(x)-1],answer))

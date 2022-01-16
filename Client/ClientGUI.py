@@ -309,15 +309,18 @@ Sport - {event["Sport"]}""")
 
             intervenors = [x[1] for x in event["Intervenors"]]
             odds = [str(x[0]) for x in event["Intervenors"]]
-            table.add_column(intervenors[0], justify="center", style="green", no_wrap=True)
                 
             if event["Sport"]["Type"] == "WinDraw":
                 intervenors.remove("Draw")
-                drawOdd = odds.pop(-1)
+                table.add_column(intervenors[0], justify="center", style="green", no_wrap=True)
+                
+                drawOdd = odds.pop(0)
                 odds.insert(1,drawOdd)
                 table.add_column("vs", justify="center", style="yellow", no_wrap=True)
                 table.add_column(intervenors[1], justify="center", style="green", no_wrap=True)     
             else:
+                table.add_column(intervenors[0], justify="center", style="green", no_wrap=True)
+
                 table.add_column(intervenors[1], justify="center", style="green", no_wrap=True)
                 table.add_column(intervenors[2], justify="center", style="green", no_wrap=True)     
             

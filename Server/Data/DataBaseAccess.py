@@ -1,5 +1,3 @@
-from Data.DataClasses import BetSlip,Event
-
 class DataBaseAccess:
     
     def getCurrencies(self) -> dict:
@@ -14,7 +12,11 @@ class DataBaseAccess:
     def authenticateUser(self,username,password) -> bool:
         pass
 
-    def getBetSlip(self,username) -> BetSlip.BetSlip:
+    # Replaces non logged in user bet slip with the logged in user one
+    def updateBetSlip(self,prevID,username) -> None:
+        pass
+
+    def getBetSlip(self,username):
         pass
 
     def depositMoney(self,username,currency,amount) -> None:
@@ -38,7 +40,7 @@ class DataBaseAccess:
     def createIntervenor(self,name) -> bool:
         pass
 
-    def createEvent(self,name,sport,intervenors,odds) -> bool:
+    def createEvent(self,eventName, sport, intervenors, odds):
         pass
 
     def startEvent(self,eventID) -> bool:
@@ -50,7 +52,7 @@ class DataBaseAccess:
     def getSuspendedEvents(self) -> list:
         pass
     
-    def getEvent(self,eventID) -> Event.Event:
+    def getEvent(self,eventID):
         pass
 
     def addBetToBetSlip(self,username,eventID,result) -> bool:
@@ -65,9 +67,8 @@ class DataBaseAccess:
     def concludeBetSlip(self,username,amount,currency) -> None:
         pass
 
-    def getUserHistory(self,username) -> list[BetSlip.BetSlip]:
+    def getUserHistory(self,username):
         pass
-
 
     def addCurrency(self,currency,toEUR) -> bool:
         pass

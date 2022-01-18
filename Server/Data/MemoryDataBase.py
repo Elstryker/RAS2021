@@ -49,9 +49,9 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
         self.createEvent("Torneio Quim Fintas", "Tenis", "Pete Sampras,Ze Caricas", "1.2, 4.3, 8.8")
 
-        self.addBetToBetSlip("ola",1,1)
+        #self.addBetToBetSlip("ola",1,1)
         self.depositMoney("ola","EUR",20)
-        self.concludeBetSlip("ola",10,"EUR")
+        #self.concludeBetSlip("ola",10,"EUR")
         self.withdrawMoney("ola","EUR",10)
 
         for event in self.events["Available"].values():

@@ -42,9 +42,9 @@ class User(Observer.Observer):
         print(f"InStake: {total}")
         if won:
             self.wallet[currency] += total
-            self.notifications.append(f"Won {total} {currency} from a bet slip")
+            self.notifications.append((1,(total,currency))) #f"Won {total} {currency} from a bet slip"
         else:
-            self.notifications.append("One of your bet slips did not win")
+            self.notifications.append((0,None)) #"One of your bet slips did not win"
         print("User: Update requested!")
 
     

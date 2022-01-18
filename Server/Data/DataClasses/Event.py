@@ -4,7 +4,6 @@ from sqlalchemy import Column, String, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship, backref
 from Data.Database import Base
 
-
 class EventState(enum.Enum):
     Open = 1
     Suspended = 2

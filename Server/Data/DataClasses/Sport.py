@@ -2,8 +2,8 @@ import enum
 from Data.Database import Base
 from enum import unique
 from sqlalchemy import Column, String, Integer, Enum
+from sqlalchemy.sql.sqltypes import Boolean
 from sqlalchemy.ext.declarative import declarative_base
-
 
 class SportType(enum.Enum):
     Win = 1
@@ -14,12 +14,13 @@ class Sport(Base):
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     name = Column("nome", String(45), primary_key=True, unique=True)
     type = Column("tipo", Enum(SportType))
-    
+    isCollective = Column("coletivo",Boolean)
 
-    def __init__(self,type : SportType,name) -> None:
+    def __init__(self,type : SportType,name, isCollective) -> None:
         self.name = name
         self.type = type
         self.events = []
+        self.isCollective = isCollective
 
     def addEvent(self,eventID):
         self.events.append(eventID)
@@ -41,4 +42,5 @@ class Sport(Base):
             types.append(type.name)
 
         params["Type"] = types
+        params["Collectiveness"] = 0
         return params

@@ -38,9 +38,9 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         self.depositMoney(user.username,euro.name,13.45)
 
         #criação de intervenientes e eventos
-        futebol = self.createSport("Futebol",SportType.WinDraw)
-        golf = self.createSport("Golf", SportType.Win)
-        corrida = self.createSport("Corrida", SportType.Win)
+        futebol = self.createSport("Futebol",SportType.WinDraw, True)
+        golf = self.createSport("Golf", SportType.Win, False)
+        corrida = self.createSport("Corrida", SportType.Win, False)
         empate = self.createIntervenor("Draw")
         tiger = self.createIntervenor("Tiger Woods")
         jordan = self.createIntervenor("Jordan Spieth")
@@ -622,9 +622,17 @@ class DataBase(DataBaseAccess.DataBaseAccess):
     def getIntervenors(self):
         intervenors = self.session.query(Intervenor).all()
         return intervenors
+    
+    def getSportsByCollectiveness(self, isCollective):
+        return self.session.query(Sport).filter(Sport.isCollective == isCollective).all()
 
     def getSport(self, sportName):
         return self.session.query(Sport).filter(Sport.name == sportName).one_or_none()
+
+    def updateCurrencyValue(self, currencyName, value):
+        currency = self.getCurrency(currencyName)
+        currency.updateValue(value)
+        self.session.commit()
 
     def getSports(self):
         sports = self.session.query(Sport).all()

@@ -41,6 +41,9 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         futebol = self.createSport("Futebol","WinDraw", True)
         golf = self.createSport("Golf", "Win", False)
         corrida = self.createSport("Corrida", "Win", False)
+        cozinha = self.createSport("Cozinha", "Win", False)
+        andebol = self.createSport("Andebol", "WinDraw", True)
+
         empate = self.createIntervenor("Draw")
         tiger = self.createIntervenor("Tiger Woods")
         jordan = self.createIntervenor("Jordan Spieth")
@@ -51,15 +54,48 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         porto = self.createIntervenor("FCPorto")
         barca = self.createIntervenor("FCBarcelona")
         braga = self.createIntervenor("SCBraga")
+        
+        gordon = self.createIntervenor("Gordon Ramsay")
+        billy = self.createIntervenor("Bill Bailey")
+        george = self.createIntervenor("George Jesus")
 
+        vsc = self.createIntervenor("Vitoria SC")
+        belem = self.createIntervenor("Belenenses")
+
+        jeremy = self.createIntervenor("Jeremy Jenkins")
+        jeeves = self.createIntervenor("Jeeves Casper")
+        
+        benfica = self.createIntervenor("Sport Lisboa e Benfica")
+        sporting = self.createIntervenor("Sporting Clube de Portugal")
+
+        abraham = self.createIntervenor("Abraham Lincoln")
+        gandhi = self.createIntervenor("Mahatma Gandhi")
 
 
         e1 = self.createEventByObjects("Championship",futebol,[])
         e2 = self.createEventByObjects("Europa",futebol,[])
         e3 = self.createEventByObjects("Taça António Costa", golf,[])
         e4 = self.createEventByObjects("Torneio José Figueiras", corrida,[])
+        e5 = self.createEventByObjects("MasterChef", cozinha,[])
+        e6 = self.createEventByObjects("Taça de Portugal", futebol,[])
+        e7 = self.createEventByObjects("Masters de Fafe", golf,[])
+        
 
+        self.createIntervenor_Event(sporting,e8,1.05)
+        self.createIntervenor_Event(empate,e8,2.31)
+        self.createIntervenor_Event(benfica,e8,3.26)
 
+        self.createIntervenor_Event(gordon,e5,1.05)
+        self.createIntervenor_Event(billy,e5,2.31)
+        self.createIntervenor_Event(george,e5,3.26)
+
+        self.createIntervenor_Event(vsc,e6,3.37)
+        self.createIntervenor_Event(belem,e6,1.29)
+        self.createIntervenor_Event(empate,e6,1.26)
+
+        self.createIntervenor_Event(jeremy,e7,4.21)
+        self.createIntervenor_Event(jeeves,e7,2.86)
+        
 
         self.createIntervenor_Event(porto,e1,1.05)
         empate_intervernor_event = self.createIntervenor_Event(empate,e1,6.21)

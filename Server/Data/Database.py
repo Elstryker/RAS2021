@@ -32,7 +32,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         dolar = self.createCurrency("dolar",0.88)
         euro = self.createCurrency("euro",1)
         
-        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
+        user = self.createUser("root","root","root@root",datetime.date(1970,1,1))
 
         self.depositMoney(user.username,dolar.name,25)
         self.depositMoney(user.username,euro.name,13.45)

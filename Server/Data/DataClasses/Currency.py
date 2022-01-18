@@ -12,13 +12,11 @@ class Currency(Base):
     name = Column("nome", String(45),primary_key=True, unique=True)
     value = Column("valor", Float)
 
-    #users = relationship('User_Currency', back_populates='currency')
     tax = 0.03
 
     def __init__(self,name,value) -> None:
         self.name = name
         self.value = value
-        #self.users = []
 
     def convertToEUR(self,amount):
         return amount * self.value

@@ -142,7 +142,7 @@ class BookieLogic:
         
         BookieGUI.printEvents(reply["Events"])
 
-        BookieGUI.askParam("Event to start")
+        BookieGUI.askParam("Event to conclude")
         eventID = int(input("-> "))
 
         if len(reply["Events"]) <= int(eventID) or int(eventID) < 0:

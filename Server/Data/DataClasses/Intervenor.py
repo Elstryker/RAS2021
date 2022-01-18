@@ -1,7 +1,5 @@
-from Data.DataClasses import Intervenor_Event
-from enum import unique
-from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
-from sqlalchemy.orm import relationship, backref, sessionmaker, Session
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship
 from Data.Database import Base
 
 class Intervenor(Base):

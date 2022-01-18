@@ -1,7 +1,7 @@
 from Data import DataBaseAccess
 import datetime
-from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
-from sqlalchemy.orm import relationship, backref, session, sessionmaker, Session
+from sqlalchemy import Integer, create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy.ext.declarative import declarative_base
 import hashlib
 
@@ -41,6 +41,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         futebol = self.createSport("Futebol","WinDraw", True)
         golf = self.createSport("Golf", "Win", False)
         corrida = self.createSport("Corrida", "Win", False)
+
         empate = self.createIntervenor("Draw")
         tiger = self.createIntervenor("Tiger Woods")
         jordan = self.createIntervenor("Jordan Spieth")
@@ -116,24 +117,6 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                            .one_or_none()
         return currency
 
-    #inacabado
-    def updateBetSlip(self,prevID,username):
-        curBetSlip = self.getBetSlipById(prevID)
-        #numBets = len(curBetSlip.bets['Unfinished'])
-        numBets = 0
-        for bet in curBetSlip.bets:
-            #if unfinished bet
-                #numBets += 1
-            pass
-        
-        if numBets == 0: # If no bets, get previous bet slip from user
-            del self.betslips[prevID]
-        else: # Replaces previous user bet slip with the current one
-            self.betslips[username] = curBetSlip
-            curBetSlip.user = username
-            user = self.users[username]
-            user.currentBetSlip = curBetSlip
-
     def getBetSlipById(self, betslipId):
         return self.session.query(BetSlip)\
                            .filter(BetSlip.id == betslipId)\
@@ -181,7 +164,6 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             return betslip
         return None
 
-    # se calhar queremos este metodo a devolver bool porque é um deposito?
     def depositMoney(self,username,currency,amount) -> None:
         user = self.session.query(User)\
                            .filter(User.username == username)\

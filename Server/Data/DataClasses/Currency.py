@@ -1,9 +1,5 @@
-from Data.DataClasses.User_Currency import User_Currency
-from enum import unique
-from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
-from sqlalchemy.orm import relationship, backref, sessionmaker, Session
-from sqlalchemy.sql.expression import true
-from sqlalchemy.sql.sqltypes import Boolean, Float
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.sql.sqltypes import Float
 from Data.Database import Base
 
 class Currency(Base):

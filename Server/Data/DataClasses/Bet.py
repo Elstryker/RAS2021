@@ -1,5 +1,5 @@
 from enum import unique
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, create_engine, Table
+from sqlalchemy import Column, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Data.Database import Base
 
@@ -12,7 +12,6 @@ class Bet(Base):
     intervenor = relationship("Intervenor", backref=backref('bets', uselist=True))
     betslip_id = Column("boletim_id",Integer,ForeignKey('Boletim.id'),primary_key=True)
     betslip = relationship("BetSlip", backref=backref('bets', uselist=True))
-    #result = Column("resultado",Integer)
     odd = Column("odd", Float)
     
 
@@ -20,7 +19,6 @@ class Bet(Base):
         self.event = event
         self.betslip = betslip
         self.intervenor = intervenor
-        #self.result = result
         self.odd = odd
 
     def checkResult(self,result):

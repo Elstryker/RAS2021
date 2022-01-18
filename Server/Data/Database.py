@@ -321,13 +321,13 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                            .one_or_none()
 
         if user and event and betslip:
+            print(f"removing bet from event {event.id}")
             bet = self.session.query(Bet)\
                                 .filter(Bet.event_id == eventID, Bet.betslip_id == betslip.id)\
                                 .one_or_none()
             if bet:
                 betslip.removeBet(bet.event_id)
                 self.session.delete(bet)
-                self.session.commit()
                 return True
 
 
@@ -429,6 +429,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
     def createBetSlipEmpty(self, user):
         bet_slip = BetSlip(user)
+        print("creating empty betslip")
         self.addBetSlip(bet_slip)
         return bet_slip
     
@@ -444,11 +445,10 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         if user: 
             if betslip:
                 for bet in betslip.bets:
-                    self.removeBetFromBetSlip(username,bet.event_id)
+                    self.session.delete(bet)
                 self.session.delete(betslip)
             self.createBetSlipEmpty(user)
             self.session.commit()
-
 
         return False
     

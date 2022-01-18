@@ -278,7 +278,7 @@ ______                                   _           _ _  __                    
 
         return self.console.input("->")
     
-    def show_betslip(self, events:list, paginas ):
+    def show_betslip(self, loggedIn, events:list, paginas ):
         self.console.clear()
         layout : Layout = Layout()
 

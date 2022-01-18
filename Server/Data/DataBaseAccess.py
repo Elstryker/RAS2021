@@ -34,7 +34,7 @@ class DataBaseAccess:
     def getParameters(self,obj) -> dict:
         pass
 
-    def createSport(self,name,type) -> bool:
+    def createSport(self,name,type,collectiveness):
         pass
 
     def createIntervenor(self,name) -> bool:

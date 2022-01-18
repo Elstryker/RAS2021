@@ -292,16 +292,14 @@ class RASBetLN(RASBetFacade.RASBetFacade):
                 toSend["Params"] = self.db.getParameters("Sport")
         
         else:
-            try:
-                collectiveness = bool(args[3])
+            collectiveness = args[3] == "True"
 
-                with self.lock:
-                    if self.db.createSport(args[1],args[2],collectiveness):
-                        toSend["Message"] = "\n\nSport added\n"
-                    else:
-                        toSend["Message"] = "\n\nCould not add Sport\n"
-            except:
-                toSend["Message"] = "\n\nCould not add Sport\n"
+            with self.lock:
+                if self.db.createSport(args[1],args[2],collectiveness):
+                    toSend["Message"] = "\n\nSport added\n"
+                else:
+                    print("Aqui")
+                    toSend["Message"] = "\n\nCould not add Sport\n"
 
 
         return json.dumps(toSend)
@@ -390,12 +388,17 @@ class RASBetLN(RASBetFacade.RASBetFacade):
     def updateCurrencyExchange(self,currency,exchangeValue):
         toSend = dict()
 
-        with self.lock:
-            success = self.db.updateCurrencyValue(currency,float(exchangeValue))
-        if success:
-            toSend["Message"] = "\n\nCurrency removed successfully\n"
+        if currency == "euro":
+            toSend["Message"] = "\n\nCould not update currency\n"
+        
         else:
-            toSend["Message"] = "\n\nCould not remove currency (betslips use currency)\n"
+            with self.lock:
+                success = self.db.updateCurrencyValue(currency,float(exchangeValue))
+            if success:
+                toSend["Message"] = "\n\nCurrency updated successfully\n"
+            else:
+                toSend["Message"] = "\n\nCould not update currency\n"
+
 
         return json.dumps(toSend)
         

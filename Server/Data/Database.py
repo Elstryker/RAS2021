@@ -38,9 +38,9 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         self.depositMoney(user.username,euro.name,13.45)
 
         #criação de intervenientes e eventos
-        futebol = self.createSport("Futebol",SportType.WinDraw, True)
-        golf = self.createSport("Golf", SportType.Win, False)
-        corrida = self.createSport("Corrida", SportType.Win, False)
+        futebol = self.createSport("Futebol","WinDraw", True)
+        golf = self.createSport("Golf", "Win", False)
+        corrida = self.createSport("Corrida", "Win", False)
         empate = self.createIntervenor("Draw")
         tiger = self.createIntervenor("Tiger Woods")
         jordan = self.createIntervenor("Jordan Spieth")
@@ -249,7 +249,6 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                                  .all()
         return event_list
 
-    # ? tf does this do
     def getParameters(self,obj):
         if obj == "Sport":
             return Sport.getParameters()
@@ -335,8 +334,9 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return False
 
 
-    def createSport(self, name, type: SportType, isCollective):
-        sport = Sport(type,name, isCollective)
+    def createSport(self, name, type: str, isCollective):
+        sportType = SportType[type]
+        sport = Sport(sportType, name, isCollective)
         self.addSport(sport)
         return sport
 

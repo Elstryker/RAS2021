@@ -43,5 +43,5 @@ class Sport(Base):
             types.append(type.name)
 
         params["Type"] = types
-        params["Collectiveness"] = 0
+        params["Collectiveness"] = ["True","False"]
         return params

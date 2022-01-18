@@ -1,14 +1,15 @@
-
 import RASBetFacade
 from Data import DataBaseAccess
-import datetime, json
+import datetime, json, threading
 
 class RASBetLN(RASBetFacade.RASBetFacade):
 
     db : DataBaseAccess.DataBaseAccess
+    lock : threading.RLock
 
     def __init__(self,db : DataBaseAccess.DataBaseAccess) -> None:
         self.db = db
+        self.lock = threading.RLock()
 
     def createDictWithDefaultInfo(self,userID):
 
@@ -20,25 +21,28 @@ class RASBetLN(RASBetFacade.RASBetFacade):
                 return (0,None)
 
         toSend = dict()
-        toSend["Wallet"] = self.db.getUserTotalBalance(userID)
-        events = self.db.getAvailableEvents()
-        toSend["Events"] = [x.toJSON() for x in events]
-        toSend["Currencies"] = list(self.db.getCurrencies().keys())
-        
-        notifs = self.db.retrieveNotifications(userID)
+        with self.lock:
+            toSend["Wallet"] = self.db.getUserTotalBalance(userID)
+            events = self.db.getAvailableEvents()
+            toSend["Events"] = [x.toJSON() for x in events]
+            toSend["Currencies"] = list(self.db.getCurrencies().keys())
+            
+            notifs = self.db.retrieveNotifications(userID)
         toSend["Notifications"] = [convertNotification(x) for x in notifs]
 
         return toSend
 
     def depositMoney(self,userID,currency,amount):
-        self.db.depositMoney(userID,currency,float(amount))
+        with self.lock:
+            self.db.depositMoney(userID,currency,float(amount))
         toSend = self.createDictWithDefaultInfo(userID)
         toSend['Message'] = "\n\nMoney deposited successfully!\n"
         
         return json.dumps(toSend)
 
     def withdrawMoney(self,userID,currency,amount):
-        success = self.db.withdrawMoney(userID,currency,float(amount))
+        with self.lock:
+            success = self.db.withdrawMoney(userID,currency,float(amount))
         toSend = self.createDictWithDefaultInfo(userID)
 
         if success:
@@ -56,7 +60,8 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         eventID = int(args[1])
 
         if args[0] == "GET":
-            event = self.db.getEvent(eventID)
+            with self.lock:
+                event = self.db.getEvent(eventID)
             if event is None:
                 toSend["Success"] = False
                 toSend["Message"] = "Could not get event"
@@ -66,7 +71,8 @@ class RASBetLN(RASBetFacade.RASBetFacade):
                 toSend["Message"] = "Retrieved event"
         elif args[0] == "PUT":
             result = int(args[2])
-            success = self.db.addBetToBetSlip(userID,eventID,result)
+            with self.lock:
+                success = self.db.addBetToBetSlip(userID,eventID,result)
             toSend = self.createDictWithDefaultInfo(userID)
             if success:
                 toSend["Message"] = "Bet added to bet slip"
@@ -82,8 +88,9 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
     def removeBetFromBetSlip(self,userID,eventID):
         eventID = int(eventID)
-
-        success = self.db.removeBetFromBetSlip(userID,eventID)
+        
+        with self.lock:
+            success = self.db.removeBetFromBetSlip(userID,eventID)
         toSend = self.createDictWithDefaultInfo(userID)
         if success:
             toSend["Message"] = "Bet removed successfully"
@@ -94,8 +101,9 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
         return json.dumps(toSend)
 
-    def getBetSlip(self,userID): # TODO: Create one if it does not exist
-        betSlip = self.db.getBetSlip(userID)
+    def getBetSlip(self,userID):
+        with self.lock:
+            betSlip = self.db.getBetSlip(userID)
         toSend = self.createDictWithDefaultInfo(userID)
 
         if betSlip == None:
@@ -110,7 +118,8 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         return json.dumps(toSend)
 
     def cancelBetSlip(self,userID):
-        self.db.cancelBetSlip(userID)
+        with self.lock:
+            self.db.cancelBetSlip(userID)
 
         toSend = self.createDictWithDefaultInfo(userID)
 
@@ -120,21 +129,27 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
     def concludeBetSlip(self,userID,amount,currency):
         amount = float(amount)
-        success = self.db.checkBetSlipConclusion(userID)
+
+        with self.lock:
+            success = self.db.checkBetSlipConclusion(userID)
+
         if not success:
             toSend = self.createDictWithDefaultInfo(userID)
             toSend["Success"] = False
             toSend["Message"] = "\n\nAn event in your betslip is no longer open\n"
             return json.dumps(toSend)
 
-        success = self.db.withdrawMoney(userID,currency,amount)
+        with self.lock:
+            success = self.db.withdrawMoney(userID,currency,amount)
+
         toSend = self.createDictWithDefaultInfo(userID)
         if not success:
             toSend["Success"] = False
             toSend["Message"] = "\n\nNot enough funds\n"
             return json.dumps(toSend)
-        
-        success = self.db.concludeBetSlip(userID,amount,currency)
+
+        with self.lock:
+            success = self.db.concludeBetSlip(userID,amount,currency)
         if not success:
             toSend["Success"] = False
             toSend["Message"] = "\n\nA problem has occured validating your betslip\n"
@@ -148,7 +163,8 @@ class RASBetLN(RASBetFacade.RASBetFacade):
     def getBetHistory(self,username):
         toSend = self.createDictWithDefaultInfo(username)
 
-        history = self.db.getUserHistory(username)
+        with self.lock:
+            history = self.db.getUserHistory(username)
         history.sort(key=lambda x:x.id)
 
         toSend["History"] = [x.toJSON() for x in history]
@@ -157,12 +173,14 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         return json.dumps(toSend)
 
     def exchangeMoney(self,userID,fromCur,toCur,amount):
-        currencies = self.db.getCurrencies()
+        with self.lock:
+            currencies = self.db.getCurrencies()
         fromCurrency = currencies[fromCur]
         toCurrency = currencies[toCur]
         amount = int(amount)
 
-        success = self.db.withdrawMoney(userID,fromCur,amount)
+        with self.lock:
+            success = self.db.withdrawMoney(userID,fromCur,amount)
         if not success:
             toSend = self.createDictWithDefaultInfo(userID)
             toSend["Success"] = False
@@ -173,7 +191,8 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         totalEUR = fromCurrency.convertToEUR(amount)
         total = toCurrency.convertFromEUR(totalEUR)
 
-        self.db.depositMoney(userID,toCur,total)
+        with self.lock:
+            self.db.depositMoney(userID,toCur,total)
         
         toSend = self.createDictWithDefaultInfo(userID)
         toSend["Success"] = True
@@ -182,7 +201,8 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         return json.dumps(toSend)
 
     def login(self,username,password,prevBetSlip):
-        authenticated = self.db.authenticateUser(username,password)
+        with self.lock:
+            authenticated = self.db.authenticateUser(username,password)
 
         if not authenticated:
             toSend = self.createDictWithDefaultInfo(None)
@@ -197,11 +217,12 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             if prevBetSlip != "0":
                 bets = prevBetSlip.split(":")
                 betSlip = [x.split(",") for x in bets]
-
-                self.db.cancelBetSlip(username)
                 
-                for eventID,result in betSlip:
-                    self.db.addBetToBetSlip(username,int(eventID),int(result))
+                with self.lock:
+                    self.db.cancelBetSlip(username)
+                
+                    for eventID,result in betSlip:
+                        self.db.addBetToBetSlip(username,int(eventID),int(result))
 
         return json.dumps(toSend)
 
@@ -226,13 +247,17 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             age = age(date)
         except:
             valid_date = False
+
+        with self.lock:
+            exists = self.db.existsUser(username)
         
-        if  not valid_date or self.db.existsUser(username) or age < 18:
+        if  not valid_date or exists or age < 18:
             print("Could not create user")
             toSend['Message'] = "\n\nCould not register user\n"
             toSend["Success"] = False
         else:
-            self.db.createUser(username,password,date)
+            with self.lock:
+                self.db.createUser(username,password,date)
             toSend['Message'] = "\n\nUser registered with success!\n"
             toSend["Success"] = True
             
@@ -247,46 +272,53 @@ class RASBetLN(RASBetFacade.RASBetFacade):
     def addEvent(self,args):
         toSend = dict()
         if args[0] == "GET":
-            toSend["Params"] = self.db.getParameters("Event")
+            with self.lock:
+                toSend["Params"] = self.db.getParameters("Event")
         
         else:
-            if self.db.createEvent(args[1],args[2],args[3],args[4]):
-                toSend["Message"] = "\n\nEvent added\n"
-            else:
-                toSend["Message"] = "\n\nCould not add Event\n"
+            with self.lock:
+                if self.db.createEvent(args[1],args[2],args[3],args[4]):
+                    toSend["Message"] = "\n\nEvent added\n"
+                else:
+                    toSend["Message"] = "\n\nCould not add Event\n"
 
         return json.dumps(toSend)
 
     def addSport(self,args):
         toSend = dict()
         if args[0] == "GET":
-            toSend["Params"] = self.db.getParameters("Sport")
+            with self.lock:
+                toSend["Params"] = self.db.getParameters("Sport")
         
         else:
-            if self.db.createSport(args[1],args[2]):
-                toSend["Message"] = "\n\nSport added\n"
-            else:
-                toSend["Message"] = "\n\nCould not add Sport\n"
+            with self.lock:
+                if self.db.createSport(args[1],args[2]):
+                    toSend["Message"] = "\n\nSport added\n"
+                else:
+                    toSend["Message"] = "\n\nCould not add Sport\n"
 
         return json.dumps(toSend)
 
     def addIntervenor(self,args):
         toSend = dict()
         if args[0] == "GET":
-            toSend["Params"] = self.db.getParameters("Intervenor")
+            with self.lock:
+                toSend["Params"] = self.db.getParameters("Intervenor")
         
         else:
-            if self.db.createIntervenor(args[1]):
-                toSend["Message"] = "\n\nIntervenor added\n"
-            else:
-                toSend["Message"] = "\n\nCould not add Intervenor\n"
+            with self.lock:
+                if self.db.createIntervenor(args[1]):
+                    toSend["Message"] = "\n\nIntervenor added\n"
+                else:
+                    toSend["Message"] = "\n\nCould not add Intervenor\n"
 
         return json.dumps(toSend)
 
     def startEvent(self,eventID):
         toSend = dict()
         eventID = int(eventID)
-        success = self.db.startEvent(eventID)
+        with self.lock:
+            success = self.db.startEvent(eventID)
 
         if success:
             toSend["Message"] = "\n\nStarted event"
@@ -300,14 +332,17 @@ class RASBetLN(RASBetFacade.RASBetFacade):
     def concludeEvent(self,args):
         toSend = dict()
         if args[0] == "GET":
-            events = self.db.getSuspendedEvents()
+            with self.lock:
+                events = self.db.getSuspendedEvents()
             events = [x.toJSON() for x in events]
             toSend["Events"] = events
         
         else:
             eventID = int(args[1])
             result = int(args[2])
-            self.db.concludeEvent(eventID,result)
+            with self.lock:
+                self.db.concludeEvent(eventID,result)
+
             toSend["Message"] = "\n\nEvent terminated\n"
 
         return json.dumps(toSend)
@@ -315,7 +350,10 @@ class RASBetLN(RASBetFacade.RASBetFacade):
     def addCurrency(self,currency,toEUR):
         toSend = dict()
         toEUR = float(toEUR)
-        success = self.db.addCurrency(currency,toEUR)
+
+        with self.lock:
+            success = self.db.addCurrency(currency,toEUR)
+
         if success:
             toSend["Message"] = "\n\nCurrency added\n"
 
@@ -326,10 +364,13 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
     def removeCurrency(self, currency):
         toSend = dict()
-        currencies = self.db.getCurrencies()
+
+        with self.lock:
+            currencies = self.db.getCurrencies()
 
         if currency in currencies:
-            success = self.db.removeCurrency(currency)
+            with self.lock:
+                success = self.db.removeCurrency(currency)
             if success:
                 toSend["Message"] = "\n\nCurrency removed successfully\n"
             else:

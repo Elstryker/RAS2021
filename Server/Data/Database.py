@@ -79,19 +79,19 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         e5 = self.createEventByObjects("MasterChef", cozinha,[])
         e6 = self.createEventByObjects("Taça de Portugal", futebol,[])
         e7 = self.createEventByObjects("Masters de Fafe", golf,[])
-        
+        e8 = self.createEventByObjects("Taça das Nações", futebol,[])
 
-        self.createIntervenor_Event(sporting,e8,1.05)
         self.createIntervenor_Event(empate,e8,2.31)
+        self.createIntervenor_Event(sporting,e8,1.05)
         self.createIntervenor_Event(benfica,e8,3.26)
 
         self.createIntervenor_Event(gordon,e5,1.05)
         self.createIntervenor_Event(billy,e5,2.31)
         self.createIntervenor_Event(george,e5,3.26)
 
+        self.createIntervenor_Event(empate,e6,1.26)
         self.createIntervenor_Event(vsc,e6,3.37)
         self.createIntervenor_Event(belem,e6,1.29)
-        self.createIntervenor_Event(empate,e6,1.26)
 
         self.createIntervenor_Event(jeremy,e7,4.21)
         self.createIntervenor_Event(jeeves,e7,2.86)

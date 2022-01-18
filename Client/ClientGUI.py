@@ -753,13 +753,13 @@ ______                                   _           _ _  __                    
                 table.add_column("vs", justify="center", style="yellow", no_wrap=True)
                 table.add_column(intervenors[1], justify="center", style="green", no_wrap=True)     
             else:
-                table.add_column(intervenors[0], justify="center", style="green", no_wrap=True)
-
-                table.add_column(intervenors[1], justify="center", style="green", no_wrap=True)
-                table.add_column(intervenors[2], justify="center", style="green", no_wrap=True)     
+                for intervenor in intervenors:
+                    table.add_column(intervenor, justify="center", style="green", no_wrap=True)  
             
-            
-            table.add_row(Text(odds[0], justify="center"), odds[1], odds[2])
+            if len(odds) == 3:
+                table.add_row(Text(odds[0], justify="center"), odds[1], odds[2])
+            else:
+                table.add_row(Text(odds[0], justify="center"), odds[1])
 
             table_painel.add_row(table)
 

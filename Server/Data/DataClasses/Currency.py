@@ -25,3 +25,6 @@ class Currency(Base):
         curTax = self.value + Currency.tax
         total = round(amount / curTax, 2)
         return total
+
+    def updateValue(self, value):
+        self.value = value

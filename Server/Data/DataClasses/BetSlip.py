@@ -13,10 +13,6 @@ from Data.DataClasses.Event import Event, EventState
 from Data.Database import Base
 from Data.DataClasses import Bet
 
-
-
-
-
 class BetSlip(Base):
     __tablename__ = "Boletim"
     id = Column("id", Integer, primary_key=True, autoincrement=True)

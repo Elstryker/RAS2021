@@ -6,15 +6,17 @@ from Data.Database import Base
 class User(Base):
     __tablename__ = 'Utilizador'
     id = Column("id", Integer, primary_key=True, autoincrement=True)
+    email = Column("email", String(45), primary_key=True, unique=True)
     username = Column("nome", String(45), primary_key=True, unique=True)
     password = Column("password", String(45), nullable=False)
     messages = Column("mensagens", String(2000))
     wallet = relationship('User_Currency', back_populates='user')
     birthDate = Column("data_nascimento", Date)
 
-    def __init__(self,username,password, birthDate) -> None:
+    def __init__(self,username,password,email, birthDate) -> None:
         self.username = username
         self.password = password
+        self.email = email
         self.wallet = []
         self.birthDate = birthDate
 

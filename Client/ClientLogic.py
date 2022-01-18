@@ -182,10 +182,9 @@ class ClientLogic:
         self.client_gui.show_betslip(self.clientInfo.loggedIn, response, 5)
         print(response["BetSlip"])
 
-    def concludeBetSlip(self,option): # TODO
+    def concludeBetSlip(self,option):
         currency = ""
         amount = ""
-
 
         if self.clientInfo.loggedIn:
             args = ["M"]

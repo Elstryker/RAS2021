@@ -105,12 +105,20 @@ class ClientLogic:
 
         while int(aposta) < 0 or int(aposta) > len(response["Event"]["Intervenors"])-1:
             aposta = self.client_gui.showDetailedEvent(self.clientInfo.loggedIn, self.clientInfo.getEvents(), response["Event"], self.clientInfo.getPages())
-     
+
+
         if response["Event"]["Sport"]["Type"] == "WinDraw":
             if int(aposta) == 2:
                 aposta = "1"
             elif int(aposta) == 1:
                 aposta = "2"
+        
+        if not self.clientInfo.loggedIn:
+            self.clientInfo.addBetNotLoggedIn(eventID,result)
+            args = ["P"]
+            self.requestServer(args)
+
+            return
         print(f"Adding aposta {aposta}")
         args = [option,"PUT",eventID,aposta]
         response = self.requestServer(args)
@@ -118,10 +126,24 @@ class ClientLogic:
         print(response["Message"])
 
     def removeBetFromBetSlip(self,option):
+        if not self.clientInfo.loggedIn:
+            eventos = self.clientInfo.getBetSlip()
+            self.client_gui.show_betslip(eventos, 6)
+
+            args = ["P"]
+            self.requestServer(args)
+            self.clientInfo.removeBetNotLoggedIn(eventID)
+            return
+
         args = ["M"]
         response = self.requestServer(args)
-
         aposta = self.client_gui.show_betslip(response, 6)
+
+
+           
+
+            
+
         args = [option,aposta]
         response = self.requestServer(args)
 
@@ -131,9 +153,24 @@ class ClientLogic:
         args = [option]
         response = self.requestServer(args)
 
+        if not self.clientInfo.loggedIn:
+            args = ["P"]
+            self.requestServer(args)
+            self.clientInfo.cancelBetSlipNotLoggedIn()
+
+            return
+
         print(response["Message"])
 
     def showBetSlip(self,option):
+        if not self.clientInfo.loggedIn:
+            args = ["P"]
+            self.requestServer(args)
+            betSlip = self.clientInfo.getBetSlipNotLoggedIn()
+            print(betSlip)
+
+            return
+
         args = [option]
         response = self.requestServer(args)
 
@@ -150,7 +187,7 @@ class ClientLogic:
             response = self.requestServer(args)
             
             if self.client_gui.conclude_betslip(self.clientInfo.loggedIn, response) == 'S':
-                while not currency.isdigit() or int(currency) < 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
+                while not currency.isdigit() or int(currency) < 1 or int(currency) >= len(self.clientInfo.availableCurrencies):
                     currency = self.client_gui.pede_moeda(self.clientInfo.loggedIn, response, self.clientInfo.availableCurrencies, True, self.clientInfo.getPages())
                 
                 while not amount.isdigit() or int(amount) <= 0:    
@@ -167,7 +204,7 @@ class ClientLogic:
         currency = ""
         amount = ""
 
-        while not currency.isdigit() or int(currency) < 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
+        while not currency.isdigit() or int(currency) < 1 or int(currency) > 100 or int(currency) >= len(self.clientInfo.availableCurrencies):
             currency = self.client_gui.pede_moeda(self.clientInfo.loggedIn, self.clientInfo.getEvents(), self.clientInfo.availableCurrencies,  False, self.clientInfo.getPages())
 
         while not amount.isdigit() or int(amount) <= 0:    
@@ -183,7 +220,7 @@ class ClientLogic:
         currency = ""
         amount = ""
 
-        while not currency.isdigit() or int(currency) < 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
+        while not currency.isdigit() or int(currency) < 1 or int(currency) >= len(self.clientInfo.availableCurrencies):
             currency = self.client_gui.pede_moeda(self.clientInfo.loggedIn, self.clientInfo.getEvents(), self.clientInfo.availableCurrencies, False, self.clientInfo.getPages())
         
         while not amount.isdigit() or int(amount) <= 0:    
@@ -250,11 +287,12 @@ class ClientLogic:
         
         #print(f"O username é {username} e a password é {password}")
 
-        args = [option,username,password]
+        args = [option,username,password,self.clientInfo.getBetSlipNotLoggedInToSend()]
         response = self.requestServer(args)
         if response["LoggedIn"]:
             self.clientInfo.loggedIn = True
             self.client_gui.username = username
+            self.clientInfo.cancelBetSlipNotLoggedIn()
         else:
             self.client_gui.invalid_info(self.clientInfo.loggedIn, 2)
         # print(response['Message'])

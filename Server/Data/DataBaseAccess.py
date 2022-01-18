@@ -1,5 +1,3 @@
-from Data.DataClasses import BetSlip,Event
-
 class DataBaseAccess:
     
     def getCurrencies(self) -> dict:
@@ -18,7 +16,7 @@ class DataBaseAccess:
     def updateBetSlip(self,prevID,username) -> None:
         pass
 
-    def getBetSlip(self,username) -> BetSlip.BetSlip:
+    def getBetSlip(self,username):
         pass
 
     def depositMoney(self,username,currency,amount) -> None:
@@ -36,13 +34,13 @@ class DataBaseAccess:
     def getParameters(self,obj) -> dict:
         pass
 
-    def createSport(self,name,type) -> bool:
+    def createSport(self,name,type,collectiveness):
         pass
 
     def createIntervenor(self,name) -> bool:
         pass
 
-    def createEvent(self,name,sport,intervenors,odds) -> bool:
+    def createEvent(self,eventName, sport, intervenors, odds):
         pass
 
     def startEvent(self,eventID) -> bool:
@@ -54,7 +52,7 @@ class DataBaseAccess:
     def getSuspendedEvents(self) -> list:
         pass
     
-    def getEvent(self,eventID) -> Event.Event:
+    def getEvent(self,eventID):
         pass
 
     def addBetToBetSlip(self,username,eventID,result) -> bool:
@@ -66,17 +64,22 @@ class DataBaseAccess:
     def cancelBetSlip(self,username) -> None:
         pass
 
-    def concludeBetSlip(self,username,amount,currency) -> None:
+    def checkBetSlipConclusion(self,username) -> bool:
         pass
 
-    def getUserHistory(self,username) -> list[BetSlip.BetSlip]:
+    def concludeBetSlip(self,username,amount,currency) -> bool:
         pass
 
+    def getUserHistory(self,username):
+        pass
 
     def addCurrency(self,currency,toEUR) -> bool:
         pass
 
-    def removeCurrency(self,currency) -> None:
+    def updateCurrencyValue(self, currencyName, value):
+        pass
+
+    def removeCurrency(self, currencyName) -> bool:
         pass
 
     def retrieveNotifications(self,username) -> list:

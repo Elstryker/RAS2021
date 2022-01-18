@@ -10,12 +10,14 @@ class ClientInfo:
     filtros : list
     filtros_ativos : list
 
+
     def __init__(self,info) -> None:
         self.loggedIn = False
         self.wallet = dict()
         self.events = info["Events"]
         self.availableCurrencies = info["Currencies"]
         self.notifications = info["Notifications"]
+        self.nonLoggedInBetSlip = []
         self.page = 0
         self.eventsPerPage = 3
         self.totalPages = ceil(len(self.events)/self.eventsPerPage)
@@ -65,6 +67,74 @@ class ClientInfo:
         for i in range(num):
             notifs.append(self.notifications.pop(0))
         
-        
-
         return notifs
+
+    def addBetNotLoggedIn(self,eventID,result):
+        canAdd = False
+        eventID = int(eventID)
+        result = int(result)
+        for event in self.events:
+            if eventID == int(event["Id"]):
+                canAdd = True
+
+        for bets in self.nonLoggedInBetSlip:
+            if int(bets[0]) == eventID:
+                canAdd = False
+        
+        if canAdd:
+            self.nonLoggedInBetSlip.append((eventID,result))
+    
+    def removeBetNotLoggedIn(self,eventID):
+        eventID = int(eventID)
+
+        for i,events in enumerate(self.nonLoggedInBetSlip):
+            print(events)
+            if events[0] == eventID:
+                index = i
+                break
+
+        self.nonLoggedInBetSlip.pop(index)
+
+    def cancelBetSlipNotLoggedIn(self):
+        self.nonLoggedInBetSlip.clear()
+
+    def getBetSlipNotLoggedIn(self):
+        
+        def getEvent(eventID):
+            eve = None
+            for event in self.events:
+                if int(eventID) == int(event["Id"]):
+                    hasID = True
+                    eve = event
+
+            return eve
+        
+        bets = []
+        multOdd = 1
+        for eventID,result in self.nonLoggedInBetSlip:
+            betDict = dict()
+            event = getEvent(eventID)
+            betDict["EventID"] = eventID
+            betDict["EventName"] = event["Name"]
+            betDict["Choice"] = event["Intervenors"][result][1]
+            betDict["Odd"] = event["Intervenors"][result][0]
+            multOdd *= betDict["Odd"]
+            bets.append(betDict)
+            
+        dictRet = dict()
+        dictRet["Id"] = -1
+        dictRet["Bets"] = bets
+        dictRet["MultipliedOdd"] = multOdd
+        dictRet["State"] = "Creating"
+
+        return dictRet
+
+    def getBetSlipNotLoggedInToSend(self):
+        if len(self.nonLoggedInBetSlip) == 0:
+            return "0"
+        
+        arrayTransform = []
+        for eventID,result in self.nonLoggedInBetSlip:
+            arrayTransform.append(f"{eventID},{result}")
+
+        return ":".join(arrayTransform)

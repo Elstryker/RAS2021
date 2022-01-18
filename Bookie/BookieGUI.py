@@ -8,7 +8,8 @@ def showMenu():
 4 -> Start Event
 5 -> Conclude Event
 6 -> Add Currency
-7 -> Remove Currency""")
+7 -> Remove Currency
+8 -> Update Currency Exchange Value""")
 
 def askParam(param):
     print(f"{param}: ")

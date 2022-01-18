@@ -50,6 +50,8 @@ class ServerWorkerBookie:
             message = self.app.addCurrency(args[0],args[1])
         elif operation == 7: # Remove Currency
             message = self.app.removeCurrency(args[0])
+        elif operation == 8: # Update Currency Exchange
+            message = self.app.updateCurrencyExchange(args[0],args[1])
         elif operation == 0: # Quit
             replyBye = dict()
             replyBye['Message'] = "\nThank you for using RASBet, Bye!\n"

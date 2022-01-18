@@ -38,6 +38,7 @@ class BookieLogic:
             "5":self.concludeEvent,
             "6":self.addCurrency,
             "7":self.removeCurrency,
+            "8":self.updateCurrencyExchange,
             "0":self.quit
         }
         toDo = actions.get(option,self.noSuchAction)
@@ -59,13 +60,20 @@ class BookieLogic:
                 answer = input("-> ")
             elif isinstance(value, list):
                 if key == "Intervenors":
+                    value.remove("Draw")
                     BookieGUI.askLimitedParam(key,value,True) # To be able to choose more than one intervenor
                     answer = input("-> ").split(",")
+
+                    if any(int(t) <= 0 or int(t) > len(value) for t in answer):
+                        return None
+
                     answer = list(map(lambda x: value[int(x)-1],answer))
                     answer = ",".join(answer)
                 else:
                     BookieGUI.askLimitedParam(key,value)
                     answer = int(input("-> "))
+                    if answer <= 0 or answer > len(value):
+                        return None
                     answer = value[answer-1]
             else:
                 answer = ""
@@ -75,6 +83,10 @@ class BookieLogic:
 
     def addEvent(self,option):
         answers = self.getAndFillObjectParameters(option)
+
+        if answers is None:
+            print("Error on input")
+            return
 
         args = [option,"PUT"]
         args.extend(answers)
@@ -86,6 +98,10 @@ class BookieLogic:
     def addSport(self,option):
         answers = self.getAndFillObjectParameters(option)
 
+        if answers is None:
+            print("Error on input")
+            return
+
         args = [option,"PUT"]
         args.extend(answers)
 
@@ -95,6 +111,10 @@ class BookieLogic:
 
     def addIntervenor(self,option):
         answers = self.getAndFillObjectParameters(option)
+
+        if answers is None:
+            print("Error on input")
+            return
 
         args = [option,"PUT"]
         args.extend(answers)
@@ -125,10 +145,19 @@ class BookieLogic:
         BookieGUI.askParam("Event to start")
         eventID = int(input("-> "))
 
+        if len(reply["Events"]) <= int(eventID) or int(eventID) < 0:
+            print("Wrong input")
+            return
+
         event = reply["Events"][eventID]
 
         BookieGUI.askLimitedParam("Result",event["Intervenors"])
         result = input("-> ")
+        result = str(int(result) - 1) # Indexes start at 0
+
+        if len(event["Intervenors"]) <= int(result) or int(result) < 0:
+            print("Wrong input")
+            return
 
         args = [option,"PUT",str(event["Id"]),result]
         reply = self.requestServer(args)
@@ -156,6 +185,19 @@ class BookieLogic:
 
         reply = self.requestServer(args)
         print(reply["Message"])
+
+    def updateCurrencyExchange(self,option):
+        BookieGUI.askParam("Currency to adjust")
+        currency = input("-> ")
+
+        BookieGUI.askParam("Exchange to EUR value")
+        value = input("-> ")
+
+        args = [option,currency,value]
+
+        reply = self.requestServer(args)
+        print(reply["Message"])
+
 
     def noSuchAction(self,option):
         raise IOError

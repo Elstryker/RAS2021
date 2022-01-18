@@ -54,9 +54,6 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         #self.concludeBetSlip("ola",10,"EUR")
         self.withdrawMoney("ola","EUR",10)
 
-        for event in self.events["Available"].values():
-            print(f"{event.id} - {event.name}")
-
     def getCurrencies(self):
         return self.currencies
 
@@ -78,17 +75,6 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
             if user.password == password:
                 ret = True
         return ret
-
-    def updateBetSlip(self,prevID,username):
-        curBetSlip = self.betslips[prevID]
-        numBets = len(curBetSlip.bets['Unfinished'])
-        if numBets == 0: # If no bets, get previous bet slip from user
-            del self.betslips[prevID]
-        else: # Replaces previous user bet slip with the current one
-            self.betslips[username] = curBetSlip
-            curBetSlip.user = username
-            user = self.users[username]
-            user.currentBetSlip = curBetSlip
 
     def getBetSlip(self,username):
         if username in self.betslips:

@@ -1,0 +1,4 @@
+pip install sqlalchemy
+pip install sqlalchemy-utils
+sudo apt-get install python3.9-dev libmysqlclient-dev
+pip install mysqlclient

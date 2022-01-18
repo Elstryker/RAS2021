@@ -1,14 +1,27 @@
 import threading, socket, ServerWorkerClient, RASBetFacade, RASBetLN, ServerWorkerBookie
-from Data import DataBaseAccess, MemoryDataBase
+
+from sqlalchemy_utils import database_exists, create_database
+from Data.Database import Base
+from Data import DataBaseAccess,Database
 
 HOST = ''
 PORT = 40000
 
 def setupApplication():
     db : DataBaseAccess
-    db = MemoryDataBase.MemoryDataBase()
+    db = Database.DataBase()
     app : RASBetFacade
     app = RASBetLN.RASBetLN(db)
+
+
+    if not database_exists(db.engine.url):
+        print("Creating db")
+        create_database(db.engine.url)
+        print("Creating tables")
+        Base.metadata.create_all(db.engine)
+        print("Initialized the db")
+        db.createDefault()
+    
     return app
 
 def main():

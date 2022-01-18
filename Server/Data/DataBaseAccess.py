@@ -64,7 +64,10 @@ class DataBaseAccess:
     def cancelBetSlip(self,username) -> None:
         pass
 
-    def concludeBetSlip(self,username,amount,currency) -> None:
+    def checkBetSlipConclusion(self,username) -> bool:
+        pass
+
+    def concludeBetSlip(self,username,amount,currency) -> bool:
         pass
 
     def getUserHistory(self,username):

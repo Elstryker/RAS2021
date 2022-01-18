@@ -120,8 +120,14 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
     def concludeBetSlip(self,userID,amount,currency):
         amount = float(amount)
-        success = self.db.withdrawMoney(userID,currency,amount)
+        success = self.db.checkBetSlipConclusion(userID)
+        if not success:
+            toSend = self.createDictWithDefaultInfo(userID)
+            toSend["Success"] = False
+            toSend["Message"] = "\n\nAn event in your betslip is no longer open\n"
+            return json.dumps(toSend)
 
+        success = self.db.withdrawMoney(userID,currency,amount)
         toSend = self.createDictWithDefaultInfo(userID)
         if not success:
             toSend["Success"] = False
@@ -131,7 +137,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         success = self.db.concludeBetSlip(userID,amount,currency)
         if not success:
             toSend["Success"] = False
-            toSend["Message"] = "\n\nAn event in your betslip is no longer open\n"
+            toSend["Message"] = "\n\nA problem has occured validating your betslip\n"
             return json.dumps(toSend)
 
         toSend["Success"] = True

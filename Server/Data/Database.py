@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 from Data import DataBaseAccess
 import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
@@ -85,16 +86,20 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         user = self.getUserByUsername(username=username)
         return user.getHistory()
 
-    def concludeBetSlip(self,username,amount,currency_name) -> None:
+    def checkBetSlipConclusion(self,username) -> bool:
+        betslip = self.getBetSlip(username)
+        success = True
+        for bet in betslip.bets:
+            if bet.event.state != EventState.Open:
+                success = False
+        return success
+
+    def concludeBetSlip(self,username,amount,currency_name) -> bool:
         """ Concludes a betslip being created
             Checks if all events are still open"""
         betslip = self.getBetSlip(username)
         currency = self.getCurrency(currency_name)
         success = True
-
-        for bet in betslip.bets:
-            if bet.event.state != EventState.Open:
-                success = False
 
         if betslip == None or currency == None:
             success = False

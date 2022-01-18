@@ -38,6 +38,7 @@ class BookieLogic:
             "5":self.concludeEvent,
             "6":self.addCurrency,
             "7":self.removeCurrency,
+            "8":self.updateCurrencyExchange,
             "0":self.quit
         }
         toDo = actions.get(option,self.noSuchAction)
@@ -184,6 +185,19 @@ class BookieLogic:
 
         reply = self.requestServer(args)
         print(reply["Message"])
+
+    def updateCurrencyExchange(self,option):
+        BookieGUI.askParam("Currency to adjust")
+        currency = input("-> ")
+
+        BookieGUI.askParam("Exchange to EUR value")
+        value = input("-> ")
+
+        args = [option,currency,value]
+
+        reply = self.requestServer(args)
+        print(reply["Message"])
+
 
     def noSuchAction(self,option):
         raise IOError

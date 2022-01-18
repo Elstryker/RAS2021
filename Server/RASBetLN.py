@@ -286,16 +286,23 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
     def addSport(self,args):
         toSend = dict()
+
         if args[0] == "GET":
             with self.lock:
                 toSend["Params"] = self.db.getParameters("Sport")
         
         else:
-            with self.lock:
-                if self.db.createSport(args[1],args[2]):
-                    toSend["Message"] = "\n\nSport added\n"
-                else:
-                    toSend["Message"] = "\n\nCould not add Sport\n"
+            try:
+                collectiveness = bool(args[3])
+
+                with self.lock:
+                    if self.db.createSport(args[1],args[2],collectiveness):
+                        toSend["Message"] = "\n\nSport added\n"
+                    else:
+                        toSend["Message"] = "\n\nCould not add Sport\n"
+            except:
+                toSend["Message"] = "\n\nCould not add Sport\n"
+
 
         return json.dumps(toSend)
 
@@ -380,7 +387,17 @@ class RASBetLN(RASBetFacade.RASBetFacade):
 
         return json.dumps(toSend)
 
+    def updateCurrencyExchange(self,currency,exchangeValue):
+        toSend = dict()
 
+        with self.lock:
+            success = self.db.updateCurrencyValue(currency,float(exchangeValue))
+        if success:
+            toSend["Message"] = "\n\nCurrency removed successfully\n"
+        else:
+            toSend["Message"] = "\n\nCould not remove currency (betslips use currency)\n"
+
+        return json.dumps(toSend)
         
 
     

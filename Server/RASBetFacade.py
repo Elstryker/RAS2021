@@ -62,3 +62,6 @@ class RASBetFacade:
     
     def removeCurrency(self,currency):
         pass
+
+    def updateCurrencyExchange(self,currency,exchangeValue):
+        pass

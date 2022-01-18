@@ -65,14 +65,14 @@ class ClientInfo:
                 self.filtros.append(sport)
                 self.filtros_ativos.append(sport)
 
-        f = ["WinDraw", "Win", "Coletivo", "Singular"]
-        f.extend(allSports)
+        default = ["WinDraw", "Win", "Coletivo", "Singular"]
+        default.extend(allSports)
 
 
         filtros = self.filtros.copy()
 
         for filtro in self.filtros:
-            if filtro not in f:
+            if filtro not in default:
                 filtros.remove(filtro)
                 if filtro in self.filtros_ativos:
                     self.filtros_ativos.remove(filtro)

@@ -71,6 +71,26 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         abraham = self.createIntervenor("Abraham Lincoln")
         gandhi = self.createIntervenor("Mahatma Gandhi")
 
+        japao = self.createIntervenor("Japão")
+        espanha = self.createIntervenor("Espanha")
+
+        trump = self.createIntervenor("Donald Trump")
+        obama = self.createIntervenor("Obama")
+
+        zeca = self.createIntervenor("Zeca Afonso")
+        ron = self.createIntervenor("Cristiano Ronaldo")
+
+        quim = self.createIntervenor("Quim Barreiros")
+        durao = self.createIntervenor("Durão Barroso")
+
+        scbraga =  self.createIntervenor("SCBraga Futebol Feminino")
+        vscc = self.createIntervenor("VSC Futebol Feminino")
+
+
+        chibanga =  self.createIntervenor("Professor Chibanga")
+        ross = self.createIntervenor("Bob Ross")
+        manel = self.createIntervenor("Manuel de Oliveira")
+
 
         e1 = self.createEventByObjects("Championship",futebol,[])
         e2 = self.createEventByObjects("Europa",futebol,[])
@@ -80,7 +100,30 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         e6 = self.createEventByObjects("Taça de Portugal", futebol,[])
         e7 = self.createEventByObjects("Masters de Fafe", golf,[])
         e8 = self.createEventByObjects("Taça das Nações", futebol,[])
+        e9 = self.createEventByObjects("Liga da Paz", golf,[])
+        e10 = self.createEventByObjects("Taça do Mundo", futebol,[])
+        e11 = self.createEventByObjects("Corrida da Liberdade", corrida,[])
+        e12 = self.createEventByObjects("Liga do Minho", futebol,[])
+        e13 = self.createEventByObjects("Maratona dos Gambuzinos", corrida,[])
 
+        self.createIntervenor_Event(chibanga,e13,1.93)
+        self.createIntervenor_Event(ross,e13,1.38)
+        self.createIntervenor_Event(manel,e13,4.24)
+
+        self.createIntervenor_Event(empate,e12,1.94)
+        self.createIntervenor_Event(vscc,e12,3.39)
+        self.createIntervenor_Event(scbraga,e12,1.27)
+
+        self.createIntervenor_Event(quim,e11,2.34)
+        self.createIntervenor_Event(durao,e11,1.85)
+
+        self.createIntervenor_Event(empate,e10,1.94)
+        self.createIntervenor_Event(zeca,e10,3.91)
+        self.createIntervenor_Event(ron,e10,1.05)
+
+        self.createIntervenor_Event(trump,e9,2.31)
+        self.createIntervenor_Event(obama,e9,1.05)
+        
         self.createIntervenor_Event(empate,e8,2.31)
         self.createIntervenor_Event(sporting,e8,1.05)
         self.createIntervenor_Event(benfica,e8,3.26)

@@ -26,7 +26,7 @@ class ServerWorkerClient:
     def receiveClientRequests(self):
         str_Data = ''
         while str_Data != 'S':
-            data = self.sock.recv(256)
+            data = self.sock.recv(1024)
             str_Data = data.decode("utf-8")
             str_Data = str_Data.strip()
             self.processRequest(str_Data)

@@ -12,7 +12,7 @@ def main():
     cl.run()
 
 def getInitialAppInfoFromServer(sock):
-    data = sock.recv(2048)
+    data = sock.recv(8192)
     data = data.decode("utf-8")
     info = json.loads(data)
     return info

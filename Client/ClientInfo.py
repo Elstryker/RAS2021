@@ -21,7 +21,7 @@ class ClientInfo:
         self.notifications = info["Notifications"]
         self.nonLoggedInBetSlip = []
         self.page = 0
-        self.eventsPerPage = 3
+        self.eventsPerPage = 5
         self.totalPages = ceil(len(self.events)/self.eventsPerPage)
 
         self.filtros = ["WinDraw", "Win", "Coletivo", "Singular"]

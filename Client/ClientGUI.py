@@ -277,28 +277,7 @@ ______                                   _           _ _  __                    
         self.console.print(layout)
 
         return self.console.input("->")
-    """
-    def show_betslip(self, loggedIn, events:list, paginas ):
-        self.console.clear()
-        layout : Layout = Layout()
-
-        menu_printable = Columns(menu, equal=True, expand=True)
-
-        eventos_printable : list = self.showEvents(events)
-        
-        layout.split_column(
-            Layout(" ", name="empty space"),
-            Layout(name="header", ratio=3),
-            Layout(Panel(eventos_printable, title='[red]Eventos'), name="events", ratio=9),
-            Layout(Panel(menu_printable, title='[red]Menu'), name="menu", ratio=3)
-        )
-
-        self.login_layout(loggedIn, layout)
-
-        self.console.print(layout)
-
-        return self.console.input("Introduza a letra da opção desejada -> ")
-"""
+ 
     def show_betslip_detail(self, loggedIn, events, opcao):
         self.console.clear()
 

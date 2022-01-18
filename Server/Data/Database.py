@@ -29,8 +29,8 @@ class DataBase(DataBaseAccess.DataBaseAccess):
     def createDefault(self):
         #criação de user e moeda
 
-        dolar = self.createCurrency("dolar",1)
-        euro = self.createCurrency("euro",1.12)
+        dolar = self.createCurrency("dolar",0.88)
+        euro = self.createCurrency("euro",1)
         
         user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
 

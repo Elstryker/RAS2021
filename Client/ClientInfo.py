@@ -68,15 +68,6 @@ class ClientInfo:
         default = ["WinDraw", "Win", "Coletivo", "Singular"]
         default.extend(allSports)
 
-
-        filtros = self.filtros.copy()
-
-        for filtro in self.filtros:
-            if filtro not in default:
-                filtros.remove(filtro)
-                if filtro in self.filtros_ativos:
-                    self.filtros_ativos.remove(filtro)
-
         self.filteredEvents = self.filterEvents()
 
         self.totalPages = ceil(len(self.filteredEvents)/self.eventsPerPage)

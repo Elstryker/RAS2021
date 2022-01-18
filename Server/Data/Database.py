@@ -1,10 +1,9 @@
-from xmlrpc.client import Boolean
 from Data import DataBaseAccess
 import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref, session, sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.expression import false
+import hashlib
 
 Base = declarative_base()
 
@@ -32,7 +31,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
         dolar = self.createCurrency("dolar",1)
         euro = self.createCurrency("euro",1.12)
-
+        
         user = self.createUser("ola","adeus",datetime.date(1970,1,1))
 
         self.depositMoney(user.username,dolar.name,25)
@@ -73,12 +72,11 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
         #criação de bets
 
-        betSlip1 = self.createBetSlipEmpty(user)
-        #b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
-        b2 = self.createBet(betSlip1,e2,porto,porto_int_ev.odd)
+        betSlip1 = self.getBetSlip(user.username)
+        b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
 
-        #betSlip1.addBet(b1)
-        betSlip1.addBet(b2)
+        betSlip1.addBet(b1)
+        #betSlip1.addBet(b2)
         self.concludeBetSlip(user.username, 25, "euro")
 
 
@@ -151,7 +149,8 @@ class DataBase(DataBaseAccess.DataBaseAccess):
     
     def createUser(self,name,password,birthDate):
         currencies = self.getCurrencies().values()
-        user = User(name,password,birthDate)
+        hashedpassword = hashlib.sha1(password.encode('utf-8')).hexdigest()
+        user = User(name,hashedpassword,birthDate)
         for currency in currencies:
             new_user_currency = User_Currency(user=user,currency=currency,amount=0)
         self.createBetSlipEmpty(user)   
@@ -164,7 +163,8 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                            .one_or_none()
         #print("got user " + user.username + " with password " + user.password)
         if user:
-            if user.password == password:
+            hashedpassword = hashlib.sha1(password.encode('utf-8')).hexdigest()
+            if user.password == hashedpassword:
                 return True
 
         return False
@@ -441,10 +441,11 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                               .filter(BetSlip.user_id == user.id, BetSlip.state == BetSlipState.Creating)\
                               .one_or_none()
 
-        if user and betslip:
-            for bet in betslip.bets:
-                self.removeBetFromBetSlip(username,bet.event_id)
-            self.session.delete(betslip)
+        if user: 
+            if betslip:
+                for bet in betslip.bets:
+                    self.removeBetFromBetSlip(username,bet.event_id)
+                self.session.delete(betslip)
             self.createBetSlipEmpty(user)
             self.session.commit()
 

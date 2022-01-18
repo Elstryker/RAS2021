@@ -3,6 +3,7 @@ from Data.DataClasses import Sport, Intervenor_Event
 from sqlalchemy import Column, String, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship, backref
 from Data.Database import Base
+from Data.Observable import Observable
 
 class EventState(enum.Enum):
     Open = 1

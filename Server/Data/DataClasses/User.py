@@ -66,7 +66,3 @@ class User(Base):
                 self.messages += ("One of your bet slips did not win")
 
         print("User: Update requested!")
-
-    
-
-    

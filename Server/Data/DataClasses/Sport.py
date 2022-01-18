@@ -1,9 +1,7 @@
 import enum
 from Data.Database import Base
-from enum import unique
 from sqlalchemy import Column, String, Integer, Enum
 from sqlalchemy.sql.sqltypes import Boolean
-from sqlalchemy.ext.declarative import declarative_base
 
 class SportType(enum.Enum):
     Win = 1

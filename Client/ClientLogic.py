@@ -26,9 +26,9 @@ class ClientLogic:
             inp = "Q"
             notifs = self.clientInfo.getNotifications(2)
 
-            print(self.clientInfo.events)
-            print("\n\nFiltros", self.clientInfo.filtros_ativos)
-            print(self.clientInfo.filteredEvents)
+            #print(self.clientInfo.events)
+            #print("\n\nFiltros", self.clientInfo.filtros_ativos)
+            #print(self.clientInfo.filteredEvents)
             
             while self.selecao(inp):
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents(), self.clientInfo.getPages(), notifs)

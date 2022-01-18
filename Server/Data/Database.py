@@ -3,7 +3,7 @@ import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine, Table
 from sqlalchemy.orm import relationship, backref, session, sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.expression import false
+import hashlib
 
 Base = declarative_base()
 
@@ -31,8 +31,8 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
         dolar = self.createCurrency("dolar",1)
         euro = self.createCurrency("euro",1.12)
-
-        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
+        
+        user = self.createUser("ola","adeus",datetime.date(1970,1,1))
 
         self.depositMoney(user.username,dolar.name,25)
         self.depositMoney(user.username,euro.name,13.45)
@@ -72,12 +72,11 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
         #criação de bets
 
-        betSlip1 = self.createBetSlipEmpty(user)
-        #b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
-        b2 = self.createBet(betSlip1,e2,porto,porto_int_ev.odd)
+        betSlip1 = self.getBetSlip(user.username)
+        b1 = self.createBet(betSlip1,e1,empate,empate_intervernor_event.odd)
 
-        #betSlip1.addBet(b1)
-        betSlip1.addBet(b2)
+        betSlip1.addBet(b1)
+        #betSlip1.addBet(b2)
         self.concludeBetSlip(user.username, 25, "euro")
 
 
@@ -85,14 +84,30 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         user = self.getUserByUsername(username=username)
         return user.getHistory()
 
-    def concludeBetSlip(self,username,amount,currency_name) -> None:
+    def checkBetSlipConclusion(self,username) -> bool:
+        betslip = self.getBetSlip(username)
+        success = True
+        for bet in betslip.bets:
+            if bet.event.state != EventState.Open:
+                success = False
+        return success
+
+    def concludeBetSlip(self,username,amount,currency_name) -> bool:
+        """ Concludes a betslip being created
+            Checks if all events are still open"""
         betslip = self.getBetSlip(username)
         currency = self.getCurrency(currency_name)
-        betslip.applyBetSlip(amount,currency)
+        success = True
 
-        user = self.getUserByUsername(username=username)
+        if betslip == None or currency == None:
+            success = False
 
-        self.createBetSlipEmpty(user)
+        if success:
+            betslip.applyBetSlip(amount,currency) 
+            user = self.getUserByUsername(username=username)
+            self.createBetSlipEmpty(user)
+
+        return success
 
 
     def getCurrency(self, currency_name) -> Currency:
@@ -132,12 +147,13 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             return True
         return False
     
-    def createUser(self,name,password,email,birthDate):
+    def createUser(self,name,password,birthDate):
         currencies = self.getCurrencies().values()
-        user = User(name,password,email,birthDate)
+        hashedpassword = hashlib.sha1(password.encode('utf-8')).hexdigest()
+        user = User(name,hashedpassword,birthDate)
         for currency in currencies:
             new_user_currency = User_Currency(user=user,currency=currency,amount=0)
-            #user.wallet.append(new_user_currency)     
+        self.createBetSlipEmpty(user)   
         self.addUser(user)
         return user
 
@@ -147,7 +163,8 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                            .one_or_none()
         #print("got user " + user.username + " with password " + user.password)
         if user:
-            if user.password == password:
+            hashedpassword = hashlib.sha1(password.encode('utf-8')).hexdigest()
+            if user.password == hashedpassword:
                 return True
 
         return False
@@ -424,10 +441,11 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                               .filter(BetSlip.user_id == user.id, BetSlip.state == BetSlipState.Creating)\
                               .one_or_none()
 
-        if user and betslip:
-            for bet in betslip.bets:
-                self.removeBetFromBetSlip(username,bet.event_id)
-            self.session.delete(betslip)
+        if user: 
+            if betslip:
+                for bet in betslip.bets:
+                    self.removeBetFromBetSlip(username,bet.event_id)
+                self.session.delete(betslip)
             self.createBetSlipEmpty(user)
             self.session.commit()
 
@@ -446,12 +464,12 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return bet
 
     def addUser(self, user: User):
-        """ try: """
-        self.session.add(user)    
-        self.session.commit() 
-        """ except:
+        try:
+            self.session.add(user)    
+            self.session.commit() 
+        except:
             print("Erro na inserção de User")
-            self.session.rollback() """
+            self.session.rollback()
 
     def addIntervenor(self, intervenor: Intervenor):
         try:
@@ -483,8 +501,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                                   .all()
         return len(betslipsWithCurrency) > 0
 
-    #untested
-    def removeCurrency(self, currencyName) -> None:
+    def removeCurrency(self, currencyName) -> bool:
         currency = self.getCurrency(currencyName)
         print(f"removing currency {currency.name}")
 
@@ -502,11 +519,13 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                         self.session.delete(user_currency)
 
             self.session.delete(currency)
-
             self.session.commit()
+
+            return True
         else:
             if currency:
                 print(f"Some BetSlips use {currencyName}")
+            return False
 
     def addCurrency(self, currencyName, toEUR) -> bool:
         return self.addCurrencyByObject(self.createCurrency(currencyName,toEUR))
@@ -579,12 +598,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
     def getUser(self, user_id: Integer) -> User:
         user = self.session.query(User).filter(User.id == user_id).one()
-        print(user.email)
-        return user
-
-    def getUserByEmail(self, user_email: str) -> User:
-        user = self.session.query(User).filter(User.email == user_email).one()
-        print(user.email)
+        print(f"got user {user.username}")
         return user
 
     def getUserByUsername(self, username: str) -> User:

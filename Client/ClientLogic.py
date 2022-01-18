@@ -25,10 +25,6 @@ class ClientLogic:
         while inp != 'S':
             inp = "Q"
             notifs = self.clientInfo.getNotifications(2)
-
-            #print(self.clientInfo.events)
-            #print("\n\nFiltros", self.clientInfo.filtros_ativos)
-            #print(self.clientInfo.filteredEvents)
             
             while self.selecao(inp):
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents(), self.clientInfo.getPages(), notifs)
@@ -67,7 +63,6 @@ class ClientLogic:
         while not resposta.isdigit() or int(resposta) < 0 or int(resposta) >= len(self.clientInfo.filtros):
             resposta = self.client_gui.pergunta_filtros(self.clientInfo.loggedIn, self.clientInfo.getFiltros(), self.clientInfo.getFiltros_ativos(), self.clientInfo.availableCurrencies, self.clientInfo.getEvents(), self.clientInfo.getPages())
         
-        #print(f"opcao: {self.clientInfo.filtros[int(resposta)]}")
         escolha = self.clientInfo.filtros[int(resposta)]
         
         if escolha in self.clientInfo.filtros_ativos:
@@ -295,7 +290,6 @@ class ClientLogic:
             args = [option,self.clientInfo.availableCurrencies[int(fromCurrency)],self.clientInfo.availableCurrencies[int(toCurrency)],amount]
             response = self.requestServer(args)
 
-            #print(response["Message"])
         else:
             self.client_gui.invalid_info(self.clientInfo.loggedIn, 1)
     
@@ -303,8 +297,6 @@ class ClientLogic:
     def login(self,option):
         username = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 0, self.clientInfo.getPages())
         password = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 1, self.clientInfo.getPages())
-        
-        #print(f"O username é {username} e a password é {password}")
 
         args = [option,username,password,self.clientInfo.getBetSlipNotLoggedInToSend()]
         response = self.requestServer(args)
@@ -314,7 +306,6 @@ class ClientLogic:
             self.clientInfo.cancelBetSlipNotLoggedIn()
         else:
             self.client_gui.invalid_info(self.clientInfo.loggedIn, 2)
-        # print(response['Message'])
 
     def logout(self,option):
         if self.clientInfo.loggedIn:

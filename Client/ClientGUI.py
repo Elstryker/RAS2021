@@ -363,15 +363,12 @@ ______                                   _           _ _  __                    
                 )
 
                 notif1 = self.get_mensagem(notificacoes[0])
-                #notif1.stylize("red", 0, 6)
 
                 if len(notificacoes) == 1:
                     layout["notificacoes"].split_column(
                         Layout(Panel(Align(notif1,vertical='middle', align='center'), title='[red]Notificação'))
                     )
                 else:
-                    #notif2 = self.get_mensagem(notificacoes[1])
-                    #notif2.stylize("bold green", 0, 6)
                     notif2 = Text("Perdeu uma aposta!")
                     notif2.stylize("red", 0, 6)
 
@@ -522,7 +519,6 @@ ______                                   _           _ _  __                    
 
         eventos_printable : list = self.showEvents(events)
 
-        #eventos_printable : list = self.showEventsSlip(event
         filtros_printable_list : list = self.make_filtros(filtros, filtros_ativos)
 
 

@@ -226,7 +226,6 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         user = self.session.query(User)\
                            .filter(User.username == username)\
                            .one_or_none()
-        #print("got user " + user.username + " with password " + user.password)
         if user:
             hashedpassword = hashlib.sha1(password.encode('utf-8')).hexdigest()
             if user.password == hashedpassword:

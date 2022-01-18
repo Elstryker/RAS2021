@@ -62,6 +62,10 @@ class BookieLogic:
                     value.remove("Draw")
                     BookieGUI.askLimitedParam(key,value,True) # To be able to choose more than one intervenor
                     answer = input("-> ").split(",")
+
+                    if any(int(t) <= 0 or int(t) > len(value) for t in answer):
+                        return None
+
                     answer = list(map(lambda x: value[int(x)-1],answer))
                     answer = ",".join(answer)
                 else:
@@ -93,6 +97,10 @@ class BookieLogic:
     def addSport(self,option):
         answers = self.getAndFillObjectParameters(option)
 
+        if answers is None:
+            print("Error on input")
+            return
+
         args = [option,"PUT"]
         args.extend(answers)
 
@@ -102,6 +110,10 @@ class BookieLogic:
 
     def addIntervenor(self,option):
         answers = self.getAndFillObjectParameters(option)
+
+        if answers is None:
+            print("Error on input")
+            return
 
         args = [option,"PUT"]
         args.extend(answers)
@@ -131,6 +143,10 @@ class BookieLogic:
 
         BookieGUI.askParam("Event to start")
         eventID = int(input("-> "))
+
+        if len(reply["Events"]) <= int(eventID) or int(eventID) < 0:
+            print("Wrong input")
+            return
 
         event = reply["Events"][eventID]
 

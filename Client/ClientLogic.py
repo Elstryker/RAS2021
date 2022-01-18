@@ -153,6 +153,10 @@ class ClientLogic:
         #ClientGUI.askAmount()
         amount = input("-> ")
 
+        if float(amount) < 1:
+            print("Tem que ser acima de 1 unidade")
+            return
+
         currency = ''
         #ClientGUI.askCurrency(self.clientInfo.availableCurrencies)
         currency = input("-> ")
@@ -167,8 +171,9 @@ class ClientLogic:
         currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
         amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
         
-        
-        print(f"O amount é {amount} e a currency é {currency}")
+        if float(amount) < 1 or float(amount) > 100 :
+            print("Tem que ser acima de 1 unidade e abaixo de 100 unidades")
+            return
 
         args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
         response = self.requestServer(args)
@@ -179,6 +184,10 @@ class ClientLogic:
     def withdrawMoney(self,option):
         currency = self.client_gui.pede_moeda(self.clientInfo.getEvents(), self.clientInfo.availableCurrencies)
         amount = self.client_gui.ask_info(self.clientInfo.getEvents(), 3)
+
+        if float(amount) < 1:
+            print("Tem que ser acima de 1 unidade")
+            return
 
         args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]
         self.requestServer(args)

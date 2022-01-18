@@ -277,7 +277,7 @@ ______                                   _           _ _  __                    
         self.console.print(layout)
 
         return self.console.input("->")
-    
+    """
     def show_betslip(self, loggedIn, events:list, paginas ):
         self.console.clear()
         layout : Layout = Layout()
@@ -298,7 +298,7 @@ ______                                   _           _ _  __                    
         self.console.print(layout)
 
         return self.console.input("Introduza a letra da opção desejada -> ")
-
+"""
     def show_betslip_detail(self, loggedIn, events, opcao):
         self.console.clear()
 

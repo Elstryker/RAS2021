@@ -30,13 +30,21 @@ class ClientLogic:
             print("\n\nFiltros", self.clientInfo.filtros_ativos)
             print(self.clientInfo.filteredEvents)
             
-            while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPpHhNnLlTt':
+            while self.selecao(inp):
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents(), self.clientInfo.getPages(), notifs)
             
             inp = inp.upper()
             
             self.handle_input(inp)
-            
+    
+    def selecao(self, input):
+        if self.clientInfo.loggedIn:
+            result = input not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPpHhNnLlTt'
+        else:
+            result = input not in 'EeFfIiRrCcMmVvAaPpTtSs'
+        
+        return result
+
     def requestServer(self,args):
         message = ";".join(args)
 
@@ -131,6 +139,7 @@ class ClientLogic:
         print(response["Message"])
 
     def removeBetFromBetSlip(self,option):
+        print(self.clientInfo.loggedIn)
         if not self.clientInfo.loggedIn:
             eventos = self.clientInfo.getBetSlipNotLoggedIn()
             eventID = self.client_gui.show_betslip(self.clientInfo.loggedIn, {"BetSlip":eventos}, 6)
@@ -142,7 +151,7 @@ class ClientLogic:
 
         args = ["M"]
         response = self.requestServer(args)
-        aposta = self.client_gui.show_betslip(response, 6)
+        aposta = self.client_gui.show_betslip(self.clientInfo.loggedIn, response, 6)
 
         args = [option,aposta]
         response = self.requestServer(args)

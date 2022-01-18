@@ -6,7 +6,7 @@ class DataBaseAccess:
     def existsUser(self,username) -> bool:
         pass
 
-    def createUser(self,username,password,birthdate) -> None:
+    def createUser(self,username,password,email,birthdate) -> None:
         pass
 
     def authenticateUser(self,username,password) -> bool:

@@ -56,24 +56,6 @@ class ClientLogic:
 
         return response
 
-
-    def filter(self,option):
-        resposta = "F"
-
-        while not resposta.isdigit() or int(resposta) < 0 or int(resposta) >= len(self.clientInfo.filtros):
-            resposta = self.client_gui.pergunta_filtros(self.clientInfo.loggedIn, self.clientInfo.getFiltros(), self.clientInfo.getFiltros_ativos(), self.clientInfo.availableCurrencies, self.clientInfo.getEvents(), self.clientInfo.getPages())
-        
-        escolha = self.clientInfo.filtros[int(resposta)]
-        
-        if escolha in self.clientInfo.filtros_ativos:
-            self.clientInfo.filtros_ativos.remove(escolha)
-        else:
-            self.clientInfo.filtros_ativos.append(escolha)
-
-        self.requestServer(["P"])
-
-
-
     def handle_input(self,option):
         actions = {
             "I":self.addBetToBetSlip,
@@ -125,16 +107,14 @@ class ClientLogic:
             self.clientInfo.addBetNotLoggedIn(eventID, aposta)
             args = ["P"]
             self.requestServer(args)
-
             return
-        print(f"Adding aposta {aposta}")
+
         args = [option,"PUT",eventID,aposta]
         response = self.requestServer(args)
 
         print(response["Message"])
 
     def removeBetFromBetSlip(self,option):
-        print(self.clientInfo.loggedIn)
         if not self.clientInfo.loggedIn:
             eventos = self.clientInfo.getBetSlipNotLoggedIn()
             eventID = self.client_gui.show_betslip(self.clientInfo.loggedIn, {"BetSlip":eventos}, 6)
@@ -150,8 +130,6 @@ class ClientLogic:
 
         args = [option,aposta]
         response = self.requestServer(args)
-
-        print(response)
 
     def cancelBetSlip(self,option):
 
@@ -291,7 +269,21 @@ class ClientLogic:
 
         else:
             self.client_gui.invalid_info(self.clientInfo.loggedIn, 1)
-    
+
+    def filter(self,option):
+        resposta = "F"
+
+        while not resposta.isdigit() or int(resposta) < 0 or int(resposta) >= len(self.clientInfo.filtros):
+            resposta = self.client_gui.pergunta_filtros(self.clientInfo.loggedIn, self.clientInfo.getFiltros(), self.clientInfo.getFiltros_ativos(), self.clientInfo.availableCurrencies, self.clientInfo.getEvents(), self.clientInfo.getPages())
+        
+        escolha = self.clientInfo.filtros[int(resposta)]
+        
+        if escolha in self.clientInfo.filtros_ativos:
+            self.clientInfo.filtros_ativos.remove(escolha)
+        else:
+            self.clientInfo.filtros_ativos.append(escolha)
+
+        self.requestServer(["P"])
     
     def login(self,option):
         username = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 0, self.clientInfo.getPages())
@@ -332,7 +324,6 @@ class ClientLogic:
 
             response = self.requestServer(args)
 
-            print(response)
             print(response['Message'])
         else:
             self.client_gui.invalid_info(self.clientInfo.loggedIn, 4)

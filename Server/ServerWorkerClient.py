@@ -63,7 +63,7 @@ class ServerWorkerClient:
         elif operation == "A" or operation == "P": # Update Info
             message = self.app.getDefaultInfo(self.userID)
         elif operation == "E": # Register
-            message = self.app.register(args[0],args[1],args[2])
+            message = self.app.register(args[0],args[1],args[2],args[3])
         elif operation == "F": # Login
             message = self.app.login(args[0],args[1],args[2])
             dic = json.loads(message)

@@ -34,7 +34,7 @@ class RASBetFacade:
     def logout(self,userID):
         pass
 
-    def register(self,userID,password,birthdate):
+    def register(self,userID,password,birthdate,email):
         pass
 
     def getDefaultInfo(self,userID):

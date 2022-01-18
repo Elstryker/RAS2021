@@ -231,7 +231,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         toSend['Message'] = "\n\nLogged out successfully\n"
         return json.dumps(toSend)
 
-    def register(self,username,password,birthdate):
+    def register(self,username,password,birthdate,email):
         toSend = self.createDictWithDefaultInfo(username)
 
         def age(birthdate : datetime.date):
@@ -257,7 +257,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             toSend["Success"] = False
         else:
             with self.lock:
-                self.db.createUser(username,password,date)
+                self.db.createUser(username,password,email,date)
             toSend['Message'] = "\n\nUser registered with success!\n"
             toSend["Success"] = True
             

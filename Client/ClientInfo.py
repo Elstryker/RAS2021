@@ -100,13 +100,11 @@ class ClientInfo:
     def getNotifications(self,num):
         notifs = []
         if not self.notifications:
-            #print("well nao ha nada")
             return []
 
         if len(self.notifications) < num:
             num = len(self.notifications)
 
-        #print(num)
         for _ in range(num):
             notifs.append(self.notifications.pop(0))
         
@@ -131,7 +129,6 @@ class ClientInfo:
         eventID = int(eventID)
 
         for i,events in enumerate(self.nonLoggedInBetSlip):
-            print(events)
             if events[0] == eventID:
                 index = i
                 break

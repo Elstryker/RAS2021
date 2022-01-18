@@ -7,7 +7,8 @@ class ClientInfo:
     events : list[dict] # List of events to print
     availableCurrencies : list # List of all of existing currencies in server
     notifications : list
-
+    filtros : list
+    filtros_ativos : list
 
 
     def __init__(self,info) -> None:
@@ -18,8 +19,11 @@ class ClientInfo:
         self.notifications = info["Notifications"]
         self.nonLoggedInBetSlip = []
         self.page = 0
-        self.eventsPerPage = 2
+        self.eventsPerPage = 3
         self.totalPages = ceil(len(self.events)/self.eventsPerPage)
+        self.filtros = ["WinDraw", "Win", "Futebol", "Tenis", "Corrida", "Golf", "Ping Pong"]
+        self.filtros_ativos = ["WinDraw", "Win", "Futebol", "Tenis", "Corrida", "Golf", "Ping Pong"]
+    
 
     def updateInfo(self,response):
         self.wallet = response["Wallet"]
@@ -27,6 +31,16 @@ class ClientInfo:
         self.availableCurrencies = response["Currencies"]
         self.notifications.extend(response["Notifications"])
         self.totalPages = ceil(len(self.events)/self.eventsPerPage)
+
+    def getPages(self):
+        return self.page,self.totalPages
+    
+
+    def getFiltros(self):
+        return self.filtros
+
+    def getFiltros_ativos(self):
+        return self.filtros_ativos
 
     def nextPage(self):
         if self.page < self.totalPages - 1:
@@ -42,12 +56,14 @@ class ClientInfo:
 
     def getNotifications(self,num):
         notifs = []
-        if self.notifications == 0:
+        if not self.notifications:
+            #print("well nao ha nada")
             return []
 
         if len(self.notifications) < num:
             num = len(self.notifications)
 
+        #print(num)
         for i in range(num):
             notifs.append(self.notifications.pop(0))
         

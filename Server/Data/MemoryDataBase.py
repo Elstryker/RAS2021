@@ -29,7 +29,8 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createSport("Futebol",SportType.WinDraw)
         self.createSport("Golf", SportType.Win)
         self.createSport("Corrida", SportType.Win)
-
+        self.createSport("Tenis", SportType.WinDraw)
+        
         self.createIntervenor("Tiger Woods")
         self.createIntervenor("Jordan Spieth")
         self.createIntervenor("Rory Mcllroy")
@@ -39,15 +40,18 @@ class MemoryDataBase(DataBaseAccess.DataBaseAccess):
         self.createIntervenor("FCPorto")
         self.createIntervenor("FCBarcelona")
         self.createIntervenor("SCBraga")
+        self.createIntervenor("Pete Sampras")
+        self.createIntervenor("Ze Caricas")
 
         self.createEvent("Championship","Futebol","FCPorto,SCBraga","1.05,6.21,1.50")
         self.createEvent("Europa","Futebol","FCPorto,FCBarcelona","1.56,3.67,2.00")
         self.createEvent("Taça António Costa", "Golf", "Tiger Woods,Jordan Spieth,Rory Mcllroy", "4.2, 2.3, 1.9")
         self.createEvent("Torneio José Figueiras", "Corrida", "Eliud Kipchoge,Naoko Takahashi,Rosa Mota", "4.2, 2.3, 8.1")
+        self.createEvent("Torneio Quim Fintas", "Tenis", "Pete Sampras,Ze Caricas", "1.2, 4.3, 8.8")
 
-        self.addBetToBetSlip("ola",3,1)
+        #self.addBetToBetSlip("ola",1,1)
         self.depositMoney("ola","EUR",20)
-        self.concludeBetSlip("ola",10,"EUR")
+        #self.concludeBetSlip("ola",10,"EUR")
         self.withdrawMoney("ola","EUR",10)
 
     def getCurrencies(self):

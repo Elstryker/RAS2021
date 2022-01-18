@@ -241,7 +241,8 @@ class ClientLogic:
 
                 boletim = self.encontra_boletim(response["History"], int(escolha))
 
-                self.client_gui.show_betslip(self.clientInfo.loggedIn, {"BetSlip":boletim}, 5)
+                if boletim != None:
+                    self.client_gui.show_betslip(self.clientInfo.loggedIn, {"BetSlip":boletim}, 5)
         else:
             self.client_gui.invalid_info(self.clientInfo.loggedIn, 1)
 
@@ -249,10 +250,10 @@ class ClientLogic:
     def encontra_boletim(self, boletins : list, escolha : int):
         resposta = None
         print(boletins)
-        while resposta is None:
-            for boletim in boletins:
-                if boletim["Id"] == escolha:
-                    resposta = boletim
+
+        for boletim in boletins:
+            if boletim["Id"] == escolha:
+                resposta = boletim
 
         return resposta
 

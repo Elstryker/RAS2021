@@ -369,8 +369,7 @@ ______                                   _           _ _  __                    
                         Layout(Panel(Align(notif1,vertical='middle', align='center'), title='[red]Notificação'))
                     )
                 else:
-                    notif2 = Text("Perdeu uma aposta!")
-                    notif2.stylize("red", 0, 6)
+                    notif2 = self.get_mensagem(notificacoes[1])
 
                     layout["notificacoes"].split_column(
                         Layout(Panel(Align(notif1,vertical='middle', align='center'), title='[red]Notificação')),

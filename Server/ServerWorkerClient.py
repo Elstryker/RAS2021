@@ -1,7 +1,7 @@
 import threading
 import socket
 import RASBetFacade
-import random, json
+import json
 
 class ServerWorkerClient:
 

@@ -373,7 +373,7 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         with self.lock:
             currencies = self.db.getCurrencies()
 
-        if currency in currencies:
+        if currency in currencies and currency != 'euro':
             with self.lock:
                 success = self.db.removeCurrency(currency)
             if success:

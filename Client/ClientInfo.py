@@ -1,4 +1,5 @@
 from math import ceil
+from string import printable
 
 class ClientInfo:
 
@@ -15,27 +16,78 @@ class ClientInfo:
         self.loggedIn = False
         self.wallet = dict()
         self.events = info["Events"]
+        self.filteredEvents = info["Events"]
         self.availableCurrencies = info["Currencies"]
         self.notifications = info["Notifications"]
         self.nonLoggedInBetSlip = []
         self.page = 0
         self.eventsPerPage = 3
         self.totalPages = ceil(len(self.events)/self.eventsPerPage)
-        self.filtros = ["WinDraw", "Win", "Futebol", "Tenis", "Corrida", "Golf", "Ping Pong"]
-        self.filtros_ativos = ["WinDraw", "Win", "Futebol", "Tenis", "Corrida", "Golf", "Ping Pong"]
+
+        self.filtros = ["WinDraw", "Win", "Coletivo", "Singular"]
+        self.filtros_ativos = ["WinDraw", "Win", "Coletivo", "Singular"]
+
+        allSports = self.getAllSports()
+        
+        self.filtros.extend(allSports)
+        self.filtros_ativos.extend(allSports)
+
+    def getAllSports(self):
+        sports = []
+        for event in self.events:
+            sportName = event["Sport"]["Name"]
+            if sportName not in sports:
+                sports.append(sportName)
+
+        return sports
     
+    def filterEvents(self):
+        filteredEvents = []
+        for event in self.events:
+            type = event["Sport"]["Type"]
+            coletivo = "Coletivo" if event["Sport"]["Collectiveness"] else "Singular"
+            sport = event["Sport"]["Name"]
+            if type in self.filtros_ativos and coletivo in self.filtros_ativos and sport in self.filtros_ativos:
+                filteredEvents.append(event)
+
+        return filteredEvents
 
     def updateInfo(self,response):
         self.wallet = response["Wallet"]
         self.events = response["Events"]
         self.availableCurrencies = response["Currencies"]
         self.notifications.extend(response["Notifications"])
-        self.totalPages = ceil(len(self.events)/self.eventsPerPage)
+
+        allSports = self.getAllSports()
+        
+        for sport in allSports:
+            if sport not in self.filtros:
+                self.filtros.append(sport)
+                self.filtros_ativos.append(sport)
+
+        f = ["WinDraw", "Win", "Coletivo", "Singular"]
+        f.extend(allSports)
+
+
+        filtros = self.filtros.copy()
+
+        for filtro in self.filtros:
+            if filtro not in f:
+                filtros.remove(filtro)
+                if filtro in self.filtros_ativos:
+                    self.filtros_ativos.remove(filtro)
+
+        self.filteredEvents = self.filterEvents()
+
+        self.totalPages = ceil(len(self.filteredEvents)/self.eventsPerPage)
+        self.page = min(self.page,self.totalPages-1)
+        if self.page == -1 and self.totalPages != 0:
+            self.page = 0 
+
 
     def getPages(self):
         return self.page,self.totalPages
     
-
     def getFiltros(self):
         return self.filtros
 
@@ -51,7 +103,7 @@ class ClientInfo:
 
     def getEvents(self):
         offset = self.page * self.eventsPerPage
-        events = self.events[offset:offset+self.eventsPerPage]
+        events = self.filteredEvents[offset:offset+self.eventsPerPage]
         return events
 
     def getNotifications(self,num):
@@ -64,7 +116,7 @@ class ClientInfo:
             num = len(self.notifications)
 
         #print(num)
-        for i in range(num):
+        for _ in range(num):
             notifs.append(self.notifications.pop(0))
         
         return notifs
@@ -104,9 +156,8 @@ class ClientInfo:
             eve = None
             for event in self.events:
                 if int(eventID) == int(event["Id"]):
-                    hasID = True
                     eve = event
-
+                    break
             return eve
         
         bets = []

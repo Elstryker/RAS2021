@@ -25,6 +25,10 @@ class ClientLogic:
         while inp != 'S':
             inp = "Q"
             notifs = self.clientInfo.getNotifications(2)
+
+            print(self.clientInfo.events)
+            print("\n\nFiltros", self.clientInfo.filtros_ativos)
+            print(self.clientInfo.filteredEvents)
             
             while inp not in 'SsFfAaEeRrOoCcDdIiCcMmVvAaPpHhNnLlTt':
                 inp = self.client_gui.showMenu(self.clientInfo.loggedIn, self.clientInfo.wallet, self.clientInfo.getEvents(), self.clientInfo.getPages(), notifs)
@@ -62,6 +66,8 @@ class ClientLogic:
             self.clientInfo.filtros_ativos.remove(escolha)
         else:
             self.clientInfo.filtros_ativos.append(escolha)
+
+        self.requestServer(["P"])
 
 
 

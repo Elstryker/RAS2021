@@ -191,7 +191,7 @@ class ClientLogic:
             args = ["M"]
             response = self.requestServer(args)
             
-            if self.client_gui.conclude_betslip(self.clientInfo.loggedIn, response) == 'S':
+            if self.client_gui.conclude_betslip(self.clientInfo.loggedIn, response).lower() == 's':
                 while not currency.isdigit() or int(currency) < 0 or int(currency) >= len(self.clientInfo.availableCurrencies):
                     currency = self.client_gui.pede_moeda(self.clientInfo.loggedIn, response, self.clientInfo.availableCurrencies, True, self.clientInfo.getPages())
                 

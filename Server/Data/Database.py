@@ -32,7 +32,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         dolar = self.createCurrency("dolar",1)
         euro = self.createCurrency("euro",1.12)
         
-        user = self.createUser("ola","adeus",datetime.date(1970,1,1))
+        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
 
         self.depositMoney(user.username,dolar.name,25)
         self.depositMoney(user.username,euro.name,13.45)
@@ -147,10 +147,10 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             return True
         return False
     
-    def createUser(self,name,password,birthDate):
+    def createUser(self,name,password,email,birthDate):
         currencies = self.getCurrencies().values()
         hashedpassword = hashlib.sha1(password.encode('utf-8')).hexdigest()
-        user = User(name,hashedpassword,birthDate)
+        user = User(name,hashedpassword,email, birthDate)
         for currency in currencies:
             new_user_currency = User_Currency(user=user,currency=currency,amount=0)
         self.createBetSlipEmpty(user)   
@@ -335,8 +335,8 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return False
 
 
-    def createSport(self, name, type: SportType):
-        sport = Sport(type,name)
+    def createSport(self, name, type: SportType, isCollective):
+        sport = Sport(type,name, isCollective)
         self.addSport(sport)
         return sport
 
@@ -631,8 +631,11 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
     def updateCurrencyValue(self, currencyName, value):
         currency = self.getCurrency(currencyName)
-        currency.updateValue(value)
-        self.session.commit()
+        if currency:
+            currency.updateValue(value)
+            self.session.commit()
+            return True
+        return False
 
     def getSports(self):
         sports = self.session.query(Sport).all()

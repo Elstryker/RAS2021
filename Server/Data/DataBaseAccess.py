@@ -76,6 +76,9 @@ class DataBaseAccess:
     def addCurrency(self,currency,toEUR) -> bool:
         pass
 
+    def updateCurrencyValue(self, currencyName, value):
+        pass
+
     def removeCurrency(self, currencyName) -> bool:
         pass
 

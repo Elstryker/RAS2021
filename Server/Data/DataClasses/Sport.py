@@ -30,6 +30,7 @@ class Sport(Base):
 
         toReturn["Name"] = self.name
         toReturn["Type"] = self.type.name
+        toReturn["Collectiveness"] = self.isCollective
 
         return toReturn
 

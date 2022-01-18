@@ -53,10 +53,14 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         barca = self.createIntervenor("FCBarcelona")
         braga = self.createIntervenor("SCBraga")
 
+
+
         e1 = self.createEventByObjects("Championship",futebol,[])
         e2 = self.createEventByObjects("Europa",futebol,[])
         e3 = self.createEventByObjects("Taça António Costa", golf,[])
         e4 = self.createEventByObjects("Torneio José Figueiras", corrida,[])
+
+
 
         self.createIntervenor_Event(porto,e1,1.05)
         empate_intervernor_event = self.createIntervenor_Event(empate,e1,6.21)

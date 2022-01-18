@@ -76,7 +76,7 @@ class DataBaseAccess:
     def addCurrency(self,currency,toEUR) -> bool:
         pass
 
-    def removeCurrency(self,currency) -> None:
+    def removeCurrency(self, currencyName) -> bool:
         pass
 
     def retrieveNotifications(self,username) -> list:

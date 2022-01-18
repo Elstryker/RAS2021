@@ -220,16 +220,19 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             age = year_difference - one_or_zero
             return age
         
-        date = datetime.datetime.strptime(birthdate,'%d/%m/%Y').date()
-        age = age(date)
-
-        if self.db.existsUser(username) or age < 18:
-
+        valid_date = True
+        try:
+            date = datetime.datetime.strptime(birthdate,'%d/%m/%Y').date()
+            age = age(date)
+        except:
+            valid_date = False
+        
+        if  not valid_date or self.db.existsUser(username) or age < 18:
             print("Could not create user")
             toSend['Message'] = "\n\nCould not register user\n"
             toSend["Success"] = False
         else:
-            self.db.createUser(username,password,birthdate)
+            self.db.createUser(username,password,date)
             toSend['Message'] = "\n\nUser registered with success!\n"
             toSend["Success"] = True
             
@@ -326,11 +329,13 @@ class RASBetLN(RASBetFacade.RASBetFacade):
         currencies = self.db.getCurrencies()
 
         if currency in currencies:
-            self.db.removeCurrency(currency)
-            toSend["Message"] = "\n\nCurrency removed successfully\n"
-        
+            success = self.db.removeCurrency(currency)
+            if success:
+                toSend["Message"] = "\n\nCurrency removed successfully\n"
+            else:
+                toSend["Message"] = "\n\nCould not remove currency (betslips use currency)\n"
         else:
-            toSend["Message"] = "\n\nCould not remove currency\n"
+            toSend["Message"] = "\n\nCould not remove currency (currency not found)\n"
 
         return json.dumps(toSend)
 

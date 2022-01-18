@@ -33,7 +33,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         dolar = self.createCurrency("dolar",1)
         euro = self.createCurrency("euro",1.12)
 
-        user = self.createUser("ola","adeus","bit@connect",datetime.date(1970,1,1))
+        user = self.createUser("ola","adeus",datetime.date(1970,1,1))
 
         self.depositMoney(user.username,dolar.name,25)
         self.depositMoney(user.username,euro.name,13.45)
@@ -149,12 +149,12 @@ class DataBase(DataBaseAccess.DataBaseAccess):
             return True
         return False
     
-    def createUser(self,name,password,email,birthDate):
+    def createUser(self,name,password,birthDate):
         currencies = self.getCurrencies().values()
-        user = User(name,password,email,birthDate)
+        user = User(name,password,birthDate)
         for currency in currencies:
             new_user_currency = User_Currency(user=user,currency=currency,amount=0)
-            #user.wallet.append(new_user_currency)     
+        self.createBetSlipEmpty(user)   
         self.addUser(user)
         return user
 
@@ -463,12 +463,12 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return bet
 
     def addUser(self, user: User):
-        """ try: """
-        self.session.add(user)    
-        self.session.commit() 
-        """ except:
+        try:
+            self.session.add(user)    
+            self.session.commit() 
+        except:
             print("Erro na inserção de User")
-            self.session.rollback() """
+            self.session.rollback()
 
     def addIntervenor(self, intervenor: Intervenor):
         try:
@@ -500,8 +500,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                                   .all()
         return len(betslipsWithCurrency) > 0
 
-    #untested
-    def removeCurrency(self, currencyName) -> None:
+    def removeCurrency(self, currencyName) -> bool:
         currency = self.getCurrency(currencyName)
         print(f"removing currency {currency.name}")
 
@@ -519,11 +518,13 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                         self.session.delete(user_currency)
 
             self.session.delete(currency)
-
             self.session.commit()
+
+            return True
         else:
             if currency:
                 print(f"Some BetSlips use {currencyName}")
+            return False
 
     def addCurrency(self, currencyName, toEUR) -> bool:
         return self.addCurrencyByObject(self.createCurrency(currencyName,toEUR))
@@ -596,12 +597,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
 
     def getUser(self, user_id: Integer) -> User:
         user = self.session.query(User).filter(User.id == user_id).one()
-        print(user.email)
-        return user
-
-    def getUserByEmail(self, user_email: str) -> User:
-        user = self.session.query(User).filter(User.email == user_email).one()
-        print(user.email)
+        print(f"got user {user.username}")
         return user
 
     def getUserByUsername(self, username: str) -> User:

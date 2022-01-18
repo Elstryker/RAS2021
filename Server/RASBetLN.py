@@ -128,11 +128,14 @@ class RASBetLN(RASBetFacade.RASBetFacade):
             toSend["Message"] = "\n\nNot enough funds\n"
             return json.dumps(toSend)
         
-        self.db.concludeBetSlip(userID,amount,currency)
+        success = self.db.concludeBetSlip(userID,amount,currency)
+        if not success:
+            toSend["Success"] = False
+            toSend["Message"] = "\n\nAn event in your betslip is no longer open\n"
+            return json.dumps(toSend)
 
         toSend["Success"] = True
         toSend["Message"] = "\n\nBet slip concluded\n"
-
         return json.dumps(toSend)
 
 

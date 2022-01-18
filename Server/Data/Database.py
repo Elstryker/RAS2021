@@ -86,13 +86,25 @@ class DataBase(DataBaseAccess.DataBaseAccess):
         return user.getHistory()
 
     def concludeBetSlip(self,username,amount,currency_name) -> None:
+        """ Concludes a betslip being created
+            Checks if all events are still open"""
         betslip = self.getBetSlip(username)
         currency = self.getCurrency(currency_name)
-        betslip.applyBetSlip(amount,currency)
+        success = True
 
-        user = self.getUserByUsername(username=username)
+        for bet in betslip.bets:
+            if bet.event.state != EventState.Open:
+                success = False
 
-        self.createBetSlipEmpty(user)
+        if betslip == None or currency == None:
+            success = False
+
+        if success:
+            betslip.applyBetSlip(amount,currency) 
+            user = self.getUserByUsername(username=username)
+            self.createBetSlipEmpty(user)
+
+        return success
 
 
     def getCurrency(self, currency_name) -> Currency:

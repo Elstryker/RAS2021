@@ -207,7 +207,7 @@ class ClientLogic:
         while not currency.isdigit() or int(currency) < 0 or int(currency) > 100 or int(currency) >= len(self.clientInfo.availableCurrencies):
             currency = self.client_gui.pede_moeda(self.clientInfo.loggedIn, self.clientInfo.getEvents(), self.clientInfo.availableCurrencies,  False, self.clientInfo.getPages())
 
-        while not isfloat(amount) or int(amount) < 1:    
+        while not amount.isdigit() or int(amount) < 1:    
             amount = self.client_gui.ask_info(self.clientInfo.loggedIn, self.clientInfo.getEvents(), 3, self.clientInfo.getPages())
         
         args = [option,self.clientInfo.availableCurrencies[int(currency)],amount]

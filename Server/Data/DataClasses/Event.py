@@ -21,7 +21,6 @@ class Event(Base):
     result = Column("resultado", Integer)
 
     def __init__(self,name,sport : Sport.Sport,intervenors : list[Intervenor_Event.Intervenor_Event]) -> None:
-
         self.name = name
         self.state = EventState.Open
         self.sport = sport
@@ -38,27 +37,29 @@ class Event(Base):
             self.result = result
             self.notify()
 
-    def notify(self) -> None:
-        #print("Event: Notifying observers...")
-        for bet in self.bets:
-            for betslip in bet:
-                betslip.update(self)
-
     def getIntervenorEventByIndex(self, choice):
-        intervenors = []
-        for intervenor_event in self.intervenors:
-            if intervenor_event != None:
-                intervenors.append(intervenor_event)
+        if choice >= 0:
+            intervenors = []
+            for intervenor_event in self.intervenors:
+                if intervenor_event != None:
+                    intervenors.append(intervenor_event)
 
-        return intervenors[choice]
+            return intervenors[choice]
+        else:
+            print(f"Choice {choice} must be >= 0 (getIntervenorEventByIndex)")
+            return None
 
     def getOdd(self,choice):
-        odds = []
-        for intervenor_event in self.intervenors:
-            if intervenor_event != None:
-                odds.append(intervenor_event.odd)
+        if choice >= 0:
+            odds = []
+            for intervenor_event in self.intervenors:
+                if intervenor_event != None:
+                    odds.append(intervenor_event.odd)
 
-        return odds[choice]
+            return odds[choice]
+        else:
+            print(f"Choice {choice} must be >= 0 (getOdd)")
+            return None
 
     def toJSON(self):
         toReturn = dict()

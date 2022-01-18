@@ -51,6 +51,7 @@ class BetSlip(Base):
             for bet in self.bets:
                 if bet.event_id == eventID:
                     self.bets.remove(bet)
+                    self.multiplied_odd /= bet.odd
                     return True
         return False
 
@@ -83,43 +84,6 @@ class BetSlip(Base):
             if len(unfinishedBets) == 0:
                 self.state = BetSlipState.Finished
                 self.notify()
-
-    def cancel(self):
-        self.bets.clear()
-        self.bets = {'Finished':dict(),'Unfinished':dict()}
-        self.multipliedOdd = 1
-
-    def toJSON(self):
-        jsonToSend = dict()
-
-        bets = self.bets
-        jsonToSend["Id"] = self.id
-
-        jsonToSend["Bets"] = [x.toJSON() for x in bets]
-        if self.amount != 0:
-            jsonToSend["Amount"] = self.amount
-        
-        if self.currency != '':
-            jsonToSend["Currency"] = self.currency
-
-        jsonToSend["MultipliedOdd"] = self.multiplied_odd
-
-        jsonToSend["State"] = self.state.name
-
-        if self.inStake != 0:
-            jsonToSend["InStake"] = self.inStake
-
-        if self.state is BetSlipState.Finished:
-            jsonToSend["Won"] = self.winning
-
-        return jsonToSend
-
-    def attach(self, observer: Observer.Observer) -> None:
-        if observer not in self.observers:
-            self.observers.append(observer)
-
-    def detach(self, observer: Observer.Observer) -> None:
-        self.observers.remove(observer)
 
     def notify(self) -> None:
         print("BetSlip: Notifying observers...")

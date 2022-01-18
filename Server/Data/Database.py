@@ -309,6 +309,7 @@ class DataBase(DataBaseAccess.DataBaseAccess):
                                 .filter(Bet.event_id == eventID, Bet.betslip_id == betslip.id)\
                                 .one_or_none()
             if bet:
+                betslip.removeBet(bet.event_id)
                 self.session.delete(bet)
                 self.session.commit()
                 return True

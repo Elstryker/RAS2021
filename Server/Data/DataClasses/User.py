@@ -24,14 +24,6 @@ class User(Base):
         self.betSlips = {}
         self.notifications = []
 
-    #não recomendado
-    #currencies já são adicionadas automaticamente
-    def newCurrenciesDict(self,currencies : list):
-        wallet = dict()
-        for currency in currencies:
-            wallet[currency] = 0
-        return wallet
-
     def getCurrentBetSlip(self):
         for betslip in self.betSlips:
             if betslip.isCreating():

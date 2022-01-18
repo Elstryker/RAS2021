@@ -18,4 +18,3 @@ class Intervenor_Event(Base):
         self.intervenor = intervenor
         self.event = event
         self.odd = odd
-        #self.events = []
